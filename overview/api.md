@@ -113,7 +113,8 @@ curl -X POST http://localhost:8080/api/v2/dags/my-dag.yaml/start \
   -H "Content-Type: application/json" \
   -d '{
     "params": "{\"env\": \"production\"}",
-    "dagRunId": "custom-run-id"
+    "dagRunId": "custom-run-id",
+    "dagName": "adhoc-my-dag"
   }'
 ```
 
@@ -123,6 +124,7 @@ curl -X POST http://localhost:8080/api/v2/dags/my-dag.yaml/enqueue \
   -H "Content-Type: application/json" \
   -d '{
     "params": "{\"env\": \"production\"}",
+    "dagName": "queue-override-my-dag",
     "queue": "high-priority"  // optional: override queue
   }'
 ```

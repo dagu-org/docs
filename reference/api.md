@@ -457,6 +457,7 @@ Creates and starts a DAG run with optional parameters.
 {
   "params": "{\"env\": \"production\", \"version\": \"1.2.3\"}",
   "dagRunId": "custom-run-id",
+  "dagName": "on-demand-data-load",
   "singleton": false
 }
 ```
@@ -466,8 +467,10 @@ Creates and starts a DAG run with optional parameters.
 |-------|------|-------------|----------|
 | params | string | JSON string of parameters | No |
 | dagRunId | string | Custom run ID | No |
+| dagName | string | Override the DAG name used for this run (must satisfy DAG name validation) | No |
 | singleton | boolean | If true, prevent starting if DAG is already running (returns 409) | No |
 
+> **Tip:** Overriding the DAG name changes the identifier used for scheduler concurrency checks (`maxActiveRuns`) and queue grouping, which is useful for ad-hoc executions that should not collide with scheduled runs.
 **Response (200)**:
 ```json
 {
@@ -494,9 +497,20 @@ Adds a DAG run to the queue for later execution.
 {
   "params": "{\"key\": \"value\"}",
   "dagRunId": "optional-custom-id",
+  "dagName": "queued-ad-hoc-run",
   "queue": "optional-queue-override"
 }
 ```
+
+**Request Fields**:
+| Field | Type | Description | Required |
+|-------|------|-------------|----------|
+| params | string | JSON string of parameters | No |
+| dagRunId | string | Custom run ID | No |
+| dagName | string | Override the DAG name used for the queued run (must satisfy DAG name validation) | No |
+| queue | string | Queue name override | No |
+
+> **Tip:** When you override the DAG name, the queued run is tracked under the new identifier for both queue management and history records.
 
 **Response (200)**:
 ```json
@@ -1706,6 +1720,7 @@ curl -X POST "http://localhost:8080/api/v2/dags/ml-training-pipeline/enqueue" \
      -d '{
        "params": "{\"model\": \"recommendation_v3\", \"dataset\": \"user_interactions_2024\"}",
        "dagRunId": "ml_train_20240211_170000",
+       "dagName": "ml-training-on-demand",
        "queue": "gpu-jobs"
      }'
 ```
