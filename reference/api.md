@@ -1258,6 +1258,84 @@ All endpoints return structured error responses:
 
 ## Sub DAG Run Endpoints
 
+### Get Sub DAG Runs with Timing Information
+
+**Endpoint**: `GET /api/v2/dag-runs/{name}/{dagRunId}/sub-dag-runs`
+
+Retrieves timing and status information for all sub DAG runs within a specific DAG run. This is useful for tracking repeated executions of sub DAG steps and understanding the timeline of sub workflows.
+
+**Path Parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| name | string | DAG name |
+| dagRunId | string | DAG run ID |
+
+**Query Parameters**:
+| Parameter | Type | Description | Default |
+|-----------|------|-------------|---------|
+| remoteNode | string | Remote node name | "local" |
+
+**Response (200)**:
+```json
+{
+  "subRuns": [
+    {
+      "dagRunId": "sub_20240211_143020_001",
+      "params": "{\"file\": \"/tmp/data_batch_1.csv\", \"table\": \"fact_sales\"}",
+      "status": 4,
+      "statusLabel": "succeeded",
+      "startedAt": "2024-02-11T14:30:20Z",
+      "finishedAt": "2024-02-11T14:35:45Z"
+    },
+    {
+      "dagRunId": "sub_20240211_143600_002",
+      "params": "{\"file\": \"/tmp/data_batch_2.csv\", \"table\": \"fact_sales\"}",
+      "status": 4,
+      "statusLabel": "succeeded",
+      "startedAt": "2024-02-11T14:36:00Z",
+      "finishedAt": "2024-02-11T14:41:30Z"
+    },
+    {
+      "dagRunId": "sub_20240211_144200_003",
+      "params": "{\"file\": \"/tmp/data_batch_3.csv\", \"table\": \"fact_sales\"}",
+      "status": 1,
+      "statusLabel": "running",
+      "startedAt": "2024-02-11T14:42:00Z",
+      "finishedAt": null
+    }
+  ]
+}
+```
+
+**Response Fields**:
+- `subRuns`: Array of sub DAG run details with timing information
+- `dagRunId`: Unique identifier for the sub DAG run
+- `params`: JSON string of parameters passed to the sub DAG
+- `status`: Execution status (0-6, see status values below)
+- `statusLabel`: Human-readable status label
+- `startedAt`: ISO 8601 timestamp when the sub DAG run started
+- `finishedAt`: ISO 8601 timestamp when the sub DAG run finished (null if still running)
+
+**Status Values**:
+- 0: Not started
+- 1: Running
+- 2: Failed
+- 3: Cancelled
+- 4: Success
+- 5: Queued
+- 6: Partial Success
+
+**Error Response (404)**:
+```json
+{
+  "code": "not_found",
+  "message": "DAG run not found"
+}
+```
+
+**Use Case**:
+This endpoint is particularly useful for nodes with `repeatPolicy` that execute sub DAGs multiple times. It allows the UI to display a timeline of all executions with their respective start times, end times, and statuses, making it easier to track and debug repeated sub workflow executions.
+
 ### Get Sub DAG Run Details
 
 **Endpoint**: `GET /api/v2/dag-runs/{name}/{dagRunId}/sub-dag-runs/{subDAGRunId}`
@@ -1746,6 +1824,10 @@ curl "http://localhost:8080/api/v2/dag-runs/etl-pipeline/20240211_120000/log?off
 
 ### Working with Sub DAGs
 ```bash
+# Get all sub DAG runs with timing information
+curl "http://localhost:8080/api/v2/dag-runs/data-processing-pipeline/20240211_140000_abc123/sub-dag-runs" \
+     -H "Authorization: Bearer your-token"
+
 # Get sub DAG run details
 curl "http://localhost:8080/api/v2/dag-runs/data-processing-pipeline/20240211_140000_abc123/sub-dag-runs/sub_20240211_143020_xyz456" \
      -H "Authorization: Bearer your-token"

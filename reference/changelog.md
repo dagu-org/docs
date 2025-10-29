@@ -4,6 +4,18 @@
 
 ### Added
 - API: Added optional `dagName` field to `/dags/{fileName}/start` and `/dags/{fileName}/enqueue` for overriding the DAG name used at runtime (#1365)
+- API: Added `GET /api/v2/dag-runs/{name}/{dagRunId}/sub-dag-runs` endpoint to retrieve timing and status information for all sub DAG runs, useful for tracking repeated executions of sub DAG steps (#1041)
+- UI: Enhanced sub DAG run display with execution timeline showing datetime, status indicators, and lazy loading of execution details (#1041)
+
+### Contributors
+
+Thanks to our contributors for this release:
+
+| Contribution                           | Author                                   |
+| -------------------------------------- | ---------------------------------------- |
+| `--name` flag feature clarification and feedback (#1349) | [@ghansham](https://github.com/ghansham) |
+| Repeat execution timeline enhancements feature request (#1041) | [@jeremydelattre59](https://github.com/jeremydelattre59) |
+| Serial number ordering feedback and suggestion (#1041) | [@ghansham](https://github.com/ghansham) |
 
 ## v1.23.3 (2025-10-26)
 
@@ -32,7 +44,6 @@ Thanks to our contributors for this release:
 
 | Contribution                           | Author                                   |
 | -------------------------------------- | ---------------------------------------- |
-| `--name` flag feature clarification and feedback (#1349) | [@ghansham](https://github.com/ghansham) |
 | OIDC authentication broken interface issue report (#1359) | [@mitchplze](https://github.com/mitchplze) |
 | Distributed execution lock issue on Kubernetes (#1353) | [@yangkghjh](https://github.com/yangkghjh) |
 | Shell-like parameter expansion feature request (#1352) | [@ghansham](https://github.com/ghansham) |
