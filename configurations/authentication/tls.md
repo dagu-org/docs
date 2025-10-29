@@ -56,10 +56,6 @@ curl -k https://localhost:8080/api/v2/dags
 
 # With CA-signed certificate
 curl https://dagu.example.com/api/v2/dags
-
-# CLI with HTTPS
-export DAGU_API_URL=https://localhost:8080
-dagu status
 ```
 
 ## Multi-Environment Setup
