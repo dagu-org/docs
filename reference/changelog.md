@@ -7,17 +7,24 @@
 - API: Added `GET /api/v2/dag-runs/{name}/{dagRunId}/sub-dag-runs` endpoint to retrieve timing and status information for all sub DAG runs, useful for tracking repeated executions of sub DAG steps (#1041)
 - UI: Enhanced sub DAG run display with execution timeline showing datetime, status indicators, and lazy loading of execution details (#1041)
 - API: `POST /api/v2/dag-runs/{name}/{dagRunId}/reschedule` now accepts an optional `singleton` flag to block rescheduling when the DAG already has active or queued runs (#1347)
+- UI: Added grouped view with preset and specific date range selectors on the DAG-runs page for faster historical exploration (#1377)
+
+### Improved
+- UI: Persisted DAG/queue/search filters across navigation using a remote-aware search state provider so bookmarked URLs and session filters stay aligned (#1379)
+
+### Fixed
+- Windows: Restored queued DAG execution by exporting the necessary environment variables when spawning processes from the queue runner (#1373)
 
 ### Contributors
 
 Thanks to our contributors for this release:
 
-| Contribution                           | Author                                   |
+| Contribution                           | Contributor                              |
 | -------------------------------------- | ---------------------------------------- |
 | `--name` flag feature clarification and feedback (#1349) | [@ghansham](https://github.com/ghansham) |
 | Repeat execution timeline enhancements feature request (#1041) | [@jeremydelattre59](https://github.com/jeremydelattre59) |
 | Serial number ordering feedback and suggestion (#1041) | [@ghansham](https://github.com/ghansham) |
-| Singleton reschedule guard feedback (#1347) | [@hamadayouta](https://github.com/hamadayouta) |
+| Windows queue execution failure report and verification (#1372) | [@lvoeg](https://github.com/lvoeg) |
 
 ## v1.23.3 (2025-10-26)
 
@@ -44,7 +51,7 @@ Thanks to our contributors for this release:
 
 Thanks to our contributors for this release:
 
-| Contribution                           | Author                                   |
+| Contribution                           | Contributor                              |
 | -------------------------------------- | ---------------------------------------- |
 | OIDC authentication broken interface issue report (#1359) | [@mitchplze](https://github.com/mitchplze) |
 | Distributed execution lock issue on Kubernetes (#1353) | [@yangkghjh](https://github.com/yangkghjh) |
@@ -61,7 +68,7 @@ Thanks to our contributors for this release:
 
 Thanks to our contributors for this release:
 
-| Contribution                           | Author                                   |
+| Contribution                           | Contributor                              |
 | -------------------------------------- | ---------------------------------------- |
 | DAG manual launch bug report and detailed reproduction (#1345) | [@jeremydelattre59](https://github.com/jeremydelattre59) |
 | WebUI blank page MIME type error report (#1350) | [@overflowy](https://github.com/overflowy) |
