@@ -944,6 +944,54 @@ Creates a new DAG run based on a previous execution.
 }
 ```
 
+### Reschedule DAG Run
+
+**Endpoint**: `POST /api/v2/dag-runs/{name}/{dagRunId}/reschedule`
+
+Launches a fresh DAG run by reusing the captured parameters from a historic execution. Useful for re-running successful or failed runs while keeping the original parameter set.
+
+**Request Body**:
+```json
+{
+  "dagRunId": "optional-new-id",
+  "dagName": "optional-name-override",
+  "singleton": true
+}
+```
+
+**Request Fields**:
+| Field | Type | Description | Required |
+|-------|------|-------------|----------|
+| dagRunId | string | Custom ID for the new run. If omitted a unique ID is generated. | No |
+| dagName | string | Override the DAG name used for the rescheduled run. Must pass DAG name validation. | No |
+| singleton | boolean | When true, skips rescheduling if the DAG already has active or queued runs and returns `409`. | No |
+
+> **Note:** The request body also accepts an experimental `definitionStrategy` field. Providing a value currently returns `400` because alternate definition selection is not yet supported.
+
+**Response (200)**:
+```json
+{
+  "dagRunId": "20241101_010203_xyz",
+  "queued": false
+}
+```
+
+**Error Response (409)** - When `singleton: true` (or `maxActiveRuns` is `1`) and the DAG already has active or queued runs:
+```json
+{
+  "code": "max_run_reached",
+  "message": "DAG example_dag is already running, cannot start"
+}
+```
+
+**Error Response (404)**:
+```json
+{
+  "code": "not_found",
+  "message": "DAG run not found"
+}
+```
+
 ### Dequeue DAG Run
 
 **Endpoint**: `GET /api/v2/dag-runs/{name}/{dagRunId}/dequeue`
