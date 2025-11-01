@@ -791,6 +791,128 @@ Retrieves all DAG runs with optional filtering.
 }
 ```
 
+### Execute DAG Run from Inline Spec
+
+**Endpoint**: `POST /api/v2/dag-runs`
+
+Creates and starts a DAG-run directly from an inline YAML specification without writing a DAG file to disk.
+
+**Query Parameters**:
+| Parameter | Type | Description | Default |
+|-----------|------|-------------|---------|
+| remoteNode | string | Target remote node for execution | "local" |
+
+**Request Body**:
+```json
+{
+  "spec": "steps:\n  - name: extract\n    command: ./extract.sh",
+  "name": "ad-hoc-extract",
+  "params": "{\"env\":\"prod\"}",
+  "dagRunId": "20241101_010203_custom",
+  "singleton": true
+}
+```
+
+**Request Fields**:
+| Field | Type | Description | Required |
+|-------|------|-------------|----------|
+| spec | string | DAG specification in YAML format | Yes |
+| name | string | Override DAG name used for validation and execution | No |
+| params | string | JSON string persisted with the DAG-run and exposed to steps | No |
+| dagRunId | string | Explicit run identifier. If omitted, one is generated | No |
+| singleton | boolean | When true, aborts with `409` if the DAG already has active or queued runs | No |
+
+**Response (200)**:
+```json
+{
+  "dagRunId": "20241101_010203_custom"
+}
+```
+
+**Error Response (400)** - Invalid spec or missing `spec` field:
+```json
+{
+  "code": "bad_request",
+  "message": "spec is required"
+}
+```
+
+**Error Response (409)** - Singleton guard/maxActiveRuns blocking execution:
+```json
+{
+  "code": "max_run_reached",
+  "message": "DAG ad-hoc-extract is already running, cannot start"
+}
+```
+
+**Example**:
+```bash
+curl -X POST "http://localhost:8080/api/v2/dag-runs?remoteNode=local" \
+  -H "Content-Type: application/json" \
+  -d '{
+        "spec": "steps:\n  - name: echo\n    command: echo \"hello\"",
+        "name": "adhoc-hello",
+        "params": "{\"requestedBy\":\"cli\"}"
+      }'
+```
+
+### Enqueue DAG Run from Inline Spec
+
+**Endpoint**: `POST /api/v2/dag-runs/enqueue`
+
+Queues a DAG-run from an inline YAML spec without persisting a DAG file. The run follows queue semantics (`maxActiveRuns`, queue overrides) and is started by the scheduler.
+
+**Query Parameters**:
+| Parameter | Type | Description | Default |
+|-----------|------|-------------|---------|
+| remoteNode | string | Target remote node for queuing | "local" |
+
+**Request Body**:
+```json
+{
+  "spec": "steps:\n  - name: sleep\n    command: sleep 60",
+  "name": "queued-sleeper",
+  "params": "{\"duration\":60}",
+  "dagRunId": "queue_20241101_010203",
+  "queue": "low-priority"
+}
+```
+
+**Request Fields**:
+| Field | Type | Description | Required |
+|-------|------|-------------|----------|
+| spec | string | DAG specification in YAML format | Yes |
+| name | string | Override DAG name if the spec omits one | No |
+| params | string | JSON string saved with the queued run | No |
+| dagRunId | string | Explicit run ID. When omitted, one is generated | No |
+| queue | string | Queue name override for this run only | No |
+
+**Response (200)**:
+```json
+{
+  "dagRunId": "queue_20241101_010203"
+}
+```
+
+**Error Response (409)** - DAG already queued or `maxActiveRuns` reached:
+```json
+{
+  "code": "max_run_reached",
+  "message": "DAG queued-sleeper is already in the queue (maxActiveRuns=1), cannot enqueue"
+}
+```
+
+**Example**:
+```bash
+curl -X POST "http://localhost:8080/api/v2/dag-runs/enqueue" \
+  -H "Content-Type: application/json" \
+  -d '{
+        "spec": "steps:\n  - name: notify\n    command: ./notify.sh",
+        "name": "queued-notify",
+        "queue": "alerts"
+      }'
+```
+
 ### Get DAG Run Details
 
 **Endpoint**: `GET /api/v2/dag-runs/{name}/{dagRunId}`

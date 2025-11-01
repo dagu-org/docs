@@ -7,6 +7,7 @@
 - API: Added `GET /api/v2/dag-runs/{name}/{dagRunId}/sub-dag-runs` endpoint to retrieve timing and status information for all sub DAG runs, useful for tracking repeated executions of sub DAG steps (#1041)
 - UI: Enhanced sub DAG run display with execution timeline showing datetime, status indicators, and lazy loading of execution details (#1041)
 - API: `POST /api/v2/dag-runs/{name}/{dagRunId}/reschedule` now accepts an optional `singleton` flag to block rescheduling when the DAG already has active or queued runs (#1347)
+- API: Added `POST /api/v2/dag-runs/enqueue` to enqueue DAG-runs directly from inline YAML specs without creating DAG files, including optional queue overrides (#1375)
 - CLI: Added `--from-run-id` flag to `dagu start` for cloning historic runs with their saved parameters (#1378)
 - UI: Added grouped view with preset and specific date range selectors on the DAG-runs page for faster historical exploration (#1377)
 
@@ -28,6 +29,7 @@ Thanks to our contributors for this release:
 | Singleton reschedule guard feedback (#1347) | [@hamadayouta](https://github.com/hamadayouta) |
 | Windows queue execution failure report and verification (#1372) | [@lvoeg](https://github.com/lvoeg) |
 | `--from-run-id` flag co-author (#1378) | [@kriyanshii](https://github.com/kriyanshii) |
+| Inline spec enqueue implementation (#1375) | [@kriyanshii](https://github.com/kriyanshii) |
 
 ## v1.23.3 (2025-10-26)
 
