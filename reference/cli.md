@@ -38,7 +38,10 @@ dagu start [options] DAG_NAME_OR_FILE [-- PARAMS...]
 - `--params, -p` - Parameters as JSON
 - `--name, -N` - Override the DAG name (default: name from DAG definition or filename)
 - `--run-id, -r` - Custom run ID
+- `--from-run-id` - Re-run using the DAG snapshot and parameters captured from a historic run
 - `--no-queue, -n` - Execute immediately
+
+> **Note:** `--from-run-id` cannot be combined with `--params`, `--parent`, or `--root`. Provide exactly one DAG name or file so the command can look up the historic run.
 
 ```bash
 # Basic run
@@ -55,6 +58,9 @@ dagu start --run-id batch-001 etl.yaml
 
 # Override DAG name
 dagu start --name my_custom_name my-workflow.yaml
+
+# Clone parameters from a historic run
+dagu start --from-run-id 20241031_235959 example-dag.yaml
 ```
 
 ### `stop`
