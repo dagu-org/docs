@@ -145,9 +145,27 @@ one reminder. A second silent turn fails the run.
 
 ## Watching a run
 
-The DAG-run view gains a **Tasks** tab showing each goal, whether it is
-complete, and the reason the controller gave. The **Chat** tab shows the full
-decision transcript, turn by turn, including the tool results the controller
-saw.
+A controller has no dependency edges, so a graph of it carries no information.
+The **Status** tab shows a decision timeline in that slot instead: one row per
+turn, in the order things happened.
+
+```
+1  ▶ run_tests      failed      76.0s
+2  ▶ run_tests      failed      76.0s   #2
+3  ▶ fix_flaky      succeeded    0.0s
+4  ▶ run_tests      succeeded    0.0s   #3
+5  ✓ tests_green    task complete
+6  ▶ build_notes    succeeded    0.0s
+7  ✓ notes_drafted  task complete
+8  ⏸ sign_off       waiting
+```
+
+Repeated actions carry an attempt number, and durations are wall time, so a step
+that retried internally reads as the time it actually consumed. The steps table
+sits below, showing each step's latest attempt.
+
+The **Tasks** tab shows each goal, whether it is complete, and the reason the
+controller gave. The **Chat** tab has the full transcript, including the tool
+results the controller saw.
 
 Steps the controller never chose are marked skipped when the run finishes.
