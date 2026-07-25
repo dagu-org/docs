@@ -458,6 +458,10 @@ const fullSidebar = [
         items: llmItems,
       },
       {
+        text: "Controller Workflows",
+        link: "/writing-workflows/controller",
+      },
+      {
         text: "Embedding Dagu",
         collapsed: true,
         items: [
