@@ -45,7 +45,7 @@ steps:
 
 ### Nested Workflows
 
-Run other workflows as steps and compose them hierarchically.
+Run other workflows as steps and compose them hierarchically. See [Sub-DAGs](/writing-workflows/sub-dags) for the full reference.
 
 ```yaml
 steps:
@@ -101,9 +101,9 @@ steps:
 
 If `with.queue` is omitted, the child DAG uses its own `queue` setting, base-config default, or local DAG queue. Use `dag.run` instead when later parent steps need the child output or success/failure result before they execute.
 
-**Working Directory Inheritance:**
+**Working Directory:**
 
-When calling sub-DAGs locally, the child inherits the parent's `working_dir` if it doesn't define its own:
+A child DAG run does not inherit the parent's working directory. Each child run gets its own work directory, so parallel children cannot collide on relative paths:
 
 ```yaml
 working_dir: /app/project
@@ -111,24 +111,23 @@ working_dir: /app/project
 steps:
   - action: dag.run
     with:
-      dag: child-task    # Child runs in /app/project
+      dag: child-task    # Child runs in its own work directory
 ---
 name: child-task
-# No working_dir defined - inherits /app/project from parent
 steps:
-  - run: pwd                 # Outputs: /app/project
+  - run: pwd             # Outputs the child run work directory
 ```
 
-To override the inherited working directory, define an explicit `working_dir` in the child DAG:
+To pin a child to a specific directory, declare `working_dir` in the child DAG:
 
 ```yaml
 name: child-with-custom-dir
-working_dir: /custom/path    # Overrides inherited working_dir
+working_dir: /custom/path
 steps:
   - run: pwd                     # Outputs: /custom/path
 ```
 
-> **Note**: Working directory inheritance only applies to local execution. For distributed execution (using `worker_selector`), sub-DAGs use their own context on the worker node.
+See [Sub-DAGs: Working Directory](/writing-workflows/sub-dags#working-directory).
 
 ### Multiple DAGs in One File
 

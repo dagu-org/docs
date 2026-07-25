@@ -94,6 +94,7 @@ const fullSidebar = [
           { text: "Workflow Basics", link: "/writing-workflows/basics" },
           { text: "Base Configuration", link: "/server-admin/base-config" },
           { text: "Parameters", link: "/writing-workflows/parameters" },
+          { text: "Sub-DAGs", link: "/writing-workflows/sub-dags" },
           { text: "Environment Variables", link: "/writing-workflows/environment-variables" },
           { text: "Labels", link: "/writing-workflows/labels" },
           { text: "Tags", link: "/writing-workflows/tags" },
