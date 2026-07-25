@@ -114,4 +114,42 @@ Enable deeper reasoning for complex tasks.
 
 </div>
 
+<div class="example-card">
+
+### Controller Workflow
+
+```yaml
+type: controller
+
+env:
+  - ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+
+llm:
+  provider: anthropic
+  model: claude-sonnet-4-20250514
+
+steps:
+  - name: run_tests
+    description: Run the test suite.
+    run: |
+      test -f /tmp/dagu-flaky-cleared || { echo "FAIL"; exit 1; }
+      echo "all green"
+
+  - name: fix_flaky
+    description: Quarantine the known flaky test.
+    run: touch /tmp/dagu-flaky-cleared
+
+tasks:
+  - name: tests_green
+    description: Finished when run_tests succeeded on its most recent run.
+```
+
+The steps become a catalog of actions, and `tasks` says when the run is done.
+The model picks what runs next, so a failing test can be fixed and retried
+without wiring that path yourself.
+
+<a href="/writing-workflows/controller" class="learn-more">Learn more →</a>
+
+</div>
+
 </div>
