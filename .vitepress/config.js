@@ -191,6 +191,9 @@ const fullSidebar = [
           { text: "File Provider", link: "/writing-workflows/secrets/file-provider" },
           { text: "Vault Provider", link: "/writing-workflows/secrets/vault-provider" },
           { text: "Kubernetes Provider", link: "/writing-workflows/secrets/kubernetes-provider" },
+          { text: "AWS Provider", link: "/writing-workflows/secrets/aws-provider" },
+          { text: "GCP Provider", link: "/writing-workflows/secrets/gcp-provider" },
+          { text: "Azure Provider", link: "/writing-workflows/secrets/azure-provider" },
         ],
       },
       {
