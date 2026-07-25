@@ -7,7 +7,7 @@ For secrets that should be selected as part of a named runtime environment, use 
 Dagu supports two secret declaration styles:
 
 1. **Registry refs** for secrets managed from Dagu's Web UI.
-2. **Direct provider refs** for existing DAG-based secrets such as `env`, `file`, `kubernetes`, `vault`, and `aws`.
+2. **Direct provider refs** for existing DAG-based secrets such as `env`, `file`, `kubernetes`, `vault`, `aws`, and `gcp`.
 
 Both styles inject a target environment variable into the run. The value is resolved before steps start and is masked in Dagu-managed logs.
 
@@ -75,6 +75,7 @@ The current built-in direct provider registry contains:
 | `kubernetes` | One data key from a Kubernetes Secret resource |
 | `vault` | One field from a HashiCorp Vault secret response |
 | `aws` | A secret value from AWS Secrets Manager |
+| `gcp` | A secret value from Google Secret Manager |
 
 Existing DAGs that use `provider` and `key` continue to work. Direct provider refs do not require the Web UI secret registry.
 
@@ -115,7 +116,7 @@ secrets:
 | --- | --- | --- |
 | `name` | Yes | Target environment variable injected into the run |
 | `ref` | Required for registry refs | Registry ref, for example `prod/db-password` |
-| `provider` | Required for direct provider refs | Resolver name. Built-in values are `env`, `file`, `kubernetes`, `vault`, and `aws` |
+| `provider` | Required for direct provider refs | Resolver name. Built-in values are `env`, `file`, `kubernetes`, `vault`, `aws`, and `gcp` |
 | `key` | Required for direct provider refs | Provider-specific lookup key |
 | `options` | Direct provider refs only | Provider-specific string map |
 
@@ -243,6 +244,7 @@ Masking is not a process sandbox. The step process receives the raw secret in it
 - [Kubernetes Provider](/writing-workflows/secrets/kubernetes-provider)
 - [HashiCorp Vault Provider](/writing-workflows/secrets/vault-provider)
 - [AWS Secrets Manager Provider](/writing-workflows/secrets/aws-provider)
+- [Google Secret Manager Provider](/writing-workflows/secrets/gcp-provider)
 
 ## Complete Example
 
