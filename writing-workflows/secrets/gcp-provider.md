@@ -48,6 +48,8 @@ ADC supports service account key files and credential configuration files for Wo
 
 On services such as Compute Engine and Cloud Run, attach a service account to the runtime. ADC obtains its credentials automatically from the metadata server. On GKE, use [Workload Identity Federation for GKE](https://cloud.google.com/kubernetes-engine/docs/concepts/workload-identity) to provide an identity to the Dagu pod.
 
+On Compute Engine and GKE, the underlying instance or node must also have the [`cloud-platform` OAuth scope](https://docs.cloud.google.com/secret-manager/docs/access-secret-version).
+
 In distributed execution, configure ADC on every worker that resolves GCP secrets.
 
 ### Required Permissions
