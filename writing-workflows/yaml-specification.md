@@ -136,18 +136,28 @@ actions, and `tasks` states when the run is finished. See
 ```yaml
 type: controller
 
+env:
+  - ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+
 llm:
   provider: anthropic
   model: claude-opus-5
 
 steps:
   - name: design
+    description: Write the design note.
     action: dag.run
     with: { dag: design }
 
 tasks:
   - name: designed
     description: Finished when the design workflow succeeded.
+
+---
+name: design
+steps:
+  - name: draft
+    run: echo "design drafted"
 ```
 
 `type: agent` is reserved and is rejected by the current parser.

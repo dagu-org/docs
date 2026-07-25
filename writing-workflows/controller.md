@@ -20,10 +20,12 @@ llm:
 
 steps:
   - name: design
+    description: Write the design note.
     action: dag.run
     with: { dag: design }
 
   - name: implement
+    description: Build what the design describes.
     action: dag.run
     with: { dag: implement }
 
@@ -49,14 +51,25 @@ tasks:
 name: design
 steps:
   - name: draft
-    run: ./design.sh
+    run: echo "design drafted"
 
 ---
 name: implement
 steps:
   - name: build
-    run: ./implement.sh
+    run: echo "implemented"
 ```
+
+Save that as `ship-feature.yaml` in your DAGs directory and run it. The
+controller runs `design`, opens the review, and the run reports `waiting` until
+someone answers:
+
+```bash
+dagu start ship-feature
+dagu human-task complete --run-id <id> --step review \
+  --inputs-json '{"approved":true,"notes":"looks good"}'
+```
+
 
 The `env:` line is not optional: Dagu only propagates `DAGU_*`, `DAG_*`, `LC_*`,
 and `KUBERNETES_*` from your shell, so an exported API key needs binding before
@@ -72,12 +85,24 @@ no task is open.
 can be pointed at different work per run:
 
 ```yaml
+type: controller
+
 params:
   - TARGET: staging
 
+env:
+  - ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+
 llm:
+  provider: anthropic
+  model: claude-opus-5
   system: |
     Deploy to ${params.TARGET}. Never touch any other environment.
+
+steps:
+  - name: deploy
+    description: Deploy to the target environment.
+    run: echo "deploying to ${TARGET}"
 
 tasks:
   - name: deployed
@@ -85,7 +110,8 @@ tasks:
 ```
 
 ```bash
-dagu start release -- TARGET=production
+dagu start release                      # deploys to staging
+dagu start release -- TARGET=production # deploys to production
 ```
 
 ## When to use it
