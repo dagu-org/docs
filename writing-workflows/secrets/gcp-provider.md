@@ -103,4 +103,4 @@ Without `options.field`, Dagu returns the complete secret value.
 | `version` | Secret version number, alias, or `latest` |
 | `field` | Top-level JSON field to return |
 
-Dagu preserves version identifiers and field names exactly as written. The provider verifies the CRC32C checksum when Google Secret Manager returns one. If the checksum is invalid, the secret has no payload, or the secret cannot be read, DAG initialization fails before any step starts.
+Dagu trims surrounding whitespace from project IDs, locations, and version identifiers. Field names are preserved exactly as written. The provider verifies the CRC32C checksum when Google Secret Manager returns one. If the checksum is invalid, the secret has no payload, or the secret cannot be read, DAG initialization fails before any step starts.
