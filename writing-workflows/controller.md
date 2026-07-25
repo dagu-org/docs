@@ -157,6 +157,24 @@ dagu human-task complete --run-id <id> --step review \
 Human tasks stay root-only, so declare them on the controller itself rather than
 inside a child workflow.
 
+## Asking a person
+
+Not every question can be written down in advance. When the controller hits one,
+it calls `ask_user` with a question of its own wording. The run reports
+`waiting`, exactly as a declared human task does, and the reply comes back as the
+controller's next observation.
+
+```bash
+dagu human-task complete --run-id <id> --step ask_user \
+  --inputs-json '{"answer":"staging-eu, never production"}'
+```
+
+No configuration is needed: every controller can ask. Three things keep it from
+pestering anyone. The answers so far are restated to the controller every turn,
+an exact repeat is refused with the answer it already got, and a run may ask at
+most 5 questions. A controller running as somebody's child cannot ask at all,
+since nobody is watching a sub-workflow.
+
 ## Failure and repetition
 
 A failing action does not abort a controller run. The error and a tail of the
