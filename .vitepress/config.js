@@ -193,6 +193,7 @@ const fullSidebar = [
           { text: "AWS Provider", link: "/writing-workflows/secrets/aws-provider" },
           { text: "GCP Provider", link: "/writing-workflows/secrets/gcp-provider" },
           { text: "Azure Provider", link: "/writing-workflows/secrets/azure-provider" },
+          { text: "Alibaba Provider", link: "/writing-workflows/secrets/alibaba-provider" },
         ],
       },
       {

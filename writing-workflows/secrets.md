@@ -77,6 +77,7 @@ The current built-in direct provider registry contains:
 | `aws` | A secret value from AWS Secrets Manager |
 | `gcp` | A secret value from Google Secret Manager |
 | `azure` | A secret value from Azure Key Vault |
+| `alibaba` | A secret value from Alibaba Cloud KMS |
 
 Existing DAGs that use `provider` and `key` continue to work. Direct provider refs do not require the Web UI secret registry.
 
@@ -247,6 +248,7 @@ Masking is not a process sandbox. The step process receives the raw secret in it
 - [AWS Secrets Manager Provider](/writing-workflows/secrets/aws-provider)
 - [Google Secret Manager Provider](/writing-workflows/secrets/gcp-provider)
 - [Azure Key Vault Provider](/writing-workflows/secrets/azure-provider)
+- [Alibaba Cloud KMS Provider](/writing-workflows/secrets/alibaba-provider)
 
 ## Complete Example
 
