@@ -65,6 +65,20 @@ This restricts the chain to environment, workload identity, and managed identity
 
 In distributed execution, configure credentials on every worker that resolves Azure secrets.
 
+### Sovereign Clouds
+
+`DefaultAzureCredential` authenticates against Azure Public Cloud by default. When environment credentials authenticate to Azure Government or Azure China, set the matching authority before starting Dagu:
+
+```bash
+# Azure Government
+export AZURE_AUTHORITY_HOST=https://login.microsoftonline.us/
+
+# Azure China
+export AZURE_AUTHORITY_HOST=https://login.chinacloudapi.cn/
+```
+
+Set only the authority that matches the vault endpoint. Developer-tool credentials use the cloud configured in that tool, so configure Azure CLI for the matching cloud before running `az login`.
+
 ### Required Permissions
 
 The authenticated principal needs permission to read the referenced secrets. For vaults using Azure role-based access control, assign the [Key Vault Secrets User](https://learn.microsoft.com/azure/key-vault/general/rbac-guide) role at the narrowest practical scope. For vaults using legacy access policies, grant the `Get` secret permission.
@@ -106,11 +120,11 @@ The provider accepts these key forms:
 | --- | --- |
 | Secret name | `production-api-token` |
 | Secret URL | `https://my-vault.vault.azure.net/secrets/production-api-token` |
-| Version URL | `https://my-vault.vault.azure.net/secrets/production-api-token/0123456789abcdef` |
+| Version URL | `https://my-vault.vault.azure.net/secrets/production-api-token/0123456789abcdef0123456789abcdef` |
 
 A secret name requires a vault URL from `options.vault_url` or the global Azure configuration. A complete secret URL already contains its vault, so it cannot be combined with `options.vault_url`.
 
-When the URL does not contain a version, Dagu uses `options.version` or retrieves the latest version. A version URL cannot be combined with `options.version`.
+When the URL does not contain a version, Dagu uses `options.version` or retrieves the latest version. Azure generates each version as a 32-character identifier. A version URL cannot be combined with `options.version`.
 
 ## JSON Fields
 
