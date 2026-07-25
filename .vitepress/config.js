@@ -670,7 +670,7 @@ export default withMermaid(
       ],
 
       footer: {
-        message: "Released under the MIT License.",
+        message: "Dagu is open source under the GNU General Public License v3.0.",
         copyright: "Copyright © 2024 Dagu Contributors",
       },
 
