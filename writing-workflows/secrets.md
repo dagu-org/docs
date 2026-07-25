@@ -76,6 +76,7 @@ The current built-in direct provider registry contains:
 | `vault` | One field from a HashiCorp Vault secret response |
 | `aws` | A secret value from AWS Secrets Manager |
 | `gcp` | A secret value from Google Secret Manager |
+| `azure` | A secret value from Azure Key Vault |
 
 Existing DAGs that use `provider` and `key` continue to work. Direct provider refs do not require the Web UI secret registry.
 
@@ -245,6 +246,7 @@ Masking is not a process sandbox. The step process receives the raw secret in it
 - [HashiCorp Vault Provider](/writing-workflows/secrets/vault-provider)
 - [AWS Secrets Manager Provider](/writing-workflows/secrets/aws-provider)
 - [Google Secret Manager Provider](/writing-workflows/secrets/gcp-provider)
+- [Azure Key Vault Provider](/writing-workflows/secrets/azure-provider)
 
 ## Complete Example
 
