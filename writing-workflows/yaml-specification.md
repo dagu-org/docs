@@ -101,7 +101,8 @@ Unknown top-level fields are rejected. The accepted top-level fields are listed 
 
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
-| `type` | string | Step scheduling mode. Accepted values are `graph` and `chain`. | `graph` |
+| `type` | string | Step scheduling mode. Accepted values are `graph`, `chain`, and `controller`. | `graph` |
+| `tasks` | array | Goals a `controller` workflow must satisfy. Required with `type: controller`, invalid otherwise. | `[]` |
 
 `graph` schedules steps from their `depends` relationships.
 
@@ -126,6 +127,27 @@ type: chain
 steps:
   - run: echo "first"
   - run: echo "second"
+```
+
+`controller` hands the ordering decision to an LLM: `steps` become a catalog of
+actions, and `tasks` states when the run is finished. See
+[Controller Workflows](/writing-workflows/controller).
+
+```yaml
+type: controller
+
+llm:
+  provider: anthropic
+  model: claude-opus-5
+
+steps:
+  - name: design
+    action: dag.run
+    with: { dag: design }
+
+tasks:
+  - name: designed
+    description: Finished when the design workflow succeeded.
 ```
 
 `type: agent` is reserved and is rejected by the current parser.

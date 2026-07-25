@@ -20,6 +20,27 @@ Provider aliases include `google` for `gemini`; `ollama`, `vllm`, and `llama` fo
 
 Use `api_key_name` when the credential is stored under another environment variable. Use `base_url` for a proxy or a compatible local endpoint.
 
+## Making the key reachable
+
+Dagu does not pass your whole shell environment through to a workflow. Only
+`DAGU_*`, `DAG_*`, `LC_*`, and `KUBERNETES_*` propagate by default, so exporting
+`OPENROUTER_API_KEY` in your shell is not enough on its own: the request goes out
+without an `Authorization` header and the provider answers `401`.
+
+Bind the key in the workflow:
+
+```yaml
+env:
+  - OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
+```
+
+Or allow it through for every workflow, in `~/.dagu/config.yaml`:
+
+```yaml
+env_passthrough:
+  - OPENROUTER_API_KEY
+```
+
 ## OpenAI-Compatible Endpoints
 
 Prefer a native provider when Dagu supports it. For example, OpenRouter has its own provider, default endpoint, credential name, reasoning mapping, and web-search integration:
