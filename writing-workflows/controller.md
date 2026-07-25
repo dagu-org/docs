@@ -63,8 +63,8 @@ and `KUBERNETES_*` from your shell, so an exported API key needs binding before
 the provider can see it. See [Providers](/step-types/llm/providers).
 
 Each turn the controller picks one action, watches what happens, and picks
-again. When a task's criteria are met it calls `complete_task`. When every task
-is complete, the run concludes.
+again. It settles each task with `set_task_status` as it goes. The run ends once
+no task is open.
 
 ## When to use it
 
@@ -90,6 +90,20 @@ completion test rather than a summary. "Finished when the PR URL has been
 produced" gives the model something to check; "open a PR" does not.
 
 Both fields are required, and names must be unique.
+
+Every task starts open, and the controller settles it with one call:
+
+| Status | When | Run outcome |
+|---|---|---|
+| `completed` | the criteria are met | — |
+| `skipped` | it turned out there was nothing to do | still succeeds |
+| `failed` | it cannot be achieved | run fails, naming the task |
+| `open` | undo a decision later work invalidated | back into the loop |
+
+`skipped` matters more than it looks. Without it, a task that is moot — signing
+a Windows build for a project that has none — leaves the controller with no
+honest move: it either burns turns pretending to work, or stalls out and fails
+a run that was fine.
 
 ## Actions
 
