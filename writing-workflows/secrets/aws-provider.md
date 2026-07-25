@@ -13,17 +13,32 @@ secrets:
 
 ## Authentication
 
-Dagu uses the standard AWS SDK credential chain. Credentials can come from environment variables, shared AWS configuration files, container credentials, instance roles, or web identity credentials.
+Dagu uses the [AWS SDK for Go default credential chain](https://docs.aws.amazon.com/sdk-for-go/v2/developer-guide/configure-gosdk.html). Credentials are not configured in the DAG or Dagu configuration.
 
-A named AWS profile can be selected for the Dagu process:
+The credential chain supports:
+
+- `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and optional `AWS_SESSION_TOKEN` environment variables
+- Shared AWS `config` and `credentials` files, including IAM Identity Center and role-based profiles
+- Web identity credentials, including IAM roles for service accounts on Amazon EKS
+- Amazon ECS task roles
+- Amazon EC2 instance roles
+
+Prefer temporary credentials supplied through roles or federation instead of long-lived access keys.
+
+### Named Profiles
+
+Select a profile from the shared AWS configuration for the Dagu process:
 
 ```bash
 export AWS_PROFILE=production
+dagu start-all
 ```
 
 Profile selection is process-wide. `options.profile` is not supported. In distributed execution, configure credentials on each worker that resolves AWS secrets.
 
-The credentials need permission to call `secretsmanager:GetSecretValue` for the referenced secrets. Secrets encrypted with a customer-managed KMS key may also require `kms:Decrypt`.
+### Required Permissions
+
+The authenticated principal needs permission to call [`secretsmanager:GetSecretValue`](https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html) for every referenced secret. Secrets encrypted with a customer-managed KMS key also require `kms:Decrypt` permission for that key.
 
 ## Region
 

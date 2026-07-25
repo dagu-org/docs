@@ -15,9 +15,44 @@ secrets:
 
 ## Authentication
 
-Dagu uses Google Application Default Credentials. Credentials can come from the environment, a local Application Default Credentials file, an attached service account, or workload identity.
+Dagu uses [Google Application Default Credentials](https://cloud.google.com/docs/authentication/application-default-credentials) (ADC). The GCP provider does not accept credentials or a named `profile` option. The `project_id` setting identifies the project containing the secret; it does not select an authentication identity.
 
-In distributed execution, configure credentials on each worker that resolves GCP secrets. The credentials need permission to access the referenced secret versions.
+ADC checks these credential sources in order:
+
+1. A credential file specified by `GOOGLE_APPLICATION_CREDENTIALS`
+2. Local credentials created by the Google Cloud CLI
+3. A service account attached to the Google Cloud runtime
+
+### Local Development
+
+Create local ADC credentials:
+
+```bash
+gcloud auth application-default login
+```
+
+This is separate from `gcloud auth login`, which authenticates the Google Cloud CLI itself.
+
+### Credential File
+
+Set `GOOGLE_APPLICATION_CREDENTIALS` to an ADC-compatible credential file before starting Dagu:
+
+```bash
+export GOOGLE_APPLICATION_CREDENTIALS=/path/to/credentials.json
+dagu start-all
+```
+
+ADC supports service account key files and credential configuration files for Workload Identity Federation. Prefer federation or an attached service account for production workloads to avoid long-lived service account keys.
+
+### Google Cloud Runtimes
+
+On services such as Compute Engine and Cloud Run, attach a service account to the runtime. ADC obtains its credentials automatically from the metadata server. On GKE, use [Workload Identity Federation for GKE](https://cloud.google.com/kubernetes-engine/docs/concepts/workload-identity) to provide an identity to the Dagu pod.
+
+In distributed execution, configure ADC on every worker that resolves GCP secrets.
+
+### Required Permissions
+
+The authenticated principal needs the `secretmanager.versions.access` permission for every referenced secret. The predefined [Secret Manager Secret Accessor](https://cloud.google.com/secret-manager/docs/access-control#secretmanager.secretAccessor) role, `roles/secretmanager.secretAccessor`, provides this permission. Grant the role on individual secrets when possible.
 
 ## Project And Location
 
