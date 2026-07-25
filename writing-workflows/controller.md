@@ -66,6 +66,28 @@ Each turn the controller picks one action, watches what happens, and picks
 again. It settles each task with `set_task_status` as it goes. The run ends once
 no task is open.
 
+## Parameterising the instructions
+
+`llm.system` and each task `description` take variables, so the same controller
+can be pointed at different work per run:
+
+```yaml
+params:
+  - TARGET: staging
+
+llm:
+  system: |
+    Deploy to ${params.TARGET}. Never touch any other environment.
+
+tasks:
+  - name: deployed
+    description: Finished when the deploy to ${params.TARGET} succeeded.
+```
+
+```bash
+dagu start release -- TARGET=production
+```
+
 ## When to use it
 
 Reach for a controller when the order genuinely cannot be written down in
