@@ -157,6 +157,7 @@ const fullSidebar = [
           { text: "Queue Assignment", link: "/writing-workflows/queues" },
           { text: "Human Tasks", link: "/writing-workflows/human-tasks" },
           { text: "Approval Gates", link: "/writing-workflows/approval" },
+          { text: "Controller Workflows", link: "/writing-workflows/controller" },
         ],
       },
       {
@@ -457,6 +458,10 @@ const fullSidebar = [
         link: "/features/chat/",
         collapsed: true,
         items: llmItems,
+      },
+      {
+        text: "Controller Workflows",
+        link: "/writing-workflows/controller",
       },
       {
         text: "Embedding Dagu",

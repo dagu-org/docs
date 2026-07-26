@@ -4,6 +4,10 @@ Send a prompt or message list to a large language model with `action: chat.compl
 
 The response is written to stdout, so it can be viewed in the run log or [captured for later steps](/step-types/llm/outputs).
 
+A `chat.completion` step is one step in a workflow you laid out. When the order
+of the work is itself the thing a model should decide, use a
+[controller workflow](/writing-workflows/controller) instead.
+
 ## Basic Usage
 
 Use `prompt` for a single user message:
