@@ -73,7 +73,23 @@ dagu human-task complete --run-id <id> --step review \
 
 The `env:` line is not optional: Dagu only propagates `DAGU_*`, `DAG_*`, `LC_*`,
 and `KUBERNETES_*` from your shell, so an exported API key needs binding before
-the provider can see it. See [Providers](/step-types/llm/providers).
+the provider can see it.
+
+`llm.provider` takes `openai`, `anthropic`, `gemini`, `openrouter`, `zai`,
+`opencode`, or `local`. Add `base_url` to send the same provider at a proxy or
+an OpenAI-compatible server of your own, and `api_key_name` when the credential
+lives under a variable other than the provider's default:
+
+```yaml
+llm:
+  provider: local
+  model: qwen3:8b
+  base_url: http://localhost:11434/v1
+```
+
+[Providers & Endpoints](/step-types/llm/providers) lists the credential variable
+each provider reads. [Local Models](/step-types/llm/local-models) covers what a
+local base URL has to look like.
 
 Each turn the controller picks one action, watches what happens, and picks
 again. It settles each task with `set_task_status` as it goes. The run ends once
