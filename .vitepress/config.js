@@ -95,6 +95,7 @@ const fullSidebar = [
           { text: "Base Configuration", link: "/server-admin/base-config" },
           { text: "Parameters", link: "/writing-workflows/parameters" },
           { text: "Sub-DAGs", link: "/writing-workflows/sub-dags" },
+          { text: "Controller Workflows", link: "/writing-workflows/controller" },
           { text: "Environment Variables", link: "/writing-workflows/environment-variables" },
           { text: "Labels", link: "/writing-workflows/labels" },
           { text: "Tags", link: "/writing-workflows/tags" },
@@ -157,7 +158,6 @@ const fullSidebar = [
           { text: "Queue Assignment", link: "/writing-workflows/queues" },
           { text: "Human Tasks", link: "/writing-workflows/human-tasks" },
           { text: "Approval Gates", link: "/writing-workflows/approval" },
-          { text: "Controller Workflows", link: "/writing-workflows/controller" },
         ],
       },
       {
