@@ -241,11 +241,78 @@ an exact repeat is refused with the answer it already got, and a run may ask at
 most 5 questions. A controller running as somebody's child cannot ask at all,
 since nobody is watching a sub-workflow.
 
+## What the controller sees
+
+After an action runs, the controller reads a short report of it and nothing
+else. It never sees the step's command, its environment, or the state of any
+other step. Everything it knows about the run it built up from these reports,
+one per turn.
+
+A report carries the step's status, and then whichever of these apply:
+
+| Line | When it appears |
+|------|-----------------|
+| `error:` | The step failed. |
+| `answer:` / `submitted:` | A human task was completed. |
+| `outputs:` | The step published outputs explicitly. |
+| `output:` | Nothing was published explicitly, but the step set `output:`. |
+| `child run:` | The step ran a sub-workflow. |
+| `log:` / `stderr:` | Otherwise: the last 40 lines of each. |
+
+```text
+status: succeeded
+outputs: {"verdict":"VERDICT: ISSUES (4)","aspect":"word choice"}
+child run: check (succeeded)
+```
+
+Every report stays in the transcript and is sent again on every later turn, so
+what a step reports is paid for once per remaining turn of the run. Keeping
+reports small is the main lever on what a controller run costs.
+
+### Reporting from a sub-workflow
+
+A `dag.run` action is reported from the child run rather than from the step's
+own stdout, which only mirrors the child's status JSON.
+
+By default the report lists every output variable the child's steps set. That
+includes variables the child only uses internally, such as a file loaded to
+build a prompt, and a large one costs tokens on every turn that follows.
+
+End the child with `outputs.write` (or `stdout.outputs`) to decide what crosses
+the boundary. When a child publishes outputs that way, the controller reports
+those and stops listing the child's internal variables:
+
+```yaml
+name: check
+steps:
+  - id: load_standard
+    run: cat standard.txt      # internal: never reported to the controller
+    output: STANDARD
+
+  - id: grade
+    depends: [load_standard]
+    action: chat.completion
+    with: { prompt: "..." }
+    output: FINDINGS
+
+  - id: publish                # the report the controller reads
+    depends: [grade]
+    action: outputs.write
+    with:
+      values:
+        verdict: ${FINDINGS}
+```
+
+A child that publishes nothing keeps the default listing. Failed steps in the
+child are reported either way. See
+[Reading Child Results](/writing-workflows/sub-dags#reading-child-results) for
+how the same two mechanisms work for an ordinary caller.
+
 ## Failure and repetition
 
-A failing action does not abort a controller run. The error and a tail of the
-step's logs are handed back to the controller, which can retry the action, try
-something else, or give up and fail the run.
+A failing action does not abort a controller run. The failure is reported to the
+controller like any other outcome, and it can retry the action, try something
+else, or give up and fail the run.
 
 The controller may also re-run an action it has already run, which is what makes
 a review-and-redo cycle work. Any single action runs at most 5 times per run.

@@ -180,6 +180,8 @@ Declared step outputs (`outputs:` with `name:`) are scoped to the DAG document t
 
 Keep returned values small. Use [Artifacts](/writing-workflows/artifacts) for files, reports, and large payloads.
 
+A [controller workflow](/writing-workflows/controller#reporting-from-a-sub-workflow) treats the choice between the two as load-bearing: publishing with `outputs.write` decides what the model is told about the child run, and what it is told is resent on every later turn.
+
 ## Running Children in Parallel
 
 Add `parallel` to a `dag.run` or `dag.enqueue` step to fan out one child run per item. Each child receives `${ITEM}`.
