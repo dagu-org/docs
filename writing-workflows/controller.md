@@ -164,6 +164,46 @@ Every step becomes one tool the model can call.
   pass arguments through.
 - Every other step is a plain action with no arguments.
 
+Write a value in `params` for anything the controller should not decide. A
+parameter the step supplies is not advertised, so the model cannot supply its
+own value for it, and a step that supplies every parameter takes no arguments at
+all. Use this to fix what a step is for and leave the model only the genuine
+choices:
+
+```yaml
+steps:
+  - name: check_vocabulary
+    description: Grade the draft for AI word choice.
+    action: dag.run
+    with:
+      dag: check
+      params:
+        aspect: vocabulary      # fixed: the model only picks `depth`
+
+  - name: check_structure
+    description: Grade the draft for sentence shape.
+    action: dag.run
+    with:
+      dag: check
+      params:
+        aspect: structure
+
+---
+name: check
+params:
+  - name: aspect
+    type: string
+  - name: depth
+    type: string
+    default: normal
+```
+
+Without the fixed `aspect`, both tools would look the same to the model and it
+would have to reproduce the right value each call. Leaving a parameter open when
+it should be fixed is the more expensive mistake: a model that guesses wrong, or
+sends an empty string, produces a child run that does the wrong work and still
+reports success.
+
 `depends` is not allowed: ordering belongs to the controller. Router steps are
 not allowed either.
 
