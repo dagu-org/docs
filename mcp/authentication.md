@@ -8,7 +8,7 @@ The MCP endpoint uses the same authentication mode as the Dagu server.
 | `builtin` | Create an [API key](/server-admin/authentication/api-keys) and send it as `Authorization: Bearer dagu_...`. A login JWT also works, but API keys are better for tools and automation. |
 | `basic` | Use HTTP Basic authentication if your MCP client supports it. |
 
-Prefer an `Authorization` header. Codex and Claude Code both support sending headers to HTTP MCP servers. If a client cannot send headers, Dagu also accepts `?token=<token>` on stream endpoints, but headers are safer for shared or proxied environments.
+Prefer an `Authorization` header. Most MCP clients support sending headers to HTTP MCP servers, as listed in [Clients](/mcp/clients/#configuration-shapes). If a client cannot send headers, Dagu also accepts `?token=<token>` on stream endpoints, but headers are safer for shared or proxied environments.
 
 ## API Key Surfaces
 

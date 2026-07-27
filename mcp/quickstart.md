@@ -47,7 +47,7 @@ In your MCP client, add an HTTP or Streamable HTTP MCP server:
 | URL | `$DAGU_MCP_URL` |
 | Auth | `Authorization: Bearer $DAGU_MCP_API_KEY` when Dagu authentication is enabled |
 
-For specific client commands, see [Clients](/mcp/clients).
+For specific client commands, see [Clients](/mcp/clients/).
 
 ## First Operations
 

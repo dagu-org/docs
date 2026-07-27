@@ -4,3 +4,4 @@
 /features/chat/local-ai/ /step-types/llm/local-models 301
 /features/chat/opencode /step-types/llm/opencode 301
 /features/chat/opencode/ /step-types/llm/opencode 301
+/mcp/clients /mcp/clients/ 301

@@ -28,7 +28,7 @@ If the Dagu server uses a base path, place `/mcp` under that base path. For exam
 | Goal | Start here |
 |------|------------|
 | Connect a client for the first time | [Quickstart](/mcp/quickstart) |
-| Configure Codex or Claude Code | [Clients](/mcp/clients) |
+| Configure Claude Code, Codex, Cursor, VS Code, or another client | [Clients](/mcp/clients/) |
 | Understand the request path and audit flow | [Architecture](/mcp/architecture) |
 | Choose API key, role, surface, and attribution settings | [Authentication](/mcp/authentication) |
 | Read or mutate Dagu through MCP tools | [Tools](/mcp/tools) |
