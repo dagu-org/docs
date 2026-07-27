@@ -132,9 +132,6 @@ Use names such as `version`, `image_tag`, `artifact_url`, or `record_count`.
 Do not use step outputs for large reports, logs, media files, or full datasets. Write those to an artifact instead and publish only the small path or summary that later steps need.
 
 ```yaml
-artifacts:
-  enabled: true
-
 steps:
   - id: report
     run: ./generate-report --format markdown

@@ -189,9 +189,6 @@ Strict step-output references address declared top-level output names. Nested pa
 Use files for larger data. Use artifacts when the run should retain the file for preview or download.
 
 ```yaml
-artifacts:
-  enabled: true
-
 steps:
   - id: generate_report
     run: ./generate-report

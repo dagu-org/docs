@@ -99,9 +99,6 @@ Execution mode behavior:
 A common pattern is to stream a Markdown report to an artifact and write generated sidecar files into the artifact directory:
 
 ```yaml
-artifacts:
-  enabled: true
-
 steps:
   - id: build_report
     run: ./audit --format markdown

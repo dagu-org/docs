@@ -153,9 +153,6 @@ Execution mode behavior:
 Example:
 
 ```yaml
-artifacts:
-  enabled: true
-
 steps:
   - id: write_report
     run: ./generate-report --format markdown
