@@ -66,7 +66,7 @@ someone answers:
 
 ```bash
 dagu start ship-feature
-dagu human-task complete --run-id <id> --step review \
+dagu human-task complete ship-feature --run-id <id> --step review \
   --inputs-json '{"approved":true,"notes":"looks good"}'
 ```
 
@@ -223,6 +223,89 @@ reports success.
 `depends` is not allowed: ordering belongs to the controller. Router steps are
 not allowed either.
 
+## Driving a coding agent
+
+An [`action: harness.run`](/step-types/harness/) step runs a coding agent CLI,
+which makes it the natural action for work too open-ended to write down. Declare
+it on the controller and the model can fire it, but not aim it: only `dag.run`
+advertises parameters, so every other action is a tool that takes no arguments
+and the prompt stays whatever the author wrote.
+
+To let the controller write the instruction, put the harness in a child workflow
+and expose the prompt as a parameter:
+
+```yaml
+type: controller
+
+llm:
+  provider: anthropic
+  model: claude-opus-5
+
+steps:
+  - name: write_slogan
+    description: Have a coding agent write one slogan line. Tell it exactly what to write.
+    action: dag.run
+    with:
+      dag: agent
+
+  - id: review
+    name: review
+    action: human.task
+    with:
+      prompt: Approve this slogan?
+      form:
+        type: object
+        properties:
+          approved: { type: boolean }
+          feedback: { type: string }
+        required: [approved]
+
+tasks:
+  - name: approved
+    description: Finished when write_slogan produced a slogan and the reviewer set approved=true.
+
+---
+name: agent
+params:
+  - name: INSTRUCTION
+    type: string
+    description: What the agent should write, in full.
+
+harness:
+  provider: claude
+  model: sonnet
+
+steps:
+  - id: work
+    action: harness.run
+    with:
+      prompt: ${INSTRUCTION}
+    output: RESULT
+
+  - id: publish
+    depends: [work]
+    action: outputs.write
+    with:
+      values:
+        slogan: ${RESULT}
+```
+
+Rejecting the review resumes the run, and the controller reaches for the same
+action with a new `INSTRUCTION` written against the feedback. That cycle is what
+the pairing buys: a person judges, and the controller re-aims the agent.
+
+The `publish` step is not decoration. An agent CLI writes a lot to stdout, and a
+step that publishes nothing is reported as the last 40 lines of its log, resent
+on every remaining turn. Ending the child with `outputs.write` keeps the
+transcript to the line that matters.
+
+Budget the redo cycle against the per-step cap: any one action runs at most 5
+times per run, so five rejections exhaust `write_slogan`. Split the work across
+distinct steps when a longer cycle is expected.
+
+A DAG-level `harness:` block sets defaults for the harness steps under it. Steps
+that declare a command are unaffected and still run it.
+
 ## Waiting for a person
 
 An `action: human.task` step works exactly as it does elsewhere, and it is the
@@ -232,7 +315,7 @@ resumes the same run, and the controller picks the conversation back up with the
 submitted answer as its next observation.
 
 ```bash
-dagu human-task complete --run-id <id> --step review \
+dagu human-task complete ship-feature --run-id <id> --step review \
   --inputs-json '{"approved":true,"notes":"ship it"}'
 ```
 
@@ -247,7 +330,7 @@ it calls `ask_user` with a question of its own wording. The run reports
 controller's next observation.
 
 ```bash
-dagu human-task complete --run-id <id> --step ask_user \
+dagu human-task complete ship-feature --run-id <id> --step ask_user \
   --inputs-json '{"answer":"staging-eu, never production"}'
 ```
 

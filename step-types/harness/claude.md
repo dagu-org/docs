@@ -21,8 +21,12 @@ Any `with` key other than `provider` and `fallback` is passed as a CLI flag. Sna
 | Flag | Type | Description |
 |------|------|-------------|
 | `--model` | string | Model variant (e.g. `sonnet`, `opus`) |
-| `--bare` | boolean | Minimal output mode |
+| `--bare` | boolean | Minimal mode: skips hooks, LSP, plugin sync, auto-memory, `CLAUDE.md` discovery, and keychain reads |
 | `--max-turns` | number | Maximum tool-calling iterations |
+
+`bare: true` skips keychain reads, so a subscription login is not visible to the
+step and the run fails with `Not logged in · Please run /login`. Use it only
+when the credential comes from `ANTHROPIC_API_KEY` in the step environment.
 
 ## Example
 
@@ -35,13 +39,12 @@ steps:
       prompt: |
         Review the current branch for bugs and style issues
       model: sonnet
-      bare: true
 ```
 
 Generated invocation:
 
 ```text
-claude -p "Review the current branch for bugs and style issues" --bare --model sonnet
+claude -p "Review the current branch for bugs and style issues" --model sonnet
 ```
 
 ## YOLO Mode
