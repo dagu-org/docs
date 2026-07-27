@@ -204,6 +204,7 @@ steps:
     # Overrides retry_policy — this step must not retry
     retry_policy:
       limit: 0
+      interval_sec: 0
     env:
       - OUTPUT_DIR: /reports
     # Effective env: [NOTIFY=true, OUTPUT_DIR=/reports]

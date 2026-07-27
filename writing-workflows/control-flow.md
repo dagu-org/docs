@@ -121,7 +121,7 @@ steps:
 To pin a child to a specific directory, declare `working_dir` in the child DAG:
 
 ```yaml
-name: child-with-custom-dir
+# child-with-custom-dir.yaml
 working_dir: /custom/path
 steps:
   - run: pwd                     # Outputs: /custom/path

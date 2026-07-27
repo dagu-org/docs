@@ -112,6 +112,7 @@ steps:
     run: pg_isready -U postgres
     retry_policy:
       limit: 10
+      interval_sec: 3
       
   - id: load_schema
     run: psql -U postgres myapp -f schema.sql

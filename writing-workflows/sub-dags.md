@@ -290,7 +290,7 @@ Every child run gets its own work directory, exposed as `DAG_RUN_WORK_DIR` and `
 To pin a child to a specific directory, declare it in the child:
 
 ```yaml
-name: child
+# child.yaml
 working_dir: /srv/app
 steps:
   - run: pwd    # /srv/app

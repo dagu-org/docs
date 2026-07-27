@@ -10,7 +10,7 @@ For command output, prefer attaching stdout or stderr directly to an artifact:
 
 ```yaml
 steps:
-  - id: generate-report
+  - id: generate_report
     run: ./generate-report --format markdown
     stdout:
       artifact: reports/summary.md
@@ -80,7 +80,7 @@ When artifact storage is active, `${context.paths.artifacts_dir}` resolves to th
 
 ```yaml
 steps:
-  - id: write-files
+  - id: write_files
     run: |
       test -n "${context.paths.artifacts_dir}"
       mkdir -p "${context.paths.artifacts_dir}/images"
@@ -103,18 +103,18 @@ artifacts:
   enabled: true
 
 steps:
-  - id: build-report
+  - id: build_report
     run: ./audit --format markdown
     stdout:
       artifact: reports/summary.md
 
-  - id: build-sidecars
+  - id: build_sidecars
     run: |
       set -eu
       mkdir -p "${context.paths.artifacts_dir}/reports" "${context.paths.artifacts_dir}/images"
       cp ./charts/service-latency.png "${context.paths.artifacts_dir}/images/service-latency.png"
       printf 'status=ok\n' > "${context.paths.artifacts_dir}/reports/metadata.txt"
-    depends: build-report
+    depends: build_report
 ```
 
 This gives the run a Markdown report, a plain-text sidecar file, and an image that operators can preview directly in the [Web UI](/overview/web-ui).
@@ -125,7 +125,7 @@ This gives the run a Markdown report, a plain-text sidecar file, and an image th
 
 ```yaml
 steps:
-  - id: export-json
+  - id: export_json
     run: ./export --format json
     stdout:
       artifact: exports/data.json

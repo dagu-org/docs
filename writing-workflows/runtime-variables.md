@@ -157,7 +157,7 @@ artifacts:
   enabled: true
 
 steps:
-  - id: write-report
+  - id: write_report
     run: ./generate-report --format markdown
     stdout:
       artifact: reports/summary.md

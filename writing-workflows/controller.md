@@ -382,7 +382,7 @@ the boundary. When a child publishes outputs that way, the controller reports
 those and stops listing the child's internal variables:
 
 ```yaml
-name: check
+# check.yaml
 steps:
   - id: load_standard
     run: cat standard.txt      # internal: never reported to the controller
