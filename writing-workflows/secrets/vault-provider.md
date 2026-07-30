@@ -20,6 +20,10 @@ secrets:
   vault:
     address: https://vault.example.com
     token: hvs.example
+    # Optional TLS settings for a private CA or mTLS to Vault
+    ca_cert: /etc/dagu/certs/vault-ca.pem
+    client_cert: /etc/dagu/certs/vault-client.crt
+    client_key: /etc/dagu/certs/vault-client.key
 ```
 
 The same fields can be set with Dagu config environment variables:
@@ -27,6 +31,9 @@ The same fields can be set with Dagu config environment variables:
 ```bash
 export DAGU_SECRETS_VAULT_ADDRESS=https://vault.example.com
 export DAGU_SECRETS_VAULT_TOKEN=hvs.example
+export DAGU_SECRETS_VAULT_CA_CERT=/etc/dagu/certs/vault-ca.pem
+export DAGU_SECRETS_VAULT_CLIENT_CERT=/etc/dagu/certs/vault-client.crt
+export DAGU_SECRETS_VAULT_CLIENT_KEY=/etc/dagu/certs/vault-client.key
 ```
 
 Per-secret options override the global defaults for that secret:
@@ -39,11 +46,14 @@ secrets:
     options:
       vault_address: https://vault-alt.example.com
       vault_token: hvs.override
+      vault_ca_cert: /etc/dagu/certs/alt-vault-ca.pem
+      vault_client_cert: /etc/dagu/certs/alt-vault-client.crt
+      vault_client_key: /etc/dagu/certs/alt-vault-client.key
 ```
 
 If no Dagu Vault address is configured, the resolver uses the HashiCorp Vault API client's default address, `https://127.0.0.1:8200`. If no Dagu Vault token is configured, Dagu creates the client without a token.
 
-`vault_address`, `vault_token`, and `field` option values are literal strings. They are not expanded through DAG variables or dotenv values.
+`vault_address`, `vault_token`, `vault_ca_cert`, `vault_client_cert`, `vault_client_key`, and `field` option values are literal strings. They are not expanded through DAG variables or dotenv values.
 
 ## Key Parsing
 

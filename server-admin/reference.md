@@ -80,6 +80,9 @@ secrets:
   vault:
     address: "https://vault.example.com"
     token: "hvs.DummyToken"
+    ca_cert: ""        # Path to a CA certificate file for verifying a custom/private Vault TLS endpoint
+    client_cert: ""    # Path to a client certificate file for mTLS authentication to Vault
+    client_key: ""     # Path to a client key file paired with `client_cert`
 
 # Permissions
 permissions:
@@ -490,6 +493,9 @@ Legacy YAML keys `scheduler.heartbeat_interval`, `scheduler.heartbeat_sync_inter
 ### External Secrets
 - `DAGU_SECRETS_VAULT_ADDRESS` - Default Vault server address for the `vault` secret provider
 - `DAGU_SECRETS_VAULT_TOKEN` - Default Vault token for the `vault` secret provider
+- `DAGU_SECRETS_VAULT_CA_CERT` - Path to a CA certificate file for verifying a custom/private Vault TLS endpoint
+- `DAGU_SECRETS_VAULT_CLIENT_CERT` - Path to a client certificate file for mTLS authentication to Vault
+- `DAGU_SECRETS_VAULT_CLIENT_KEY` - Path to a client key file paired with `DAGU_SECRETS_VAULT_CLIENT_CERT`
 - `DAGU_SECRETS_KUBERNETES_NAMESPACE` - Default namespace for the `kubernetes` secret provider
 - `DAGU_SECRETS_KUBERNETES_KUBECONFIG` - Default kubeconfig path for the `kubernetes` secret provider
 - `DAGU_SECRETS_KUBERNETES_CONTEXT` - Default kubeconfig context for the `kubernetes` secret provider
