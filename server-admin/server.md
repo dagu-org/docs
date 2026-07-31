@@ -60,6 +60,10 @@ paths:
   contexts_dir: ""                                   # Auto: {data_dir}/contexts
   executable: ""                                    # Auto: current executable
 
+# DAG definition discovery
+dag_discovery:
+  recursive: false      # Discover DAGs below paths.dags_dir
+
 # Permissions
 permissions:
   write_dags: true         # Allow creating/editing/deleting DAGs
@@ -181,11 +185,15 @@ All options support `DAGU_` prefix:
 **Paths:**
 - `DAGU_HOME` - Set all paths
 - `DAGU_DAGS_DIR` - DAGs directory
+- `DAGU_DAG_DISCOVERY_RECURSIVE` - Discover DAG definitions recursively below `paths.dags_dir` (default: `false`)
 - `DAGU_LOG_DIR` - Logs
 - `DAGU_DATA_DIR` - Data
 - `DAGU_TOOLS_DIR` - Managed DAG tool cache
 - `DAGU_EVENT_STORE_DIR` - Centralized event log directory
 - `DAGU_CONTEXTS_DIR` - CLI contexts directory
+
+For directory traversal, duplicate handling, and Web UI behavior, see
+[Recursive DAG Discovery](/server-admin/configuration#recursive-dag-discovery).
 
 **Auth:**
 - `DAGU_AUTH_MODE` - Auth mode: `none`, `basic`, or `builtin` (default: `builtin`)

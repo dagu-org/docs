@@ -69,6 +69,7 @@ Configuration fields can be overridden with `DAGU_` environment variables. Neste
 export DAGU_HOST=0.0.0.0
 export DAGU_PORT=8080
 export DAGU_DAGS_DIR=/opt/dagu/dags
+export DAGU_DAG_DISCOVERY_RECURSIVE=true
 export DAGU_DATA_DIR=/var/lib/dagu/data
 export DAGU_DAG_STATE_DIR=/var/lib/dagu/data/dag-state
 
@@ -83,6 +84,7 @@ Common examples:
 | `DAGU_PORT` | `port` | Web UI port |
 | `DAGU_PUBLIC_URL` | `public_url` | External URL used in generated links |
 | `DAGU_DAGS_DIR` | `paths.dags_dir` | DAG definition directory |
+| `DAGU_DAG_DISCOVERY_RECURSIVE` | `dag_discovery.recursive` | Discover DAG definitions in subdirectories |
 | `DAGU_DATA_DIR` | `paths.data_dir` | Data directory used by derived stores |
 | `DAGU_LOG_DIR` | `paths.log_dir` | Log directory |
 | `DAGU_ARTIFACT_DIR` | `paths.artifact_dir` | DAG-run artifact directory |
@@ -155,6 +157,37 @@ Most persistent runtime data is stored under `paths.data_dir` by default.
 | `paths.users_dir` | `{data_dir}/users` | Builtin auth users |
 | `paths.contexts_dir` | `{data_dir}/contexts` | CLI contexts |
 | `paths.workspaces_dir` | `{data_dir}/workspaces` | Web UI workspaces |
+
+## Recursive DAG Discovery
+
+By default, Dagu discovers DAG definitions only at the top level of
+`paths.dags_dir`. Enable recursive discovery to organize `.yaml` and `.yml`
+files in subdirectories:
+
+```yaml
+paths:
+  dags_dir: /opt/dagu/dags
+
+dag_discovery:
+  recursive: true
+```
+
+The equivalent environment variable is:
+
+```bash
+export DAGU_DAG_DISCOVERY_RECURSIVE=true
+```
+
+Recursive discovery skips dot-directories, the root `workspaces/` directory,
+and symlinks. `paths.alt_dags_dir` remains a lookup path and is not included in
+the recursive catalog.
+
+File names without their `.yaml` or `.yml` extension must be unique across the
+discovered tree. Effective DAG `name` values must also be unique. Comparison is
+case-sensitive. If either value is duplicated, Dagu excludes every DAG in that
+conflict from the Definitions page and scheduler. The Definitions page shows an
+error with the conflicting paths. After the files are renamed or removed, the
+remaining DAG is discovered again automatically.
 
 ### Persistent State Directory
 

@@ -84,6 +84,11 @@ This is the best place to:
 - start or enqueue a workflow from its detail view
 - see whether a workflow is scheduled, suspended, or recently failed
 
+When [recursive DAG discovery](/server-admin/configuration#recursive-dag-discovery)
+finds duplicate file names or effective DAG names, the Definitions page shows
+an error with the conflicting paths. All DAGs in the conflict are hidden from
+the list and excluded from scheduling until the files are renamed or removed.
+
 ## Workflow Details
 
 Open any workflow from **Definitions** to inspect its latest run, schedule, webhook settings, history, and YAML.

@@ -75,6 +75,10 @@ paths:
   workspaces_dir: ""         # Auto: {data_dir}/workspaces
   executable: ""            # Auto: current executable path
 
+# DAG definition discovery
+dag_discovery:
+  recursive: false          # Discover DAGs below paths.dags_dir (default: false)
+
 # External Secret Providers
 secrets:
   vault:
@@ -338,6 +342,15 @@ All options support `DAGU_` prefix.
 **Note:** The `--dagu-home` CLI flag takes precedence over the `DAGU_HOME` environment variable.
 
 `paths.artifact_dir` is the global artifact base directory. A DAG can override it with `artifacts.dir`.
+
+### DAG Discovery
+- `DAGU_DAG_DISCOVERY_RECURSIVE` - Discover `.yaml` and `.yml` DAG definitions recursively below `paths.dags_dir` (default: `false`)
+
+When recursive discovery is enabled, file stems and effective DAG names must
+each be unique across the discovered tree. Conflicting DAGs are excluded until
+the conflict is resolved. See
+[Recursive DAG Discovery](/server-admin/configuration#recursive-dag-discovery)
+for traversal and Web UI behavior.
 
 ### Authentication
 - `DAGU_AUTH_MODE` - Authentication mode: `none`, `basic`, or `builtin` (default: `builtin`)
