@@ -22,10 +22,8 @@
 /features/executors/github-actions/ /dagu-actions/ 301
 /features/executors/hitl /writing-workflows/human-tasks 301
 /features/executors/hitl/ /writing-workflows/human-tasks 301
-/features/executors/* /step-types/:splat 301
 /features/etl /step-types/sql/ 301
 /features/etl/ /step-types/sql/ 301
-/features/etl/* /step-types/sql/:splat 301
 /writing-workflows/custom-step-types /dagu-actions/custom 301
 /writing-workflows/custom-step-types/ /dagu-actions/custom 301
 /writing-workflows/official-actions /dagu-actions/official 301
@@ -42,17 +40,14 @@
 /configurations/authentication/token/ /server-admin/authentication/api-keys 301
 /configurations /server-admin/ 301
 /configurations/ /server-admin/ 301
-/configurations/* /server-admin/:splat 301
 
 # Previous feature hierarchy
 /features/agent /step-types/harness/ 301
 /features/agent/ /step-types/harness/ 301
-/features/agent/* /step-types/harness/ 301
 /features/approval /writing-workflows/approval 301
 /features/approval/ /writing-workflows/approval 301
 /features/bots /web-ui/notifications 301
 /features/bots/ /web-ui/notifications 301
-/features/bots/* /web-ui/notifications 301
 /features/cockpit /web-ui/cockpit 301
 /features/cockpit/ /web-ui/cockpit 301
 /features/data-flow /writing-workflows/data-flow 301
@@ -93,7 +88,6 @@
 /features/worker-labels/ /server-admin/distributed/worker-labels 301
 /features/workers /server-admin/distributed/workers/ 301
 /features/workers/ /server-admin/distributed/workers/ 301
-/features/workers/* /server-admin/distributed/workers/:splat 301
 /features/workspaces /web-ui/workspaces 301
 /features/workspaces/ /web-ui/workspaces 301
 
@@ -140,14 +134,12 @@
 # Earlier guide hierarchy
 /github-integration /dagu-actions/official/github-cli 301
 /github-integration/ /dagu-actions/official/github-cli 301
-/github-integration/* /dagu-actions/official/github-cli 301
 /guides /getting-started/concepts 301
 /guides/ /getting-started/concepts 301
 /guides/deployment /server-admin/deployment/ 301
 /guides/deployment/ /server-admin/deployment/ 301
 /guides/deployment/local /server-admin/deployment/ 301
 /guides/deployment/local/ /server-admin/deployment/ 301
-/guides/deployment/* /server-admin/deployment/:splat 301
 /guides/distributed/remote-nodes /server-admin/remote-nodes 301
 /guides/distributed/remote-nodes/ /server-admin/remote-nodes 301
 /guides/distributed/worker-labels /server-admin/distributed/worker-labels 301
@@ -156,7 +148,6 @@
 /guides/distributed/workers/ /server-admin/distributed/workers/ 301
 /guides/distributed /server-admin/distributed/ 301
 /guides/distributed/ /server-admin/distributed/ 301
-/guides/execution/* /writing-workflows/:splat 301
 /guides/operations/git-sync /server-admin/git-sync 301
 /guides/operations/git-sync/ /server-admin/git-sync 301
 /guides/operations/logging /server-admin/operations 301
@@ -195,12 +186,10 @@
 /guides/step-types/sql/ /step-types/sql/ 301
 /guides/step-types /writing-workflows/ 301
 /guides/step-types/ /writing-workflows/ 301
-/guides/step-types/* /step-types/:splat 301
 /guides/workflows /writing-workflows/ 301
 /guides/workflows/ /writing-workflows/ 301
 /guides/workflows/variables /writing-workflows/template-variables 301
 /guides/workflows/variables/ /writing-workflows/template-variables 301
-/guides/workflows/* /writing-workflows/:splat 301
 
 # Earlier concepts, resources, and tutorials
 /concepts/architecture /overview/architecture 301
@@ -241,3 +230,16 @@
 /tutorials/ /writing-workflows/examples 301
 /step-types/github-actions /dagu-actions/ 301
 /step-types/github-actions/ /dagu-actions/ 301
+
+# Dynamic catch-all redirects must follow every exact rule.
+/features/executors/* /step-types/:splat 301
+/features/etl/* /step-types/sql/:splat 301
+/configurations/* /server-admin/:splat 301
+/features/agent/* /step-types/harness/ 301
+/features/bots/* /web-ui/notifications 301
+/features/workers/* /server-admin/distributed/workers/:splat 301
+/github-integration/* /dagu-actions/official/github-cli 301
+/guides/deployment/* /server-admin/deployment/:splat 301
+/guides/execution/* /writing-workflows/:splat 301
+/guides/step-types/* /step-types/:splat 301
+/guides/workflows/* /writing-workflows/:splat 301
