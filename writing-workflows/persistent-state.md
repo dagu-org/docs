@@ -300,6 +300,8 @@ Use that form only when you intentionally want to couple to another DAG's privat
 
 State entries have monotonically increasing versions. Use `expected_version` when two runs may update the same key at the same time.
 
+<!-- dagu-example: no-validate; expected_version runtime expressions require dagucloud/dagu#2465 -->
+
 ```yaml
 params:
   - name: NEXT_COUNT

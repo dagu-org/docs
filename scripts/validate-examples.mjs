@@ -13,7 +13,12 @@ import { fileURLToPath } from "node:url";
 
 const docsRoot = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const daguBin = process.env.DAGU_BIN || process.argv[2] || "dagu";
-const excludedDirectories = new Set([".git", "node_modules", "superpowers"]);
+const excludedDirectories = new Set([
+  ".dagu-source",
+  ".git",
+  "node_modules",
+  "superpowers",
+]);
 const markdownFiles = [];
 
 function collectMarkdown(path) {
