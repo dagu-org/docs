@@ -679,7 +679,7 @@ handler_on:
 
 ## Step Fields
 
-Steps can be an array or a map. Array form is recommended because it preserves order clearly.
+Steps are defined as an array.
 
 ```yaml
 steps:
@@ -691,18 +691,7 @@ steps:
     depends: first
 ```
 
-Map form is accepted:
-
-```yaml
-steps:
-  first:
-    run: echo "first"
-  second:
-    run: echo "second"
-    depends: first
-```
-
-In an array, nested arrays define a parallel group for chain dependency injection.
+Nested arrays define a parallel group for chain dependency injection.
 
 ```yaml
 type: chain
