@@ -2,6 +2,22 @@ import { defineConfig } from "vitepress";
 import { withMermaid } from "vitepress-plugin-mermaid";
 import { issueLinksPlugin } from "./theme/plugins/issueLinks.js";
 
+const siteUrl = "https://docs.dagu.sh";
+const siteDescription =
+  "Local-first workflow engine for ops automation and AI-assisted operations. Open source and self-hostable: declarative YAML, single binary, air-gapped ready.";
+
+function canonicalUrl(pageData) {
+  let relativePath = pageData.relativePath;
+  if (relativePath === "[page].md" && pageData.params?.page) {
+    relativePath = `${pageData.params.page}.md`;
+  }
+
+  const route = relativePath
+    .replace(/(^|\/)index\.md$/, "$1")
+    .replace(/\.md$/, "");
+  return new URL(`/${route}`, siteUrl).href;
+}
+
 const llmItems = [
   { text: "Overview", link: "/step-types/llm/" },
   { text: "Providers & Endpoints", link: "/step-types/llm/providers" },
@@ -576,27 +592,26 @@ const kilnCodeTheme = {
 export default withMermaid(
   defineConfig({
     title: "Dagu",
-    description: "Local-first workflow engine for ops automation and AI-assisted operations. Open source and self-hostable: declarative YAML, single binary, air-gapped ready.",
+    description: siteDescription,
     lang: "en-US",
     lastUpdated: true,
     cleanUrls: true,
-    srcExclude: ["feature-request-*.md"],
+    srcExclude: ["README.md", "feature-request-*.md"],
+    sitemap: {
+      hostname: siteUrl,
+    },
+    transformHead({ pageData }) {
+      const url = canonicalUrl(pageData);
+      const description = pageData.frontmatter.description || siteDescription;
+      return [
+        ["link", { rel: "canonical", href: url }],
+        ["meta", { name: "description", content: description }],
+        ["meta", { property: "og:description", content: description }],
+        ["meta", { property: "og:url", content: url }],
+      ];
+    },
 
     head: [
-      [
-        "meta",
-        {
-          name: "description",
-          content: "Local-first workflow engine for ops automation and AI-assisted operations. Open source and self-hostable: declarative YAML, single binary, air-gapped ready.",
-        },
-      ],
-      [
-        "meta",
-        {
-          property: "og:description",
-          content: "Local-first workflow engine for ops automation and AI-assisted operations. Open source and self-hostable: declarative YAML, single binary, air-gapped ready.",
-        },
-      ],
       ["meta", { property: "og:image", content: "https://docs.dagu.sh/og.png" }],
       ["meta", { property: "og:image:width", content: "1280" }],
       ["meta", { property: "og:image:height", content: "640" }],

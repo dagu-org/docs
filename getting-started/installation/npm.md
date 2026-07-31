@@ -1,3 +1,7 @@
+---
+description: Install the official Dagu command-line binary through the @dagucloud/dagu npm package on supported platforms.
+---
+
 # Install via npm
 
 The `@dagucloud/dagu` package is a thin wrapper that downloads the correct Dagu binary for your platform during postinstall.

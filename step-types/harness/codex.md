@@ -4,7 +4,7 @@ OpenAI Codex is an agentic coding tool that runs in your terminal.
 
 ## Installation
 
-See the [official OpenAI Codex documentation](https://platform.openai.com/docs/guides/codex).
+See the [official OpenAI Codex documentation](https://developers.openai.com/codex/).
 
 For containerized Dagu runs, see [Run Codex in a Container](./sandbox/codex).
 That page includes a Dockerfile based on OpenAI's `codex-universal` image and a

@@ -1,3 +1,7 @@
+---
+description: Choose the supported Dagu installation method for macOS, Linux, Windows, Docker, Kubernetes, npm, or a source build.
+---
+
 # Installation
 
 Pick the guide for your platform.

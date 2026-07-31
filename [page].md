@@ -1,5 +1,6 @@
 ---
 title: What is Dagu?
+description: Learn how Dagu runs local-first YAML workflows with a single binary, file-backed state, scheduling, retries, approvals, and distributed workers.
 ---
 
 <img src="/hero-logo.webp" alt="Dagu" style="display: block; margin: 0 auto; width: 100%">

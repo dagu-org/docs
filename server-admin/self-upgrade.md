@@ -16,7 +16,7 @@ dagu upgrade
 dagu upgrade --check
 
 # Upgrade to specific version
-dagu upgrade --version v1.30.0
+dagu upgrade --version v2.11.0
 
 # Preview changes without installing
 dagu upgrade --dry-run
@@ -43,7 +43,7 @@ The upgrade command automatically detects how Dagu was installed:
 | Method | Self-Upgrade | Recommended Action |
 |--------|--------------|-------------------|
 | Binary download | Yes | `dagu upgrade` |
-| Go install | No | `go install github.com/dagucloud/dagu@latest` |
+| Go install | No | Reinstall with the script installer or a released binary |
 | Homebrew | No | `brew upgrade dagu` |
 | Snap | No | `snap refresh dagu` |
 | Docker | No | Pull latest image |
@@ -60,9 +60,7 @@ The upgrade command automatically detects how Dagu was installed:
 
 - **macOS**: amd64, arm64
 - **Linux**: 386, amd64, arm64, armv6, armv7, ppc64le, s390x
-- **FreeBSD**: 386, amd64, arm64, armv6, armv7
-- **OpenBSD**: 386, amd64, arm64, armv6, armv7
-- **Windows**: 386, amd64, arm64, armv6, armv7
+- **Windows**: 386, amd64, arm64
 
 ## Update Notifications
 
@@ -88,8 +86,8 @@ dagu upgrade --check
 
 Output:
 ```
-Current version: v1.30.0
-Latest version:  v1.30.3
+Current version: v2.11.0
+Latest version:  v2.11.1
 
 An update is available. Run 'dagu upgrade' to update.
 ```
@@ -104,8 +102,8 @@ Output:
 ```
 Dry run - no changes will be made
 
-Current version: v1.30.0
-Target version:  v1.30.3
+Current version: v2.11.0
+Target version:  v2.11.1
 
 The following changes will be made:
   - Download: dagu_1.30.3_darwin_arm64.tar.gz (25.3 MB)
@@ -124,7 +122,7 @@ Creates `/usr/local/bin/dagu.bak` before replacing.
 ### Upgrade to Specific Version
 
 ```bash
-dagu upgrade --version v1.30.0
+dagu upgrade --version v2.11.0
 ```
 
 ### Include Pre-releases

@@ -1,3 +1,7 @@
+---
+description: Run Dagu workflow steps in isolated Docker containers using image or exec mode and local or remote Docker-compatible runtimes.
+---
+
 # Docker
 
 Run workflow steps in Docker containers for isolated, reproducible execution.

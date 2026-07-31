@@ -1,11 +1,11 @@
 # Embedded Go API
 
-The Go package `github.com/dagucloud/dagu` exposes an experimental API for starting Dagu DAG runs from another Go application.
+The Go package `github.com/dagucloud/dagu/v2` exposes an experimental API for starting Dagu DAG runs from another Go application.
 
 The API is marked experimental in the package documentation. Names, options, and behavior may change before this API is declared stable.
 
 ```go
-import "github.com/dagucloud/dagu"
+import "github.com/dagucloud/dagu/v2"
 ```
 
 ## Local Execution
@@ -21,7 +21,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/dagucloud/dagu"
+	"github.com/dagucloud/dagu/v2"
 )
 
 func main() {

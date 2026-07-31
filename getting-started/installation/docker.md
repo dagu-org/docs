@@ -1,3 +1,7 @@
+---
+description: Run Dagu with Docker or Docker Compose and persist workflows, history, logs, and settings on a host volume.
+---
+
 # Install with Docker
 
 Run Dagu in Docker and keep your workflows, history, logs, and settings on a host volume.

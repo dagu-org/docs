@@ -1,3 +1,7 @@
+---
+description: Install Dagu and run your first scheduled YAML workflow in under five minutes with the CLI, web UI, Docker, npm, or Homebrew.
+---
+
 # Quickstart
 
 From zero to a running workflow in under five minutes.
