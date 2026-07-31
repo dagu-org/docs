@@ -275,7 +275,7 @@ handler_on:
     run: echo "Final cleanup"
 steps:
   - id: validate_environment
-    run: echo "Validating environment: ${params.ENVIRONMENT}"
+    run: 'echo "Validating environment: ${params.ENVIRONMENT}"'
 ```
 
 <a href="/writing-workflows/yaml-specification" class="learn-more">Learn more →</a>

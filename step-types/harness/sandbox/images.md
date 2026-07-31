@@ -98,6 +98,11 @@ with `container.env` or a mounted credentials directory.
 Step-level container:
 
 ```yaml
+harnesses:
+  your_provider:
+    binary: your-provider
+    prompt_mode: arg
+
 steps:
   - id: review
     action: harness.run

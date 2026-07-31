@@ -1135,12 +1135,12 @@ params:
   - name: DOMAIN
     default: example.com
   - name: TODAY
-    eval: `date +%Y-%m-%d`
+    eval: "`date +%Y-%m-%d`"
 
 steps:
   - run: echo "Hello ${params.USER} from ${params.DOMAIN}"
   - run: echo "Today is ${params.TODAY}"
-  - run: echo "The shell can still run this: `date +%Y-%m-%d`"
+  - run: 'echo "The shell can still run this: `date +%Y-%m-%d`"'
 ```
 
 Declared step outputs are referenced through the `steps` namespace:
@@ -1216,7 +1216,7 @@ params:
   - name: ENVIRONMENT
     default: production
   - name: DATE
-    eval: `date +%Y-%m-%d`
+    eval: "`date +%Y-%m-%d`"
 
 env:
   DATA_DIR: /data/etl
@@ -1247,10 +1247,10 @@ steps:
     run: ./scripts/validate.sh
 
   - id: extract_data
-    run: |
-      raw_data_path="/data/raw/${params.DATE}.json"
-      uv run --python 3.13.9 python extract.py --date="${params.DATE}" --output "$raw_data_path"
-      printf 'raw_data_path=%s\n' "$raw_data_path" >> "$DAGU_OUTPUT_FILE"
+    run:
+      - mkdir -p /data/raw
+      - uv run --python 3.13.9 python extract.py --date="${params.DATE}" --output "/data/raw/${params.DATE}.json"
+      - printf 'raw_data_path=%s\n' "/data/raw/${params.DATE}.json" >> "$DAGU_OUTPUT_FILE"
     outputs:
       - name: raw_data_path
     retry_policy:
@@ -1302,6 +1302,23 @@ smtp:
   port: "587"
   username: etl-notifications@company.com
   password: ${env.SMTP_PASSWORD}
+
+---
+name: transform_module
+params:
+  - name: type
+    required: true
+  - name: input
+    required: true
+container:
+  image: python:3.11-slim
+  volumes:
+    - ./scripts:/scripts:ro
+tools:
+  - astral-sh/uv@0.11.14
+steps:
+  - id: transform
+    run: uv run --python 3.13.9 python /scripts/transform.py --type="${params.type}" --input="${params.input}"
 ```
 
 ## Common Accuracy Gotchas

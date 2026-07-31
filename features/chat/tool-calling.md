@@ -130,7 +130,7 @@ description: "A tool defined locally"
 params: "input"
 
 steps:
-  - run: echo "Processing: $1"
+  - run: 'echo "Processing: $1"'
     output: RESULT
 ```
 

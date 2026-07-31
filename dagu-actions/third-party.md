@@ -108,7 +108,7 @@ steps:
       text: "Build ${params.BUILD_ID} finished"
 
   - id: audit
-    run: echo "Notification message: ${steps.notify.outputs.messageId}"
+    run: 'echo "Notification message: ${steps.notify.outputs.messageId}"'
     depends: notify
 ```
 

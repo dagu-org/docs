@@ -100,6 +100,11 @@ Both root-level and step-level `container:` can attach to an existing running
 container:
 
 ```yaml
+harnesses:
+  your_provider:
+    binary: your-provider
+    prompt_mode: arg
+
 steps:
   - id: review
     action: harness.run

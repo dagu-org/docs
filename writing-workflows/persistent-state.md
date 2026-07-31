@@ -173,6 +173,8 @@ Fields:
 
 Output includes `changed`, `foundPrevious`, `current`, optional `previous`, and version/hash fields when a stored entry exists or is written.
 
+<!-- dagu-example: no-validate; continuation of the state.diff workflow above -->
+
 ```yaml
 steps:
   - id: notify_if_changed

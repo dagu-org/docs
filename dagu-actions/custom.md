@@ -198,6 +198,8 @@ stderr, log_output, worker_selector, output, approval
 
 Execution fields belong in the action template, not at the call site. A custom action call uses only:
 
+<!-- dagu-example: no-validate; the custom action template is defined by the caller -->
+
 ```yaml
 steps:
   - action: release.announce
@@ -227,6 +229,8 @@ actions:
 ```
 
 `hello.yaml`
+
+<!-- dagu-example: no-validate; this workflow requires the base config shown above -->
 
 ```yaml
 steps:

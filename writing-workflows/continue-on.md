@@ -260,7 +260,7 @@ When a step with `continue_on` fails but the DAG continues, the final status is 
 ```yaml
 handler_on:
   success:
-    run: echo "DAG completed (status: ${context.run.status})"  # partially_succeeded
+    run: 'echo "DAG completed (status: ${context.run.status})"'  # partially_succeeded
 
 steps:
   - id: optional_step
@@ -281,7 +281,7 @@ steps:
       mark_success: false  # Default
 
   - id: step_b
-    run: echo "Step A status: failed"
+    run: 'echo "Step A status: failed"'
     depends: step_a  # Runs because of continue_on
 
   - id: step_c
@@ -291,7 +291,7 @@ steps:
       mark_success: true  # Override status
 
   - id: step_d
-    run: echo "Step C status: success"
+    run: 'echo "Step C status: success"'
     depends: step_c  # Sees step-c as successful
 ```
 

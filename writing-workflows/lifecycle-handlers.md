@@ -131,7 +131,7 @@ When using [human tasks](/writing-workflows/human-tasks) or [approval gates](/wr
 ```yaml
 handler_on:
   wait:
-    run: notify-slack.sh "Approval needed: $DAG_WAITING_STEPS"
+    run: 'notify-slack.sh "Approval needed: $DAG_WAITING_STEPS"'
 
 steps:
   - id: choose_target

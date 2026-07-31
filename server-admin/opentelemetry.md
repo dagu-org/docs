@@ -139,8 +139,11 @@ otel:
   endpoint: "otel-collector:4317"
   resource:
     deployment.environment: "production"
+```
 
-# my-workflow.yaml (inherits base configuration)
+The workflow can override individual attributes while inheriting the remaining base configuration:
+
+```yaml
 otel:
   resource:
     service.name: "dagu-${DAG_NAME}"  # Override specific attributes

@@ -35,7 +35,7 @@ steps:
       text: "Deploy finished"
 
   - id: audit
-    run: echo "Message: ${steps.notify.outputs.messageId}"
+    run: 'echo "Message: ${steps.notify.outputs.messageId}"'
     depends: notify
 ```
 
@@ -209,7 +209,7 @@ steps:
       text: "Deploy finished"
 
   - id: audit
-    run: echo "Message: ${steps.notify.outputs.messageId}"
+    run: 'echo "Message: ${steps.notify.outputs.messageId}"'
     depends: notify
 ```
 

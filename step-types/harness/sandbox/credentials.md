@@ -13,6 +13,11 @@ Use `container.env` for API keys and provider tokens:
 env:
   - PROVIDER_API_KEY: ${PROVIDER_API_KEY}
 
+harnesses:
+  your_provider:
+    binary: your-provider
+    prompt_mode: arg
+
 steps:
   - id: review
     action: harness.run
@@ -42,6 +47,11 @@ set the provider's home or config variable if that CLI supports one.
 env:
   - PROVIDER_API_KEY: ${PROVIDER_API_KEY}
 
+harnesses:
+  your_provider:
+    binary: your-provider
+    prompt_mode: arg
+
 steps:
   - id: review
     action: harness.run
@@ -69,6 +79,11 @@ Use a step-level `container:` when one harness attempt should receive a
 credential:
 
 ```yaml
+harnesses:
+  your_provider:
+    binary: your-provider
+    prompt_mode: arg
+
 steps:
   - id: review
     action: harness.run
@@ -99,6 +114,11 @@ container:
   pull_policy: never
   env:
     - PROVIDER_API_KEY=${env.PROVIDER_API_KEY}
+
+harnesses:
+  your_provider:
+    binary: your-provider
+    prompt_mode: arg
 
 steps:
   - id: test

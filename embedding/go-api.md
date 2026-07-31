@@ -167,6 +167,8 @@ func (e *echoExecutor) Run(context.Context) error {
 
 YAML can then reference the registered type:
 
+<!-- dagu-example: no-validate; embedded YAML names its entrypoint and uses an in-process executor -->
+
 ```yaml
 name: embedded-custom
 steps:

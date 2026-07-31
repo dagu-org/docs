@@ -131,7 +131,7 @@ steps:
     action: k8s.run
     with:
       image: alpine:3.20
-      command: [sh, -c, 'echo hello from kubernetes']
+      command: sh -c 'echo hello from kubernetes'
 ```
 
 <a href="/step-types/kubernetes" class="learn-more">Learn more →</a>
@@ -486,7 +486,7 @@ steps:
       subject: "Weekly Report"
       message: "Attached."
       attachments:
-        - run: report.txt
+        - report.txt
 ```
 
 ```mermaid

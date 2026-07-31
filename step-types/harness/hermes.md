@@ -38,6 +38,14 @@ This produces **single prompt in, final response text out** — no banner, no sp
 Hermes supports a `--yolo` flag that bypasses dangerous-command approval prompts. This is essential for fully automated workflows where no human is present to approve commands:
 
 ```yaml
+harnesses:
+  hermes:
+    binary: hermes
+    prefix_args: ["-z"]
+    prompt_mode: arg
+    option_flags:
+      max_turns: --max-turns
+
 steps:
   - name: auto-refactor
     action: harness.run
@@ -60,6 +68,14 @@ hermes -z "Refactor the auth module to use interfaces" --toolsets terminal,skill
 ## Example
 
 ```yaml
+harnesses:
+  hermes:
+    binary: hermes
+    prefix_args: ["-z"]
+    prompt_mode: arg
+    option_flags:
+      max_turns: --max-turns
+
 steps:
   - name: refactor-auth
     action: harness.run
@@ -80,6 +96,14 @@ hermes -z "Refactor the auth module to use interfaces" --toolsets terminal,skill
 ## Fallback Example
 
 ```yaml
+harnesses:
+  hermes:
+    binary: hermes
+    prefix_args: ["-z"]
+    prompt_mode: arg
+    option_flags:
+      max_turns: --max-turns
+
 harness:
   provider: hermes
   yolo: true

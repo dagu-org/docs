@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vitepress dev",
     "build": "vitepress build",
-    "preview": "vitepress preview"
+    "preview": "vitepress preview",
+    "validate:examples": "node scripts/validate-examples.mjs"
   },
   "keywords": [
     "dagu",

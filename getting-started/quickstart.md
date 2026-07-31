@@ -1,5 +1,5 @@
 ---
-description: Install Dagu and run your first scheduled YAML workflow in under five minutes with the CLI, web UI, Docker, npm, or Homebrew.
+description: Install Dagu and run your first YAML workflow in under five minutes with the CLI, web UI, Docker, npm, or Homebrew.
 ---
 
 # Quickstart
@@ -90,16 +90,16 @@ Succeeded - 2026-04-24T15:23:07+09:00
 dag: hello (0s)
 ├─log: .../logs/hello/.../dag-run....log
 │
-├─cmd_1 (0s) [succeeded]
+├─hello (0s) [succeeded]
 │ ├─echo "Hello from Dagu!"
 │ │
-│ └─stdout: .../cmd_1....out
+│ └─stdout: .../hello....out
 │     Hello from Dagu!
 │
-└─cmd_2 (0s) [succeeded]
+└─step_2 (0s) [succeeded]
   ├─echo "Running step 2"
   │
-  └─stdout: .../cmd_2....out
+  └─stdout: .../step_2....out
       Running step 2
 
 Result: Succeeded
@@ -132,7 +132,7 @@ docker run --rm -v ~/.dagu:/var/lib/dagu ghcr.io/dagucloud/dagu:latest dagu hist
 ::: code-group
 
 ```bash [Installed binary]
-dagu start-all
+dagu start-all --dags .
 ```
 
 ```bash [Docker]
@@ -146,12 +146,13 @@ docker run --rm \
 :::
 
 Visit <http://localhost:8080>. The UI shows live run status, logs per step, execution history, and a YAML editor.
+The `--dags .` flag keeps `hello.yaml` in the workflow list while the server runs.
 
 ::: tip Using Dagu?
 Star Dagu on GitHub to bookmark the repository and signal your support: [★ Star Dagu on GitHub](https://github.com/dagucloud/dagu).
 :::
 
-On first launch against an empty DAGs directory, Dagu creates a set of example workflows (`example-01-basic-sequential.yaml` through `example-06-container-workflow.yaml`). The default binary directory is `~/.config/dagu/dags/`; the Docker commands above mount `~/.dagu/dags/` at `/var/lib/dagu/dags/`. Set `DAGU_SKIP_EXAMPLES=true` or `skip_examples: true` in `config.yaml` to disable the examples.
+On first launch against an empty DAGs directory, Dagu creates five example workflows (`example-01-basic-sequential.yaml` through `example-05-template-and-file.yaml`). The default binary directory is `~/.config/dagu/dags/`; the Docker commands above mount `~/.dagu/dags/` at `/var/lib/dagu/dags/`. Set `DAGU_SKIP_EXAMPLES=true` or `skip_examples: true` in `config.yaml` to disable the examples.
 
 ## Core pieces
 

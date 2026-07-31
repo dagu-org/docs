@@ -170,6 +170,7 @@ steps:
   - run: echo "heartbeat"  # Sends heartbeat signal
     repeat_policy:
       repeat: while            # Repeat indefinitely while successful
+      exit_code: [0]
       interval_sec: 60
 ```
 

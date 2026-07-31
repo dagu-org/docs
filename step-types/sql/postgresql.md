@@ -52,6 +52,7 @@ steps:
     action: postgres.query
     with:
       dsn: "${env.DATABASE_URL}"
+      query: SELECT 1
       timeout: 30           # Query timeout in seconds
 ```
 

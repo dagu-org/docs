@@ -693,7 +693,7 @@ steps:
       output:
         - "WARNING"
         - "SKIP"
-        - "re:^\[WARN\]"        # Regex: lines starting with [WARN]
+        - 're:^\[WARN\]'        # Regex: lines starting with [WARN]
         - "re:error.*ignored"   # Regex: error...ignored pattern
   - id: process
     run: echo "Processing"
@@ -737,8 +737,8 @@ steps:
     continue_on:
       exit_code: [0, 3, 4, 5]  # Various non-error states
       output:
-        - run: "Analysis complete with warnings"
-        - run: "re:Found [0-9]+ minor issues"
+        - "Analysis complete with warnings"
+        - "re:Found [0-9]+ minor issues"
       mark_success: true
       
   # Graceful degradation pattern

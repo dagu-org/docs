@@ -127,9 +127,11 @@ steps:
   - id: step_2
     run: echo "step 2"
     depends: step_1
+```
 
-# Independent steps can run in parallel
----
+Independent steps can run in parallel:
+
+```yaml
 steps:
   - id: a
     run: echo A

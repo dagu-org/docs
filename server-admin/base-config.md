@@ -317,6 +317,8 @@ actions:
 
 Any DAG loaded with this base config can use:
 
+<!-- dagu-example: no-validate; this workflow requires the base config shown above -->
+
 ```yaml
 steps:
   - action: greet

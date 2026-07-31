@@ -116,8 +116,11 @@ queues:
       max_concurrency: 5
     - name: "batch"
       max_concurrency: 1
+```
 
-# DAG file
+Assign the queue in the DAG file:
+
+```yaml
 queue: "critical"  # Assign to queue for concurrency control
 steps:
   - run: echo "Processing critical task"

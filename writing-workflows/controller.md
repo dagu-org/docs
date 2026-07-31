@@ -212,6 +212,10 @@ params:
   - name: depth
     type: string
     default: normal
+
+steps:
+  - id: grade
+    run: ./check.sh "${params.aspect}" "${params.depth}"
 ```
 
 Without the fixed `aspect`, both tools would look the same to the model and it

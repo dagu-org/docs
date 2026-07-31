@@ -98,9 +98,9 @@ The Kubernetes executor is intentionally narrow:
 - Supports a single command only
 - Does not support combining `action: k8s.run` with `run:`
 - Does not support step-level `shell:`
-- Does not support multi-command `command: [...]` lists where each item is a separate command
+- Does not support array-form `command: [...]`; arrays represent multiple commands in Dagu
 
-These are valid:
+Use one command string. Dagu splits the string into the container command and arguments:
 
 ```yaml
 steps:
@@ -114,10 +114,12 @@ steps:
     action: k8s.run
     with:
       image: python:3.12-alpine
-      command: [python3, -c, 'print("hello")']
+      command: python3 -c 'print("hello")'
 ```
 
 These are not supported:
+
+<!-- dagu-example: no-validate; intentionally invalid example -->
 
 ```yaml
 steps:
@@ -520,7 +522,7 @@ steps:
               name: app-secrets
               key: database_url
 
-      command: [app, migrate]
+      command: app migrate
   - id: report
     action: kubernetes.run
     with:
@@ -534,7 +536,7 @@ steps:
             on_exit_codes:
               operator: In
               values: [42]
-      command: [app, report, --date, "${env.DATE}"]
+      command: 'app report --date "${env.DATE}"'
     depends: migrate
 ```
 

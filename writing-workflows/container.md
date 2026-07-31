@@ -395,10 +395,10 @@ steps:
       volumes:
         - ./src:/app
       working_dir: /app
-    run: |
-      npm install
-      npm run build
-      npm test
+    run:
+      - npm install
+      - npm run build
+      - npm test
 ```
 
 Instead of duplicating the `container`, `env`, `retry_policy`, `preconditions`, etc. across multiple steps, combine commands into one step. All commands run in the same container instance, sharing the filesystem state (e.g., `node_modules` from `npm install`).

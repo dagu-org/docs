@@ -180,7 +180,7 @@ steps:
 
         Report available at: ${steps.generate_report.outputs.report_path}
       attachments:
-        - run: ${steps.generate_report.outputs.report_path}
+        - ${steps.generate_report.outputs.report_path}
     depends: generate_report
 ```
 

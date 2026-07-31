@@ -197,6 +197,13 @@ docker run --rm \
 The same mount in a Dagu step:
 
 ```yaml
+harnesses:
+  shell:
+    binary: sh
+    prefix_args:
+      - -c
+    prompt_mode: arg
+
 steps:
   - id: codex_login_status
     action: harness.run

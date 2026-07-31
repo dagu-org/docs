@@ -68,6 +68,7 @@ steps:
     action: sqlite.query
     with:
       dsn: "file:./app.db"
+      query: SELECT 1
       timeout: 30           # Query timeout in seconds
       shared_memory: false   # Set true for :memory: databases to share across steps
 ```

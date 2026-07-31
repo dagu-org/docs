@@ -31,17 +31,22 @@ steps:
 ### Dotenv Files
 
 ```yaml
-# Specify single dotenv file
 dotenv: .env
 
-# Load multiple files (all files loaded, later override earlier)
+steps:
+  - run: 'echo "Database: ${env.DATABASE_URL}"'
+```
+
+To load multiple files, use a list. Later files override values from earlier files:
+
+```yaml
 dotenv:
   - .env.defaults
   - .env.local
   - .env.production
 
 steps:
-  - run: echo "Database: ${env.DATABASE_URL}"
+  - run: 'echo "Database: ${env.DATABASE_URL}"'
 ```
 
 <a href="/writing-workflows/data-variables#dotenv" class="learn-more">Learn more →</a>
@@ -242,7 +247,7 @@ steps:
       - name: final_value
 
   - id: print_result
-    run: echo "Result: ${steps.produce_result.outputs.final_value}"
+    run: 'echo "Result: ${steps.produce_result.outputs.final_value}"'
     depends: produce_result
 ```
 
