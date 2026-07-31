@@ -21,6 +21,23 @@ const excludedDirectories = new Set([
 ]);
 const markdownFiles = [];
 
+function commandOutput(result) {
+  return [result.stdout, result.stderr]
+    .filter(Boolean)
+    .join(" ")
+    .trim()
+    .replace(/\s+/g, " ");
+}
+
+const versionResult = spawnSync(daguBin, ["version"], { encoding: "utf8" });
+if (versionResult.status !== 0) {
+  console.error(formatCommandFailure(versionResult));
+  process.exit(1);
+}
+const validatorVersion = commandOutput(versionResult);
+const validatorLabel = `${daguBin} (${validatorVersion})`;
+console.log(`Using Dagu validator: ${validatorLabel}`);
+
 function collectMarkdown(path) {
   const stat = statSync(path);
   if (stat.isFile()) {
@@ -117,6 +134,7 @@ try {
 }
 
 if (failures.length > 0) {
+  console.error(`\nDagu validator: ${validatorLabel}`);
   for (const failure of failures) {
     console.error(`\n${failure.file}:${failure.line}`);
     console.error(failure.output);

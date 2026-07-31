@@ -602,7 +602,7 @@ export default withMermaid(
     lang: "en-US",
     lastUpdated: true,
     cleanUrls: true,
-    srcExclude: ["README.md", "feature-request-*.md"],
+    srcExclude: ["README.md", "feature-request-*.md", "superpowers/**"],
     sitemap: {
       hostname: siteUrl,
     },

@@ -1,5 +1,6 @@
 {
   "name": "dagu-sh-docs",
+  "main": "worker.js",
   "compatibility_date": "2025-04-01",
   "routes": [
     { "pattern": "docs.dagu.sh", "custom_domain": true },
@@ -8,5 +9,7 @@
   ],
   "assets": {
     "directory": ".vitepress/dist/",
+    "binding": "ASSETS",
+    "run_worker_first": true,
   },
 }

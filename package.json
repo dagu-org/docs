@@ -5,9 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vitepress dev",
-    "build": "vitepress build",
+    "build": "vitepress build && node scripts/validate-social-metadata.mjs",
     "preview": "vitepress preview",
-    "validate:examples": "node scripts/validate-examples.mjs"
+    "test:worker": "node --test tests/worker.test.mjs",
+    "validate:examples": "node scripts/validate-examples.mjs",
+    "validate:social": "node scripts/validate-social-metadata.mjs"
   },
   "keywords": [
     "dagu",
