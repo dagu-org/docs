@@ -225,9 +225,9 @@ Use `base.yaml` for defaults inherited by DAGs:
 env:
   - APP_ENV: production
 
-handlerOn:
+handler_on:
   failure:
-    command: echo "failed"
+    run: echo "failed"
 ```
 
 Do not put `paths`, `auth`, `coordinator`, `worker`, or other server process settings in `base.yaml`; they belong in `config.yaml`.

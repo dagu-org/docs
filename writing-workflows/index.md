@@ -80,7 +80,7 @@ graph LR
   summarize --> publish
 ```
 
-`git.checkout` still runs on every DAG run. If `path` is empty, it clones the repository. If `path` already contains a Git repository, it fetches and checks out the requested ref instead of cloning again. If the path exists with non-Git files, the step fails. If overlapping DAG runs can use the same `working_dir`, use a per-run directory or set `max_active_runs: 1`.
+`git.checkout` still runs on every DAG run. If `path` is empty, it clones the repository. If `path` already contains a Git repository, it fetches and checks out the requested ref instead of cloning again. If the path exists with non-Git files, the step fails. DAGs without a named queue use a local queue with concurrency 1. If a named queue allows overlapping runs, use a per-run `working_dir`.
 
 ## Tool Dependencies
 

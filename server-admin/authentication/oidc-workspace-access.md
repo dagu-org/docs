@@ -18,7 +18,7 @@ auth:
     role_mapping:
       groups_claim: groups
       group_mappings:
-        dagu-org-admins: admin
+        dagu-admins: admin
       workspace_mappings:
         payments-team:
           - workspace: payments

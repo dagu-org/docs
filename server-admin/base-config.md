@@ -272,8 +272,8 @@ delay_sec: 0
 # Wait time before restart (seconds)
 restart_wait_sec: 60
 
-# Max concurrent DAG runs (per DAG)
-max_active_runs: 1
+# DAGs without a named queue use a local queue with concurrency 1.
+# Define a named queue in config.yaml when custom concurrency is required.
 
 # Max concurrent steps within a run
 max_active_steps: 4
@@ -554,7 +554,6 @@ env:
 # Execution limits
 timeout_sec: 3600
 hist_retention_days: 30
-max_active_runs: 1
 max_clean_up_time_sec: 30
 
 # Logging
