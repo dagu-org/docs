@@ -96,7 +96,7 @@ and set `DAGU_PODMAN_HOST` to the path as seen inside that container:
 ```yaml
 services:
   dagu:
-    image: ghcr.io/dagu-org/dagu:latest
+    image: ghcr.io/dagucloud/dagu:latest
     ports:
       - "8080:8080"
     volumes:

@@ -284,7 +284,7 @@ The chart rejects proxy authentication when `ui.replicas` is not `1`, when
 Deployment, so UI upgrades briefly interrupt browser access.
 
 Start with the chart's
-[NetworkPolicy example](https://github.com/dagu-org/dagu/blob/main/charts/dagu/examples/proxy-network-policy.yaml),
+[NetworkPolicy example](https://github.com/dagucloud/dagu/blob/main/charts/dagu/examples/proxy-network-policy.yaml),
 then change its namespaces and selectors. Allow the component that forwards the
 application request to Dagu, not necessarily the authentication service.
 

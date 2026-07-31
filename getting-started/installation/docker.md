@@ -36,7 +36,6 @@ services:
     environment:
       - DAGU_TZ=America/New_York
       - DAGU_PORT=8080        # optional, default 8080
-      - DAGU_HOME=/dagu       # optional
       - PUID=1000             # optional, default 1000
       - PGID=1000             # optional, default 1000
     volumes:
@@ -46,6 +45,8 @@ volumes:
 ```
 
 Start with `docker compose up -d`.
+
+The image defaults `DAGU_HOME` to `/var/lib/dagu`, matching the volume mount. If `DAGU_HOME` is customized, mount the persistent volume at the same path and ensure it is writable by `PUID`/`PGID`.
 
 ## Giving DAGs access to the host Docker daemon
 
@@ -83,8 +84,9 @@ For AI and coding-agent CLI sandboxes, see
 | Tag | Contents |
 |---|---|
 | `latest` | Latest stable release |
-| `vX.Y.Z` | Specific release |
-| `<tag>-full` | Includes sudo, common CLI tools (useful when DAG steps need them) |
+| `<version>` | Specific release, such as `2.11.1` |
+| `alpine`, `<version>-alpine` | Alpine-based runtime image |
+| `dev`, `<version>-dev` | Development image with compilers, SDKs, and common CLI tools |
 
 Full list: [Docker Images](/server-admin/deployment/docker-images).
 

@@ -34,9 +34,17 @@ Full options (specific versions, custom directories, service scope, uninstall, C
 
 Verify:
 
-```bash
+::: code-group
+
+```bash [Installed binary]
 dagu version
 ```
+
+```bash [Docker]
+docker run --rm ghcr.io/dagucloud/dagu:latest dagu version
+```
+
+:::
 
 ## 2. Write your first workflow
 
@@ -53,9 +61,22 @@ steps:
 
 ## 3. Run it
 
-```bash
+::: code-group
+
+```bash [Installed binary]
 dagu start hello.yaml
 ```
+
+```bash [Docker]
+mkdir -p ~/.dagu/dags
+cp hello.yaml ~/.dagu/dags/
+docker run --rm \
+  -v ~/.dagu:/var/lib/dagu \
+  ghcr.io/dagucloud/dagu:latest \
+  dagu start hello
+```
+
+:::
 
 Output:
 
@@ -84,26 +105,41 @@ Timestamp, duration, and log paths vary by run.
 
 Other useful commands:
 
-```bash
+::: code-group
+
+```bash [Installed binary]
 dagu validate hello.yaml   # Check syntax without running
 dagu dry hello.yaml        # Show execution plan
 dagu status hello          # Last run status
 dagu history hello         # Recent runs
 ```
 
-Run with Docker instead:
-
-```bash
-mkdir -p ~/.dagu/dags && cp hello.yaml ~/.dagu/dags/
-docker run --rm -v ~/.dagu:/var/lib/dagu ghcr.io/dagucloud/dagu:latest \
-  dagu start hello
+```bash [Docker]
+docker run --rm -v ~/.dagu:/var/lib/dagu ghcr.io/dagucloud/dagu:latest dagu validate hello
+docker run --rm -v ~/.dagu:/var/lib/dagu ghcr.io/dagucloud/dagu:latest dagu dry hello
+docker run --rm -v ~/.dagu:/var/lib/dagu ghcr.io/dagucloud/dagu:latest dagu status hello
+docker run --rm -v ~/.dagu:/var/lib/dagu ghcr.io/dagucloud/dagu:latest dagu history hello
 ```
+
+:::
 
 ## 4. Open the web UI
 
-```bash
+::: code-group
+
+```bash [Installed binary]
 dagu start-all
 ```
+
+```bash [Docker]
+docker run --rm \
+  -v ~/.dagu:/var/lib/dagu \
+  -p 8080:8080 \
+  ghcr.io/dagucloud/dagu:latest \
+  dagu start-all
+```
+
+:::
 
 Visit <http://localhost:8080>. The UI shows live run status, logs per step, execution history, and a YAML editor.
 
@@ -111,7 +147,7 @@ Visit <http://localhost:8080>. The UI shows live run status, logs per step, exec
 Star Dagu on GitHub to bookmark the repository and signal your support: [★ Star Dagu on GitHub](https://github.com/dagucloud/dagu).
 :::
 
-On first launch against an empty DAGs directory (`~/.config/dagu/dags/`), Dagu creates a set of example workflows (`example-01-basic-sequential.yaml` through `example-06-container-workflow.yaml`). Set `DAGU_SKIP_EXAMPLES=true` or `skip_examples: true` in `config.yaml` to disable.
+On first launch against an empty DAGs directory, Dagu creates a set of example workflows (`example-01-basic-sequential.yaml` through `example-06-container-workflow.yaml`). The default binary directory is `~/.config/dagu/dags/`; the Docker commands above mount `~/.dagu/dags/` at `/var/lib/dagu/dags/`. Set `DAGU_SKIP_EXAMPLES=true` or `skip_examples: true` in `config.yaml` to disable the examples.
 
 ## Core pieces
 

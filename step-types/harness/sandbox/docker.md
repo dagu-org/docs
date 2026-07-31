@@ -149,7 +149,7 @@ Dagu container if harness steps should create sibling containers:
 ```yaml
 services:
   dagu:
-    image: ghcr.io/dagu-org/dagu:latest
+    image: ghcr.io/dagucloud/dagu:latest
     ports:
       - "8080:8080"
     volumes:
