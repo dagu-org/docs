@@ -1,6 +1,6 @@
 # MCP Resources
 
-Dagu exposes MCP resources for DAG specs, DAG-run details, run logs, and built-in references.
+Dagu exposes MCP resources for DAG specs, DAG-run details, scheduler and step logs, and built-in references.
 
 ## Resource URIs
 
@@ -11,7 +11,8 @@ Dagu exposes MCP resources for DAG specs, DAG-run details, run logs, and built-i
 | `dagu://reference/notifications` | `text/markdown` | How run-completion notifications work over MCP resources. |
 | `dagu://dags/{name}/spec` | `application/yaml` | Current YAML spec for a DAG. |
 | `dagu://runs/{name}/{dagRunId}` | `application/json` | Current DAG-run details. |
-| `dagu://runs/{name}/{dagRunId}/logs` | `application/json` | DAG-run logs. |
+| `dagu://runs/{name}/{dagRunId}/logs` | `application/json` | Scheduler log and step log metadata. |
+| `dagu://runs/{name}/{dagRunId}/steps/{stepName}/logs` | `application/json` | Standard output and standard error for one step. |
 
 Use `dagu_read` with a `uri` to read any resource directly:
 
@@ -48,6 +49,10 @@ Dagu sends a resource update notification when the run reaches a terminal state:
 - `rejected`
 
 Clients without resource subscription support should poll `dagu_read` with `target=run` and the same `name` and `dagRunId`.
+
+## MCP App Run Inspector
+
+Hosts that support MCP Apps can render run-related `dagu_read` and `dagu_execute` results in an interactive inspector. It provides run and step status, scheduler and per-step logs, refresh, stop, and retry.
 
 ## Built-in Prompts
 

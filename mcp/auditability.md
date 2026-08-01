@@ -12,8 +12,8 @@ MCP audit entries use the `mcp` category and include MCP-specific fields when av
 | `surface` | Accepted credential surface. MCP API-key requests use `mcp`. |
 | `result` | Outcome such as `received`, `started`, `succeeded`, `failed`, or `denied`. |
 | `correlation_id` | Shared ID that connects MCP attempt events with downstream domain events. |
-| `resource_type` | Affected resource class such as `dag`, `run`, `run_logs`, or `mcp_request`. |
-| `resource_id` | Affected resource identifier, such as a DAG name or `dagName/dagRunId`. |
+| `resource_type` | Affected resource class such as `dag`, `run`, `run_logs`, `dag_run_step_log`, or `mcp_request`. |
+| `resource_id` | Affected resource identifier, such as a DAG name, `dagName/dagRunId`, or `dagName/dagRunId/stepName`. |
 | `workspace` | Canonical workspace used for audit filtering. |
 | `credential_id` | Accepted credential identifier, independent of the user or service-account subject. |
 | `credential_type` | Credential class such as `api_key`, `session`, `basic`, or `none`. |
