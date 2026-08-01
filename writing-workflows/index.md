@@ -127,7 +127,7 @@ dagu start deploy.yaml -- ENVIRONMENT=production
 
 Parameters can also be typed and validated before a run starts. See [Parameters](/writing-workflows/parameters).
 
-### Run steps in a container
+### Run the workflow in a shared container
 
 ```yaml
 container:
@@ -138,6 +138,83 @@ steps:
 ```
 
 All steps share one workflow container and its filesystem. See [Container](/writing-workflows/container).
+
+## Use built-in actions
+
+`run` executes a command through a shell. For operations with structured inputs, set `action` and pass its configuration under `with`. Actions use the same dependencies, retries, conditions, status tracking, and logs as command steps.
+
+### Run one step in Docker
+
+Use `docker.run` when a step needs its own container:
+
+```yaml
+steps:
+  - id: container_job
+    action: docker.run
+    with:
+      image: alpine:3
+      auto_remove: true
+      command: echo "Hello from Docker"
+```
+
+The container is separate from containers used by other steps. See [Docker](/step-types/docker#executor-with-syntax).
+
+### Run a command over SSH
+
+```yaml
+steps:
+  - id: check_server
+    action: ssh.run
+    with:
+      user: deploy
+      host: app.example.com
+      command: uptime
+```
+
+Dagu captures the remote command's status, stdout, and stderr as a normal step result. See [SSH](/step-types/ssh).
+
+### Route to selected steps
+
+`router.route` provides switch-style branching. Target steps implicitly depend on the router; steps in unselected routes are skipped.
+
+```yaml
+type: graph
+
+params:
+  - TARGET: staging
+
+steps:
+  - id: choose_target
+    action: router.route
+    with:
+      value: ${params.TARGET}
+      routes:
+        staging: [deploy_staging]
+        production: [deploy_production]
+
+  - id: deploy_staging
+    run: ./deploy.sh staging
+
+  - id: deploy_production
+    run: ./deploy.sh production
+```
+
+Exact values and `re:` regular-expression patterns can each select one or more target steps. See [Router](/step-types/router).
+
+### Run a coding agent
+
+`harness.run` launches an external coding-agent CLI as a workflow step:
+
+```yaml
+steps:
+  - id: review
+    action: harness.run
+    with:
+      provider: codex
+      prompt: Review the current branch and report correctness risks
+```
+
+The provider CLI must be installed and authenticated on the worker, or supplied through a containerized harness. See [Harness](/step-types/harness/) and [Sandboxed Execution](/step-types/harness/sandbox/).
 
 ### Wait for a person
 
@@ -154,6 +231,8 @@ steps:
 ```
 
 The run enters `Waiting` at `confirm` and releases its worker slot. Complete the task from the Web UI, REST API, or CLI to resume the same run. See [Human Tasks](/writing-workflows/human-tasks).
+
+Other built-in actions cover [HTTP requests](/step-types/http), [SQL](/step-types/sql/), [Kubernetes jobs](/step-types/kubernetes), [S3](/step-types/s3), [Git](/step-types/git), files, archives, templates, and persistent state.
 
 ## Find the next topic
 
