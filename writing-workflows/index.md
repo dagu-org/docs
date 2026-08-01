@@ -1,316 +1,172 @@
+---
+description: Start with any command and grow it into a scheduled, observable, reliable DAG using simple YAML.
+---
+
 # Writing Workflows
 
-## Workflow Structure
+A Dagu workflow is a YAML file with a `steps` list. Start with a command you already run, then add dependencies and operational behavior only when the workflow needs them.
+
+## Start with one command
+
+Save this as `hello.yaml`:
 
 ```yaml
-description: "Process daily data"
-schedule: "0 2 * * *"      # Optional: cron schedule
-queue: "daily-jobs"        # Optional: assign to global queue for concurrency control
-tools:                     # Optional: install portable CLIs before the run
-  - jqlang/jq@jq-1.7.1
-
-params:                    # Runtime parameters
-  - name: ENVIRONMENT
-    type: string
-    default: staging
-    enum: [dev, staging, prod]
-  - name: BATCH_SIZE
-    type: integer
-    default: 25
-    minimum: 1
-    maximum: 100
-  - name: DATE
-    eval: "`date +%Y-%m-%d`"
-
-env:                       # Environment variables
-  - DATE: ${params.DATE}
-  - DATA_DIR: /tmp/data
-
-steps:                     # Workflow steps
-  - run: echo "Processing ${params.ENVIRONMENT} for date ${env.DATE} with batch ${params.BATCH_SIZE}"
+steps:
+  - run: echo "Hello from Dagu"
 ```
 
-Parameter `default` values are literal. To compute a runtime default, use `eval:` on an inline rich param definition. See [Parameters](/writing-workflows/parameters) for precedence, fallback behavior, and typed validation.
+Run it:
 
-## Multiple-Step DAG
+```bash
+dagu start hello.yaml
+```
 
-Dagu runs all ready steps at the same time. In this DAG, `checkout_scripts` gets the scripts first. Then `validate` and `summarize` both wait for `extract` and run in parallel. `publish` waits for both of them.
+That is a complete workflow. A name, schedule, queue, parameter block, and runner configuration are not required.
 
-`defaults.retry_policy` gives each step the same retry policy unless that step sets its own `retry_policy`.
+An `id` is optional for an isolated step. Add one when another step needs to depend on it or reference its output:
 
 ```yaml
-defaults:
-  retry_policy:
-    limit: 2
-    interval_sec: 10
-
-working_dir: ./workspace/data-pipeline
-
 steps:
-  - id: checkout_scripts
-    action: git.checkout
-    with:
-      repository: https://github.com/example/data-pipeline.git
-      ref: v1.2.3
-      path: .
+  - id: hello
+    run: echo "Hello from Dagu"
 
-  - id: extract
-    depends: checkout_scripts
-    run: ./scripts/extract.sh
+  - run: echo "Finished"
+    depends: hello
+```
 
-  - id: validate
-    depends: extract
-    run: ./scripts/validate.sh
+## Add dependencies to build a DAG
 
-  - id: summarize
-    depends: extract
-    run: ./scripts/summarize.sh
+Each step's `depends` field lists the steps that must succeed first. Dagu starts every step whose dependencies are ready.
 
-  - id: publish
-    depends: [validate, summarize]
-    run: ./scripts/publish.sh
+```yaml
+steps:
+  - id: fetch
+    run: ./fetch.sh
+
+  - id: clean
+    run: ./clean.sh
+    depends: fetch
+
+  - id: analyze
+    run: ./analyze.sh
+    depends: fetch
+
+  - id: report
+    run: ./report.sh
+    depends: [clean, analyze]
 ```
 
 ```mermaid
 graph LR
-  checkout_scripts --> extract
-  extract --> validate
-  extract --> summarize
-  validate --> publish
-  summarize --> publish
+  fetch --> clean
+  fetch --> analyze
+  clean --> report
+  analyze --> report
 ```
 
-`git.checkout` still runs on every DAG run. If `path` is empty, it clones the repository. If `path` already contains a Git repository, it fetches and checks out the requested ref instead of cloning again. If the path exists with non-Git files, the step fails. DAGs without a named queue use a local queue with concurrency 1. If a named queue allows overlapping runs, use a per-run `working_dir`.
+The run proceeds in three stages:
 
-## Tool Dependencies
+1. `fetch` runs first.
+2. `clean` and `analyze` become ready together, so they run in parallel.
+3. `report` waits for both branches.
 
-Declare external CLI dependencies with top-level `tools` when a host command step needs a reproducible binary version:
+There is no separate parallel-execution configuration. Parallelism follows directly from the graph.
 
-```yaml
-tools:
-  - jqlang/jq@jq-1.7.1
+## Validate, preview, and inspect runs
 
-steps:
-  - id: filter
-    run: jq '.items[] | .id' input.json
+Use the CLI while developing a workflow:
+
+```bash
+dagu validate pipeline.yaml  # Check the YAML
+dagu dry pipeline.yaml       # Show the execution plan
+dagu start pipeline.yaml     # Run it now
+dagu history pipeline        # List recent runs
 ```
 
-Dagu installs the tools before the DAG starts, exposes them on `PATH` for that DAG run, and caches them under the worker-local data directory. Use this for portable CLIs such as `jq`, `yq`, linters, formatters, converters, and release helpers. Do not use it for commands that require user-managed login state or profiles, such as `gcloud` or AI agent CLIs.
+Start the server to inspect the same workflows in the Web UI:
 
-See [Tools](/writing-workflows/tools) for syntax, registry behavior, sub-DAG behavior, distributed worker behavior, and current limitations.
-
-## Base Configuration
-
-Share common settings across all DAGs using base configuration:
-
-```yaml
-# ~/.config/dagu/base.yaml
-env:
-  - LOG_LEVEL: info
-  - AWS_REGION: us-east-1
-  - SMTP_USER: ${SMTP_USER}
-  - SMTP_PASS: ${SMTP_PASS}
-
-smtp:
-  host: smtp.company.com
-  port: "587"
-  username: ${env.SMTP_USER}
-  password: ${env.SMTP_PASS}
-
-error_mail:
-  from: alerts@company.com
-  to: oncall@company.com
-  attach_logs: true
-
-hist_retention_days: 30 # Keep workflow history and logs for 30 days by default
-queue: "default"      # Default queue for all DAGs (define in config.yaml)
+```bash
+dagu start-all --dags .
 ```
 
-DAGs automatically inherit these settings:
+Open <http://localhost:8080> to see the graph, live step status, logs, run history, and controls for starting, stopping, and retrying runs.
 
-```yaml
-# my-workflow.yaml
-# Inherits all base settings
-# Can override specific values:
-env:
-  - LOG_LEVEL: debug  # Override
-  - CUSTOM_VAR: value # Addition
+## Add operational behavior when needed
 
-steps:
-  - run: echo "Processing"
-```
+Top-level fields configure the workflow as a whole. Fields inside a step configure that command.
 
-Configuration precedence: System defaults → Base config → DAG config
-
-See [Base Configuration](/server-admin/base-config) for complete documentation on all available fields.
-
-## Local `actions:` Definitions
-
-`actions:` defines local shortcuts for built-in steps. Put them in a DAG file or `base.yaml`. Each shortcut can define inputs and a template. Dagu expands it into a normal step before the run starts.
-
-```yaml
-actions:
-  greet:
-    input_schema:
-      type: object
-      additionalProperties: false
-      required: [message]
-      properties:
-        message:
-          type: string
-    template:
-      run: |
-        #!/bin/bash
-        printf '%s\n' {{ json .input.message }}
-
-steps:
-  - action: greet
-    with:
-      message: hello
-```
-
-The most common pattern is a `run` custom action with a templated `script`. The step call site supplies typed `with` input, the schema can apply defaults, and the template expands to a normal built-in step before execution. See [Custom Actions](/dagu-actions/custom) for the exact rules.
-
-## Dagu Actions and Third-Party Actions
-
-Packaged actions run code from a pinned package. The caller chooses the version. The package declares its inputs, workflow, and required `tools`. Dagu installs those tool versions and runs the package workflow.
-
-- Use [Dagu Actions](/dagu-actions/official) when a maintained `dagucloud/*` action already matches the task.
-- Use [Third-Party Actions](/dagu-actions/third-party) when a non-official repository provides the package you want to pin and call.
-
-Third-party actions are called directly by versioned repository reference:
-
-```yaml
-steps:
-  - id: notify
-    action: acme/dagu-action-notify@v1.2.0
-    with:
-      text: "Deployment finished"
-```
-
-Dagu Actions are maintained by Dagu and called with the short form:
-
-```yaml
-steps:
-  - id: compute
-    action: node-script@v1
-    with:
-      input:
-        values: [1, 2, 3]
-      script: |
-        return { total: input.values.reduce((sum, value) => sum + value, 0) }
-```
-
-Packaged actions contain a `dagu-action.yaml` manifest and a DAG entrypoint. Dagu resolves the ref, validates the input, runs the action workflow as a sub-DAG, and exposes the action outputs as JSON. For details, see [Dagu Actions](/dagu-actions/) and [Action Package Execution](/dagu-actions/execution-model).
-
-## Guide Sections
-
-1. **[Basics](/writing-workflows/basics)** - Steps, commands, dependencies
-2. **[Container](/writing-workflows/container)** - Run workflows in Docker containers
-3. **[Control Flow](/writing-workflows/control-flow)** - Parallel execution, conditions, loops
-4. **[Data & Variables](/writing-workflows/data-variables)** - Parameters, outputs, data passing
-5. **[Durable Execution](/writing-workflows/durable-execution)** - Step retries, default step retries, DAG retries
-6. **[Error Handling](/writing-workflows/error-handling)** - Continue-on behavior, handlers, notifications
-7. **[Lifecycle Handlers](/writing-workflows/lifecycle-handlers)** - Cleanup and post-run steps
-8. **[Artifacts](/writing-workflows/artifacts)** - Per-run files, preview, download, and cleanup
-9. **[Persistent State](/writing-workflows/persistent-state)** - Cursors, checkpoints, and previous values across DAG runs
-10. **[Tools](/writing-workflows/tools)** - Reproducible external CLI dependencies
-11. **[Human Tasks](/writing-workflows/human-tasks)** - Pause for acknowledgement or typed operator input
-12. **[Patterns](/writing-workflows/control-flow#patterns)** - Composition patterns
-13. **[Runtime Profiles](/writing-workflows/runtime-profiles)** - Per-run profile selection for variables and secrets
-14. **[Secrets](/writing-workflows/secrets)** - External providers, resolution order, masking behavior
-
-Reusable action docs live in the [Dagu Actions](/dagu-actions/) section.
-
-## Complete Example
+### Schedule it and retry failures
 
 ```yaml
 schedule: "0 2 * * *"
 
-params:
-  - name: ENVIRONMENT
-    type: string
-    default: staging
-    enum: [dev, staging, prod]
-  - name: DRY_RUN
-    type: boolean
-    default: false
-  - name: DATE
-    eval: "`date +%Y-%m-%d`"
-
-env:
-  - DATE: ${params.DATE}
-  - DATA_DIR: /tmp/data/${env.DATE}
-
-tools:
-  - astral-sh/uv@0.11.14
-
 steps:
-  - id: download
-    run: aws s3 cp "s3://bucket/${env.DATE}.csv" "${env.DATA_DIR}/"
+  - run: ./nightly-sync.sh
     retry_policy:
       limit: 3
-      interval_sec: 60
-
-  - id: validate
-    run: uv run --python 3.13.9 python validate.py "${env.DATA_DIR}/${env.DATE}.csv" --env="${params.ENVIRONMENT}" --dry-run="${params.DRY_RUN}"
-    continue_on:
-      failure: false
-    depends: download
-
-  - id: process_users
-    run: uv run --python 3.13.9 python process.py --type=users --date="${env.DATE}"
-    depends: validate
-
-  - id: process_orders
-    run: uv run --python 3.13.9 python process.py --type=orders --date="${env.DATE}"
-    depends: validate
-
-  - id: process_products
-    run: uv run --python 3.13.9 python process.py --type=products --date="${env.DATE}"
-    depends: validate
-
-  - id: report
-    run: uv run --python 3.13.9 python report.py --date="${env.DATE}"
-    depends: [process_users, process_orders, process_products]
-
-handler_on:
-  failure:
-    run: echo "Notifying failure for ${env.DATE}"
+      interval_sec: 30
 ```
 
-## Common Patterns
+The scheduler starts this workflow every day at 02:00. A failed command is retried up to three times with 30 seconds between attempts. See [Scheduling](/writing-workflows/scheduling) and [Durable Execution](/writing-workflows/durable-execution).
 
-### Sequential Pipeline
+### Accept parameters
+
 ```yaml
-steps:
-  - id: extract
-    run: echo "Extracting data"
-  - id: transform
-    run: echo "Transforming data"
-    depends: extract
-
-  - id: load
-    run: echo "Loading data"
-    depends: transform
-```
-
-### Parallel Processing
-```yaml
-steps:
-  - parallel: [file1, file2, file3]
-    action: dag.run
-    with:
-      dag: process-file
-
-      params: "file=${ITEM}"
----
-# A child workflow for processing each file
-# This can be in a same file separated by `---` or in a separate file
-name: process-file
 params:
-  - name: file
-    required: true
+  - ENVIRONMENT: staging
+
 steps:
-  - run: echo "Processing" --file "${params.file}"
+  - run: ./deploy.sh "${params.ENVIRONMENT}"
 ```
+
+Override the value when starting the workflow:
+
+```bash
+dagu start deploy.yaml -- ENVIRONMENT=production
+```
+
+Parameters can also be typed and validated before a run starts. See [Parameters](/writing-workflows/parameters).
+
+### Run steps in a container
+
+```yaml
+container:
+  image: python:3.13
+
+steps:
+  - run: python report.py
+```
+
+All steps share one workflow container and its filesystem. See [Container](/writing-workflows/container).
+
+### Wait for a person
+
+```yaml
+steps:
+  - id: confirm
+    action: human.task
+    with:
+      prompt: Deploy to production?
+
+  - id: deploy
+    run: ./deploy.sh
+    depends: confirm
+```
+
+The run enters `Waiting` at `confirm` and releases its worker slot. Complete the task from the Web UI, REST API, or CLI to resume the same run. See [Human Tasks](/writing-workflows/human-tasks).
+
+## Find the next topic
+
+| When you want to… | Read |
+|---|---|
+| Learn step fields, scripts, dependencies, and defaults | [Workflow Basics](/writing-workflows/basics) |
+| Pass parameters, outputs, and files between steps | [Data & Variables](/writing-workflows/data-variables) |
+| Add conditions, loops, parallel iteration, or sub-DAGs | [Control Flow](/writing-workflows/control-flow) |
+| Configure retries, timeouts, handlers, and failure behavior | [Durable Execution](/writing-workflows/durable-execution) and [Error Handling](/writing-workflows/error-handling) |
+| Run HTTP, SQL, SSH, Docker, Kubernetes, or other actions | [Built-in Actions](/step-types/shell) |
+| Start from copyable workflows | [Examples](/writing-workflows/examples) |
+| Look up every supported field | [YAML Specification](/writing-workflows/yaml-specification) |
+
+::: tip Dagu working for you?
+[Star Dagu on GitHub](https://github.com/dagucloud/dagu) to bookmark the project and help other engineers discover it.
+:::
