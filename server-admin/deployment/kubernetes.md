@@ -95,8 +95,6 @@ ingress:
   className: your-ingress-class
   annotations: {}
   host: dagu.example.com
-  path: /
-  pathType: Prefix
   tls:
     enabled: true
     secretName: dagu-tls
@@ -277,6 +275,8 @@ Builtin authentication is enabled by default. The chart also supports Secret-bac
 - [Basic authentication](/server-admin/authentication/basic)
 - [OIDC authentication](/server-admin/authentication/oidc)
 - [Proxy authentication](/server-admin/authentication/proxy)
+
+The chart keeps Dagu's runtime-compatible OIDC defaults: first-time identities are created automatically and unmatched validated users receive viewer access to all named workspaces. Set `auth.oidc.roleMapping.defaultWorkspaceAccess: none` when named workspaces must be isolated, and use `allowedDomains`, `whitelist`, or explicit mappings to limit who can sign in.
 
 OIDC and license activation values reference existing Kubernetes Secrets. Secret data is read when the UI pod starts, so restart the UI after changing a referenced Secret:
 

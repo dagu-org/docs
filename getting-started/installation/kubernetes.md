@@ -58,8 +58,6 @@ ingress:
   enabled: true
   className: your-ingress-class
   host: dagu.example.com
-  path: /
-  pathType: Prefix
   tls:
     enabled: true
     secretName: dagu-tls
