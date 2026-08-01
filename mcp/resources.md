@@ -1,6 +1,6 @@
 # MCP Resources
 
-Dagu exposes MCP resources for DAG specs, DAG-run details, run logs, and built-in references.
+Dagu exposes MCP resources for DAG specs, DAG-run details, scheduler and step logs, and built-in references.
 
 ## Resource URIs
 
@@ -11,7 +11,8 @@ Dagu exposes MCP resources for DAG specs, DAG-run details, run logs, and built-i
 | `dagu://reference/notifications` | `text/markdown` | How run-completion notifications work over MCP resources. |
 | `dagu://dags/{name}/spec` | `application/yaml` | Current YAML spec for a DAG. |
 | `dagu://runs/{name}/{dagRunId}` | `application/json` | Current DAG-run details. |
-| `dagu://runs/{name}/{dagRunId}/logs` | `application/json` | DAG-run logs. |
+| `dagu://runs/{name}/{dagRunId}/logs` | `application/json` | Scheduler log and step log metadata. |
+| `dagu://runs/{name}/{dagRunId}/steps/{stepName}/logs` | `application/json` | Standard output and standard error for one step. |
 
 Use `dagu_read` with a `uri` to read any resource directly:
 
@@ -51,7 +52,7 @@ Clients without resource subscription support should poll `dagu_read` with `targ
 
 ## MCP App Run Inspector
 
-Hosts that support MCP Apps can render run-related `dagu_read` and `dagu_execute` results in an interactive inspector. It provides run and step status, logs, refresh, stop, retry, and an **Open in Dagu** button for the full Web UI run page.
+Hosts that support MCP Apps can render run-related `dagu_read` and `dagu_execute` results in an interactive inspector. It provides run and step status, scheduler and per-step logs, refresh, stop, retry, and an **Open in Dagu** button for the full Web UI run page.
 
 The button is shown only when the host supports opening external links. Dagu uses `public_url` for the link when it is configured and otherwise derives the URL from the direct MCP request. Configure [`public_url`](/server-admin/configuration#environment-variables) when Dagu is behind a reverse proxy or the MCP endpoint's internal address is not reachable from the user's browser.
 

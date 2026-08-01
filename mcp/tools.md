@@ -14,9 +14,10 @@ Use `dagu_read` for current Dagu state.
 
 | Input | Values |
 |-------|--------|
-| `target` | `dags`, `dag`, `dag_spec`, `runs`, `run`, `run_logs`, or `reference` |
+| `target` | `dags`, `dag`, `dag_spec`, `runs`, `run`, `run_logs`, `step_log`, or `reference` |
 | `name` | DAG name for DAG and run targets |
 | `dagRunId` | DAG-run ID for run and log targets |
+| `stepName` | Step name for the `step_log` target |
 | `query` | URL query string for list and log targets, such as `page=1&perPage=100` or `tail=100` |
 | `uri` | Direct resource URI, such as `dagu://reference/authoring` |
 
@@ -32,6 +33,17 @@ Examples:
 
 ```json
 { "uri": "dagu://runs/nightly-report/latest/logs?tail=100" }
+```
+
+Read stdout and stderr for one step:
+
+```json
+{
+  "target": "step_log",
+  "name": "nightly-report",
+  "dagRunId": "20260522T010000",
+  "stepName": "generate-report"
+}
 ```
 
 ## `dagu_change`
