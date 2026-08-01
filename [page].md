@@ -105,6 +105,10 @@ Want to explore without installing anything? Open the [live demo](https://dagu-d
     <p>Configure authentication, queues, storage, Git sync, and production operation.</p>
   </div>
   <div class="step-card">
+    <h3><a href="/overview/self-host-license">Teams and licensing</a></h3>
+    <p>Compare Community, licensed self-host, and managed Dagu. Review enterprise features, support, and <a href="https://dagu.sh/pricing#self-host">pricing</a>.</p>
+  </div>
+  <div class="step-card">
     <h3><a href="/mcp/">AI tools and MCP</a></h3>
     <p>Connect an MCP client or run an external agent CLI after the basic workflow is working.</p>
   </div>
