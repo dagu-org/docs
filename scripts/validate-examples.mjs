@@ -1,5 +1,7 @@
 import { spawnSync } from "node:child_process";
 import {
+  accessSync,
+  constants,
   mkdtempSync,
   readFileSync,
   readdirSync,
@@ -12,7 +14,6 @@ import { extname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const docsRoot = resolve(fileURLToPath(new URL("..", import.meta.url)));
-const daguBin = process.env.DAGU_BIN || process.argv[2] || "dagu";
 const excludedDirectories = new Set([
   ".dagu-source",
   ".git",
@@ -20,6 +21,23 @@ const excludedDirectories = new Set([
   "superpowers",
 ]);
 const markdownFiles = [];
+
+function findDaguBin() {
+  const configuredBin = process.env.DAGU_BIN || process.argv[2];
+  if (configuredBin) {
+    return configuredBin;
+  }
+
+  const siblingBuild = resolve(docsRoot, "..", ".local", "bin", "dagu");
+  try {
+    accessSync(siblingBuild, constants.X_OK);
+    return siblingBuild;
+  } catch {
+    return "dagu";
+  }
+}
+
+const daguBin = findDaguBin();
 
 function commandOutput(result) {
   return [result.stdout, result.stderr]
@@ -37,6 +55,50 @@ if (versionResult.status !== 0) {
 const validatorVersion = commandOutput(versionResult);
 const validatorLabel = `${daguBin} (${validatorVersion})`;
 console.log(`Using Dagu validator: ${validatorLabel}`);
+
+function validationEnvironment(homeDir) {
+  return {
+    ...process.env,
+    DAGU_AUTH_MODE: "none",
+    DAGU_HOME: homeDir,
+    DAGU_SKIP_EXAMPLES: "true",
+  };
+}
+
+const compatibilityDir = mkdtempSync(join(tmpdir(), "dagu-doc-validator-"));
+let compatibilityFailure = "";
+try {
+  const compatibilityFixture = join(compatibilityDir, "workflow.yaml");
+  writeFileSync(
+    compatibilityFixture,
+    'steps:\n  - id: compatibility_check\n    run: echo "ok"\n',
+  );
+  const compatibilityResult = spawnSync(
+    daguBin,
+    ["validate", compatibilityFixture],
+    {
+      encoding: "utf8",
+      env: validationEnvironment(join(compatibilityDir, "home")),
+      timeout: 20_000,
+    },
+  );
+  if (compatibilityResult.status !== 0) {
+    compatibilityFailure =
+      formatCommandFailure(compatibilityResult).slice(0, 800) ||
+      "The compatibility check did not complete successfully.";
+  }
+} finally {
+  rmSync(compatibilityDir, { recursive: true, force: true });
+}
+
+if (compatibilityFailure) {
+  console.error(
+    `The selected Dagu binary cannot validate the workflow syntax used by these docs.\n` +
+      `Set DAGU_BIN to a current Dagu build and run the command again.\n\n` +
+      compatibilityFailure,
+  );
+  process.exit(1);
+}
 
 function collectMarkdown(path) {
   const stat = statSync(path);
@@ -111,12 +173,7 @@ try {
 
       const result = spawnSync(daguBin, ["validate", fixture], {
         encoding: "utf8",
-        env: {
-          ...process.env,
-          DAGU_AUTH_MODE: "none",
-          DAGU_HOME: join(fixtureDir, "home"),
-          DAGU_SKIP_EXAMPLES: "true",
-        },
+        env: validationEnvironment(join(fixtureDir, "home")),
         timeout: 20_000,
       });
 

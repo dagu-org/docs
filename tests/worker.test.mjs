@@ -38,7 +38,7 @@ test("asset responses include transport security and cache fingerprinted social 
   };
 
   const response = await worker.fetch(
-    new Request("https://docs.dagu.sh/og-5f837289.png"),
+    new Request("https://docs.dagu.sh/og-7c9f9ca5.png"),
     env,
   );
 

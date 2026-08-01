@@ -3,9 +3,9 @@ import { withMermaid } from "vitepress-plugin-mermaid";
 import { issueLinksPlugin } from "./theme/plugins/issueLinks.js";
 
 const siteUrl = "https://docs.dagu.sh";
-const socialImage = `${siteUrl}/og-5f837289.png`;
+const socialImage = `${siteUrl}/og-7c9f9ca5.png`;
 const siteDescription =
-  "Local-first workflow engine for ops automation and AI-assisted operations. Open source and self-hostable: declarative YAML, single binary, air-gapped ready.";
+  "Turn scripts and commands into reliable YAML workflows with schedules, retries, logs, and a Web UI. One self-hosted binary, no external database.";
 
 function canonicalUrl(pageData) {
   let relativePath = pageData.relativePath;
@@ -38,7 +38,7 @@ const llmItems = [
 // Define the complete sidebar structure
 const fullSidebar = [
   {
-    text: "QuickStart",
+    text: "Quickstart",
     items: [
       { text: "What is Dagu?", link: "/overview/" },
       { text: "Quickstart", link: "/getting-started/quickstart" },
@@ -623,12 +623,12 @@ export default withMermaid(
         ["meta", { property: "og:image:type", content: "image/png" }],
         ["meta", { property: "og:image:width", content: "1280" }],
         ["meta", { property: "og:image:height", content: "640" }],
-        ["meta", { property: "og:image:alt", content: "Dagu workflow engine" }],
+        ["meta", { property: "og:image:alt", content: "Dagu: turn scripts into reliable workflows" }],
         ["meta", { name: "twitter:card", content: "summary_large_image" }],
         ["meta", { name: "twitter:title", content: title }],
         ["meta", { name: "twitter:description", content: description }],
         ["meta", { name: "twitter:image", content: socialImage }],
-        ["meta", { name: "twitter:image:alt", content: "Dagu workflow engine" }],
+        ["meta", { name: "twitter:image:alt", content: "Dagu: turn scripts into reliable workflows" }],
       ];
     },
 
@@ -693,7 +693,7 @@ export default withMermaid(
       },
 
       nav: [
-        { text: "QuickStart", link: "/getting-started/quickstart", activeMatch: "^/(overview/(?:$|architecture|deployment-models|self-host-license|contributing|changelog)|getting-started/|migration/)" },
+        { text: "Quickstart", link: "/getting-started/quickstart", activeMatch: "^/(overview/(?:$|architecture|deployment-models|self-host-license|contributing|changelog)|getting-started/|migration/)" },
         { text: "Web UI", link: "/overview/web-ui", activeMatch: "^/(overview/web-ui|web-ui/)" },
         { text: "Workflows", link: "/writing-workflows/", activeMatch: "^/writing-workflows/(?!examples/)" },
         { text: "Examples", link: "/writing-workflows/examples/", activeMatch: "^/writing-workflows/examples/" },

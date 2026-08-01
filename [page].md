@@ -1,5 +1,5 @@
 ---
-title: What is Dagu?
+title: Turn scripts into reliable workflows
 description: Turn existing scripts and commands into reliable YAML workflows with one open-source binary, a built-in Web UI, and no external database or message broker.
 ---
 
@@ -9,7 +9,7 @@ Keep your existing commands and tools. Dagu adds schedules, retries, approvals, 
 
 <div class="hero-section">
   <div class="hero-actions">
-    <a href="/getting-started/quickstart" class="VPButton brand">Get Started</a>
+    <a href="#run-your-first-workflow" class="VPButton brand">Get started</a>
     <a href="https://dagu-demo-f5e33d0e.dagu.sh/" class="VPButton alt">Try the Live Demo</a>
     <a href="/writing-workflows/examples" class="VPButton alt">View Examples</a>
   </div>
@@ -56,7 +56,7 @@ Open <http://localhost:8080> to see the workflow, step logs, and run history. Th
 
 ## See the Web UI
 
-<video src="/cockpit-demo.mp4" controls preload="metadata" playsinline aria-label="Dagu Cockpit demo" style="width: 100%; border-radius: 12px; margin: 8px 0 24px;"></video>
+<video src="/cockpit-demo.mp4" poster="/cockpit-demo-poster.jpg" controls preload="none" playsinline aria-label="Dagu Cockpit demo" style="width: 100%; border-radius: 12px; margin: 8px 0 24px;"></video>
 
 Want to explore without installing anything? Open the [live demo](https://dagu-demo-f5e33d0e.dagu.sh/) and sign in with `demouser` / `demouser`.
 

@@ -14,7 +14,7 @@ This repository contains the VitePress site that powers the Dagu documentation. 
 pnpm install
 ```
 
-## Local Development
+## Local development
 
 ```bash
 pnpm dev
@@ -22,7 +22,7 @@ pnpm dev
 
 This launches VitePress at `http://localhost:5173` with hot-reload enabled.
 
-## Building & Previewing
+## Build and preview
 
 ```bash
 pnpm build
@@ -31,9 +31,11 @@ pnpm preview
 
 `pnpm build` generates the static site into `.vitepress/dist`, and `pnpm preview` serves the built assets locally for final checks.
 
-## Validating Workflow Examples
+## Validate workflow examples
 
-The validator uses `dagu` from `PATH` by default and reports its version before checking the examples. Point `DAGU_BIN` at a current build when another Dagu version is installed locally:
+The validator prefers `../.local/bin/dagu` when this repository sits beside a Dagu checkout. Otherwise it uses `dagu` from `PATH`. It checks the binary against the current workflow syntax before scanning every example, so an old binary fails with a short, useful error.
+
+Set `DAGU_BIN` when the current build lives somewhere else:
 
 ```bash
 DAGU_BIN=/path/to/current/dagu pnpm validate:examples
@@ -41,7 +43,7 @@ DAGU_BIN=/path/to/current/dagu pnpm validate:examples
 
 CI builds Dagu from the current main branch before running this check.
 
-## Directory Overview
+## Directory overview
 
 - `index.md` — landing page for the documentation.
 - `overview/` — high-level concepts, CLI, API, and project references.

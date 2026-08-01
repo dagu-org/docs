@@ -1,7 +1,7 @@
 const CANONICAL_HOST = "docs.dagu.sh";
 const LEGACY_HOSTS = new Set(["docs.daguit.dev", "docs.dagu.cloud"]);
 const PUBLIC_HOSTS = new Set([CANONICAL_HOST, ...LEGACY_HOSTS]);
-const SOCIAL_IMAGE_PATH = "/og-5f837289.png";
+const SOCIAL_IMAGE_PATH = "/og-7c9f9ca5.png";
 
 function canonicalRedirect(url) {
   if (!PUBLIC_HOSTS.has(url.hostname)) {

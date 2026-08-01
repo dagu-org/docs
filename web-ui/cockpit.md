@@ -4,7 +4,7 @@ Cockpit is a kanban-style view for monitoring workflow runs across days. It is t
 
 ![Cockpit](/web-ui-cockpit-demo.png)
 
-<video src="/cockpit-demo.mp4" controls preload="metadata" playsinline aria-label="Cockpit demo" style="width: 100%; border-radius: 8px; margin: 16px 0 24px;"></video>
+<video src="/cockpit-demo.mp4" poster="/cockpit-demo-poster.jpg" controls preload="none" playsinline aria-label="Cockpit demo" style="width: 100%; border-radius: 8px; margin: 16px 0 24px;"></video>
 
 ## Opening Cockpit
 
