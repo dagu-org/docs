@@ -1,471 +1,419 @@
 # Kubernetes (Helm)
 
-This page documents the Helm chart in `charts/dagu` as implemented in this repository.
+The official Helm chart in `charts/dagu` deploys Dagu on Kubernetes 1.19 or newer. Its default configuration is a self-contained standalone installation designed to work with a regular cluster StorageClass.
 
-## Chart Path
+For the shortest installation path, see [Install on Kubernetes](/getting-started/installation/kubernetes).
 
-```text
-charts/dagu
-```
+## Deployment modes
 
-## Rendered Objects
+| Mode | Components | Storage | Best for |
+|---|---|---|---|
+| `standalone` (default) | One `dagu start-all` pod runs the UI, scheduler, and local executor | `ReadWriteOnce` | Most installations and initial evaluation |
+| `distributed` | Separate UI server, scheduler, coordinator, and worker Deployments | `ReadWriteMany` for server-side state | Horizontal workers and specialized worker pools |
 
-For a release named `<release>`, the chart renders:
+Standalone mode intentionally keeps one UI replica and uses the `Recreate` update strategy. This prevents two pods from writing the same file-backed state while a `ReadWriteOnce` volume is attached.
 
-- `ConfigMap/<fullname>-config`
-- `PersistentVolumeClaim/<fullname>-data`
-- `Deployment/<fullname>-coordinator`
-- `Deployment/<fullname>-scheduler`
-- `Deployment/<fullname>-ui`
-- `Deployment/<fullname>-worker-<poolName>` for each entry in `workerPools`
-- `Service/<fullname>-coordinator` (`ClusterIP`, port `50055`)
-- `Service/<fullname>-scheduler` (`ClusterIP`, port `8090`)
-- `Service/<fullname>-ui` (`ClusterIP`, port `ui.service.port`)
+## Prerequisites
 
-The chart does not render:
+- Kubernetes 1.19 or newer
+- Helm 3
+- A default `ReadWriteOnce` StorageClass, or the name of one to select
+- For distributed mode, a StorageClass that supports `ReadWriteMany`
+- For Ingress access, an installed ingress controller and a DNS record for the UI hostname
 
-- `Ingress`
-- `NetworkPolicy`
-- `ServiceAccount`, `Role`, or `RoleBinding`
-- `HorizontalPodAutoscaler`
-- `PodDisruptionBudget`
-- Services for worker Deployments
-
-`<fullname>` is resolved by the helper in `charts/dagu/templates/_helpers.tpl`:
-
-- `fullnameOverride` if set
-- otherwise let `<name>` be `nameOverride` if set, or `dagu` if not
-- if the release name already contains `<name>`, use the release name unchanged
-- otherwise use `<release>-<name>`
-
-`nameOverride` and `fullnameOverride` are supported by the templates even though they are not listed in `charts/dagu/values.yaml`.
-
-## Install
-
-Official Helm repository URL:
-
-```text
-https://dagucloud.github.io/dagu
-```
-
-Add the repository and install the chart:
+## Install standalone mode
 
 ```bash
 helm repo add dagu https://dagucloud.github.io/dagu
 helm repo update
-helm install dagu dagu/dagu --set persistence.storageClass=<your-rwx-storage-class>
+helm upgrade --install dagu dagu/dagu \
+  --namespace dagu \
+  --create-namespace \
+  --wait
 ```
 
-Render manifests without installing:
+If the cluster has no default StorageClass, pass one explicitly:
 
 ```bash
-helm template dagu dagu/dagu --set persistence.storageClass=<your-rwx-storage-class>
+helm upgrade --install dagu dagu/dagu \
+  --namespace dagu \
+  --create-namespace \
+  --set-string persistence.storageClass=standard \
+  --wait
 ```
 
-To upgrade an existing release:
+From a Dagu source checkout, replace `dagu/dagu` with `./charts/dagu`.
+
+## Rendered resources
+
+For a release named `dagu`, standalone mode creates these primary resources:
+
+- `ServiceAccount/dagu`
+- `ConfigMap/dagu-config`
+- `PersistentVolumeClaim/dagu-data`, unless `persistence.existingClaim` is set
+- `Deployment/dagu-ui`
+- `Service/dagu-ui`
+- `Ingress/dagu-ui` when `ingress.enabled=true`
+
+Distributed mode also creates:
+
+- `Deployment/dagu-scheduler` and `Service/dagu-scheduler`
+- `Deployment/dagu-coordinator` and `Service/dagu-coordinator`
+- one `Deployment/dagu-worker-<pool>` for every entry in `workerPools`
+
+The chart uses stable selectors so upgrades do not replace workloads merely because chart metadata changes. `nameOverride` and `fullnameOverride` can change the resource-name prefix. Run `helm get manifest` or query resources by the release label when custom names are used:
 
 ```bash
-helm repo update
-helm upgrade dagu dagu/dagu --set persistence.storageClass=<your-rwx-storage-class>
+kubectl --namespace dagu get deployment,service,serviceaccount,configmap,pvc,ingress \
+  --selector app.kubernetes.io/instance=dagu
 ```
 
-From the repository root, the local chart path remains available:
+## Access the UI
+
+### Port forwarding
+
+The default UI Service is a `ClusterIP` on port 8080:
 
 ```bash
-helm install dagu ./charts/dagu --set persistence.storageClass=<your-rwx-storage-class>
+kubectl --namespace dagu port-forward service/dagu-ui 8080:8080
 ```
 
-Replace `<your-rwx-storage-class>` with a StorageClass in your cluster that supports `ReadWriteMany`. If your cluster default storage class already supports `ReadWriteMany`, you can omit the flag.
+Open <http://localhost:8080>. The first visit guides the administrator through builtin-auth setup.
 
-## Version Fields
+The release notes contain commands with the actual rendered resource names:
 
-`charts/dagu/Chart.yaml` defines the chart `version`, which is the version published in the Helm repository.
-
-The deployed container image comes from `values.yaml -> image.repository` and `values.yaml -> image.tag`. With the current defaults, the chart deploys `ghcr.io/dagucloud/dagu:latest`.
-
-## Pod Configuration
-
-All Deployments created by the chart:
-
-- mount the shared PVC at `/data`
-- mount the ConfigMap at `/etc/dagu`
-- set `enableServiceLinks: false`
-- set `DAGU_HOME=/data`
-
-Additional per-component environment variables:
-
-- UI:
-  `DAGU_PORT=<ui.service.port>`
-- Coordinator:
-  `DAGU_COORDINATOR_HOST=0.0.0.0`
-  `DAGU_COORDINATOR_ADVERTISE=<fullname>-coordinator.<namespace>.svc.cluster.local`
-- Worker:
-  `DAGU_WORKER_ID` from `metadata.name`
-
-The chart also supports a shared `extraEnv` value. Every entry in `extraEnv` is added to the `env:` list of the coordinator, scheduler, UI, and all worker Deployments.
-
-Container commands are fixed by the templates:
-
-```text
-dagu coordinator --config /etc/dagu/dagu.yaml
-dagu scheduler --config /etc/dagu/dagu.yaml
-dagu server --config /etc/dagu/dagu.yaml
-dagu worker --config /etc/dagu/dagu.yaml [--worker.labels ...]
+```bash
+helm get notes dagu --namespace dagu
 ```
 
-## Dagu Configuration Written By The Chart
+### Ingress
 
-The chart writes the following `dagu.yaml` to `<fullname>-config`:
+Create a values file and replace the ingress class, hostname, and TLS Secret with values for the cluster:
 
 ```yaml
-host: "0.0.0.0"
-port: 8080
-public_url: "https://dagu.example.com" # only written when config.publicUrl is set
-api_base_path: "/api/v1"
-default_execution_mode: "distributed"
+ingress:
+  enabled: true
+  className: your-ingress-class
+  annotations: {}
+  host: dagu.example.com
+  tls:
+    enabled: true
+    secretName: dagu-tls
 
-coordinator:
-  host: "0.0.0.0"
-  port: 50055
-
-scheduler:
-  port: 8090
-
-paths:
-  data_dir: /data
-  dags_dir: /data/dags
-  log_dir: /data/logs
-  base_config: /data/base.yaml
-  suspend_flags_dir: /data/suspend
-  admin_logs_dir: /data/admin/logs
-  dag_runs_dir: /data/dag-runs
-  queue_dir: /data/queue
-  proc_dir: /data/proc
-  service_registry_dir: /data/services
-  api_keys_dir: /data/api-keys
-  webhooks_dir: /data/webhooks
-  users_dir: /data/users
-
-auth:
-  mode: "builtin"
-  builtin:
-    token:
-      secret: ""
-      ttl: "24h"
-
-peer:
-  insecure: true
+config:
+  publicUrl: https://dagu.example.com
 ```
 
-The `auth.mode`, `auth.builtin.token.secret`, and `auth.builtin.token.ttl` fields come from `values.yaml`. The other fields shown above are fixed by the chart templates.
+The TLS Secret must exist in the release namespace. Leave `ingress.tls.secretName` empty only when the ingress controller supplies a default certificate. Provider-specific settings can be added through `ingress.annotations`.
 
-When `config.envPassthrough` is non-empty, the chart also writes top-level `env_passthrough` into `dagu.yaml`.
+Apply the values:
 
-When `config.envPassthroughPrefixes` is non-empty, the chart also writes top-level `env_passthrough_prefixes` into `dagu.yaml`.
-
-The UI Deployment also sets `DAGU_PORT=<ui.service.port>`. That environment variable overrides `port` from `dagu.yaml` at runtime when `ui.service.port` is changed from the default.
-
-The following paths are not set explicitly in the chart, but Dagu derives them from `paths.data_dir` and `paths.dags_dir` at runtime:
-
-```yaml
-paths:
-  remote_nodes_dir: /data/remote-nodes
-  workspaces_dir: /data/workspaces
+```bash
+helm upgrade --install dagu dagu/dagu \
+  --namespace dagu \
+  --create-namespace \
+  --values dagu-values.yaml \
+  --wait
 ```
 
-That path layout is consistent with `DAGU_HOME=/data` and with the explicit `base_config: /data/base.yaml`.
+Point the hostname at the ingress controller and inspect the assigned address:
 
-The chart does not render DAG definition files. `paths.dags_dir` points to `/data/dags` on the shared PVC. Populate that directory through the UI/API or by writing files into the shared volume.
+```bash
+kubectl --namespace dagu get ingress dagu-ui
+```
 
-## Values Exposed By `values.yaml`
+Open <https://dagu.example.com>. Because the bundled UI and API use the same origin, `config.corsAllowedOrigins` is not needed for this setup.
 
-The chart currently defines these top-level values in `charts/dagu/values.yaml`:
+When OIDC is enabled, set `auth.oidc.clientUrl` to the same external URL and register its `/oidc-callback` path with the identity provider.
+
+::: warning Proxy authentication
+Proxy-header authentication cannot use the chart-managed Ingress. The authenticating proxy must be the only path to the UI Service. Keep `ingress.enabled=false` and follow [Proxy Authentication](/server-admin/authentication/proxy).
+:::
+
+### LoadBalancer or NodePort
+
+Clusters without an ingress controller can expose the Service directly:
 
 ```yaml
-image:
-  repository: ghcr.io/dagucloud/dagu
-  tag: latest
-  pullPolicy: IfNotPresent
+ui:
+  service:
+    type: LoadBalancer
+    port: 80
+    annotations: {}
+```
 
-scheduler:
-  replicas: 1
-  resources: ...
+`ui.service.port` is the Kubernetes Service port. Dagu still listens on `ui.containerPort`, which defaults to 8080, so exposing Service port 80 does not require the application process to bind a privileged port.
 
-coordinator:
-  replicas: 1
-  resources: ...
+`NodePort` is also supported. Kubernetes selects the node port because the chart does not set a fixed one.
+
+## Persistence
+
+The default persistence settings are:
+
+```yaml
+persistence:
+  enabled: true
+  retain: true
+  existingClaim: ""
+  accessMode: ReadWriteOnce
+  size: 10Gi
+  storageClass: ""
+  annotations: {}
+```
+
+An empty `storageClass` uses the cluster's default StorageClass. Dagu requires persistence, so `persistence.enabled` must remain `true`.
+
+### PVC retention
+
+The chart annotates its PVC so Helm retains it when the release is uninstalled. This preserves workflows, run history, credentials, and other Dagu state.
+
+Set `persistence.retain: false` only when uninstalling the release should also delete the chart-managed PVC. To remove a retained PVC explicitly:
+
+```bash
+kubectl --namespace dagu delete pvc dagu-data
+```
+
+Confirm the release name and PVC contents before deleting it.
+
+### Existing PVC
+
+To mount a PVC managed outside the release:
+
+```yaml
+persistence:
+  existingClaim: existing-dagu-data
+```
+
+The claim must already exist in the release namespace. The chart does not create, modify, retain, or delete it.
+
+In distributed mode, also declare `persistence.accessMode: ReadWriteMany`. The declaration must match the existing PVC; Helm cannot inspect the live claim while rendering.
+
+## Distributed mode
+
+Distributed mode is an explicit opt-in:
+
+```yaml
+deploymentMode: distributed
+
+persistence:
+  accessMode: ReadWriteMany
+  storageClass: nfs-client
+  size: 20Gi
+
+worker:
+  maxActiveRuns: 100
 
 workerPools:
   general:
     replicas: 2
     labels: {}
-    resources: ...
-    nodeSelector: {}
+    dataVolume:
+      sizeLimit: 2Gi
+```
+
+Install it with a values file:
+
+```bash
+helm upgrade --install dagu dagu/dagu \
+  --namespace dagu \
+  --create-namespace \
+  --values distributed-values.yaml \
+  --wait
+```
+
+The UI server, scheduler, and coordinator share the RWX PVC. Workers use ephemeral pod storage and communicate with the coordinator through its `ClusterIP` Service; they do not mount the shared PVC.
+
+Each `workerPools` entry creates an independent worker Deployment. Labels are Dagu worker-selection capabilities, while scheduling fields control Kubernetes placement:
+
+```yaml
+workerPools:
+  gpu:
+    replicas: 2
+    labels:
+      gpu: "true"
+    dataVolume:
+      sizeLimit: 10Gi
+    resources:
+      requests:
+        cpu: "1"
+        memory: 2Gi
+        ephemeral-storage: 2Gi
+      limits:
+        cpu: "2"
+        memory: 4Gi
+        ephemeral-storage: 10Gi
+    nodeSelector:
+      accelerator: nvidia
     tolerations: []
     affinity: {}
+```
 
-ui:
-  replicas: 1
-  service:
-    port: 8080
-  resources: ...
+Non-empty `nodeSelector`, `tolerations`, and `affinity` values on a worker pool override their global counterparts for that pool.
 
-auth:
-  mode: "builtin"
-  builtin:
-    token:
-      secret: ""
-      ttl: "24h"
+## Configuration and environment variables
 
-persistence:
-  enabled: true
-  accessMode: ReadWriteMany
-  size: 10Gi
-  storageClass: ""
-  skipValidation: false
+The chart renders a minimal Dagu configuration into `dagu-config` and mounts it at `/etc/dagu/dagu.yaml`. Every Deployment receives a checksum annotation, so configuration changes trigger a rollout.
 
+Common top-level settings include:
+
+```yaml
 config:
-  publicUrl: ""
+  publicUrl: https://dagu.example.com
+  corsAllowedOrigins: []
   envPassthrough: []
   envPassthroughPrefixes: []
 
 extraEnv: []
 ```
 
-`image.pullPolicy` is the actual key used by the chart. `pull_policy` is not used.
+`extraEnv` adds variables to every Dagu Deployment. `config.envPassthrough` and `config.envPassthroughPrefixes` control which pod environment variables Dagu forwards into workflow processes; they do not create those variables.
 
-Set `config.publicUrl` to the externally reachable Web UI URL when notification messages should include absolute DAG-run links.
+## Authentication and licensing
 
-## Step Environment Passthrough
+Builtin authentication is enabled by default. The chart also supports Secret-backed basic authentication and chart-managed OIDC configuration:
 
-The chart exposes Dagu's environment passthrough settings through `values.yaml -> config`:
+- [Builtin authentication](/server-admin/authentication/builtin)
+- [Basic authentication](/server-admin/authentication/basic)
+- [OIDC authentication](/server-admin/authentication/oidc)
+- [Proxy authentication](/server-admin/authentication/proxy)
 
-```yaml
-config:
-  envPassthrough:
-    - SSL_CERT_FILE
-    - HTTP_PROXY
-    - HTTPS_PROXY
-    - NO_PROXY
-  envPassthroughPrefixes:
-    - AWS_
-```
+The chart keeps Dagu's runtime-compatible OIDC defaults: first-time identities are created automatically and unmatched validated users receive viewer access to all named workspaces. Set `auth.oidc.roleMapping.defaultWorkspaceAccess: none` when named workspaces must be isolated, and use `allowedDomains`, `whitelist`, or explicit mappings to limit who can sign in.
 
-Those values only change Dagu's filter. They do not create container environment variables.
-
-If the variable must come from the pod environment, inject it with `extraEnv`:
-
-```yaml
-extraEnv:
-  - name: HTTP_PROXY
-    value: http://proxy.example.com:8080
-  - name: HTTPS_PROXY
-    value: http://proxy.example.com:8080
-  - name: NO_PROXY
-    value: 127.0.0.1,localhost,.svc,.cluster.local
-  - name: SSL_CERT_FILE
-    value: /etc/ssl/certs/custom-ca.pem
-```
-
-Combined example:
-
-```yaml
-config:
-  envPassthrough:
-    - SSL_CERT_FILE
-    - HTTP_PROXY
-    - HTTPS_PROXY
-    - NO_PROXY
-
-extraEnv:
-  - name: HTTP_PROXY
-    value: http://proxy.example.com:8080
-  - name: HTTPS_PROXY
-    value: http://proxy.example.com:8080
-  - name: NO_PROXY
-    value: 127.0.0.1,localhost,.svc,.cluster.local
-  - name: SSL_CERT_FILE
-    value: /etc/ssl/certs/custom-ca.pem
-```
-
-With that configuration:
-
-- the container processes receive the variables from `extraEnv`
-- Dagu forwards the listed variables into step execution
-- variables not present in the pod environment are not created by `config.envPassthrough`
-
-## Persistence Rules
-
-The PVC template enforces two conditions:
-
-1. `persistence.enabled` must be `true`
-2. `persistence.accessMode` must be `ReadWriteMany` unless `persistence.skipValidation=true`
-
-Examples:
+OIDC and license activation values reference existing Kubernetes Secrets. Secret data is read when the UI pod starts, so restart the UI after changing a referenced Secret:
 
 ```bash
-helm install dagu dagu/dagu \
-  --set persistence.storageClass=<your-rwx-storage-class>
+kubectl --namespace dagu rollout restart deployment/dagu-ui
 ```
 
-```bash
-helm install dagu dagu/dagu \
-  --set persistence.accessMode=ReadWriteOnce \
-  --set persistence.skipValidation=true \
-  --set workerPools.general.replicas=1
-```
+## Images and private registries
 
-`persistence.skipValidation=true` only disables the chart's RWX check. It does not change how Kubernetes storage works.
-
-If `persistence.storageClass` is the empty string, the rendered PVC omits `storageClassName` and Kubernetes uses the cluster default behavior.
-
-## Worker Pools
-
-Each entry in `workerPools` creates one Deployment:
-
-```text
-<fullname>-worker-<poolName>
-```
-
-Pool names are validated by the template and must match:
-
-```text
-^[a-z][a-z0-9-]*$
-```
-
-Examples:
-
-- valid: `general`, `gpu-workers`, `us-east-1`
-- invalid: `GPU`, `1-workers`, `my_pool`
-
-### Worker Labels
-
-`workerPools.<poolName>.labels` are Dagu worker capability labels. They are not copied into Kubernetes pod metadata.
-
-The worker pod metadata always includes `dagu.sh/worker-pool: <poolName>`, but the contents of `workerPools.<poolName>.labels` are only used to build the `--worker.labels` argument.
-
-When `labels` is non-empty, the worker Deployment adds:
-
-```text
---worker.labels <comma-separated key=value pairs>
-```
-
-When `labels: {}` is used, the chart does not add a `--worker.labels` argument.
-
-Example values:
-
-```yaml
-workerPools:
-  gpu:
-    replicas: 2
-    labels:
-      gpu: "true"
-      cuda: "12.0"
-    resources:
-      requests:
-        memory: "1Gi"
-        cpu: "500m"
-        nvidia.com/gpu: "1"
-      limits:
-        memory: "4Gi"
-        cpu: "2"
-        nvidia.com/gpu: "1"
-    nodeSelector:
-      nvidia.com/gpu.present: "true"
-    tolerations:
-      - key: nvidia.com/gpu
-        operator: Exists
-        effect: NoSchedule
-```
-
-The rendered worker command includes a `--worker.labels` flag built from that map. The exact pair order should not be relied on.
-
-### Kubernetes Scheduling Fields
-
-These pool fields are copied directly into the worker pod spec:
-
-- `nodeSelector`
-- `tolerations`
-- `affinity`
-- `resources`
-
-Example:
-
-```yaml
-workerPools:
-  gpu:
-    replicas: 1
-    labels:
-      gpu: "true"
-    nodeSelector:
-      nvidia.com/gpu.present: "true"
-    tolerations:
-      - key: nvidia.com/gpu
-        operator: Exists
-        effect: NoSchedule
-    affinity:
-      nodeAffinity:
-        requiredDuringSchedulingIgnoredDuringExecution:
-          nodeSelectorTerms:
-            - matchExpressions:
-                - key: nvidia.com/gpu.product
-                  operator: In
-                  values:
-                    - NVIDIA-A100-SXM4-40GB
-```
-
-## Minimal Values Example
+An empty `image.tag` uses the chart's `appVersion`, keeping the default image aligned with the chart release:
 
 ```yaml
 image:
-  tag: latest
-
-auth:
-  mode: builtin
-  builtin:
-    token:
-      secret: ""
-      ttl: 24h
-
-persistence:
-  enabled: true
-  accessMode: ReadWriteMany
-  size: 10Gi
-  storageClass: "<your-rwx-storage-class>"
-
-workerPools:
-  general:
-    replicas: 2
-    labels: {}
-    resources:
-      requests:
-        memory: 128Mi
-        cpu: 100m
-      limits:
-        memory: 256Mi
-        cpu: 200m
-    nodeSelector: {}
-    tolerations: []
-    affinity: {}
+  repository: ghcr.io/dagucloud/dagu
+  tag: ""
+  pullPolicy: IfNotPresent
 ```
 
-Install with that file:
-
-```bash
-helm install dagu dagu/dagu -f values.yaml
-```
-
-To force a different image tag:
+Set an explicit tag only when a different Dagu version is required. Private registry credentials can be applied to every Dagu pod:
 
 ```yaml
-image:
-  tag: 2.2.4
+imagePullSecrets:
+  - name: registry-credentials
 ```
 
-## Access The UI
+## Service account and mounted files
+
+The chart creates a release-scoped ServiceAccount and assigns it to every Dagu pod. Provider-specific annotations can connect it to supported workload identity systems such as EKS IRSA or GKE Workload Identity:
+
+```yaml
+serviceAccount:
+  create: true
+  name: ""
+  annotations:
+    example.com/workload-identity: dagu
+```
+
+Use an existing ServiceAccount by disabling creation and setting its name:
+
+```yaml
+serviceAccount:
+  create: false
+  name: dagu-runtime
+```
+
+With `create: false` and an empty name, Dagu uses the namespace's `default` ServiceAccount. The chart does not create RoleBindings or grant Kubernetes API access. Bind the permissions required by workflows or the [Kubernetes Secret provider](/writing-workflows/secrets/kubernetes-provider) to the selected account separately.
+
+Additional volumes and mounts are applied to every Dagu container. This example exposes a custom CA bundle to Dagu and its workflow processes:
+
+```yaml
+extraVolumes:
+  - name: ca-bundle
+    secret:
+      secretName: dagu-ca-bundle
+
+extraVolumeMounts:
+  - name: ca-bundle
+    mountPath: /etc/ssl/certs/dagu-ca-bundle.pem
+    subPath: ca-bundle.pem
+    readOnly: true
+
+extraEnv:
+  - name: SSL_CERT_FILE
+    value: /etc/ssl/certs/dagu-ca-bundle.pem
+
+config:
+  envPassthrough:
+    - SSL_CERT_FILE
+```
+
+Use unique volume names that do not conflict with the chart-managed `data` and `config` volumes. Referenced Secrets, ConfigMaps, PVCs, and CSI resources must already be available in the release namespace where applicable.
+
+## Pod settings and resources
+
+These values apply to every Dagu pod:
+
+```yaml
+podAnnotations: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
+```
+
+The default `podSecurityContext.fsGroup` is 1000 so mounted runtime files remain writable after the image entrypoint switches to the default Dagu user.
+
+The standalone UI container has resource requests but no default limits because local workflow subprocesses run inside it. Set limits only after accounting for the workflows the pod will execute.
+
+## Upgrade
+
+Keep release configuration in a values file for reproducible upgrades:
 
 ```bash
-kubectl port-forward svc/dagu-ui 8080:8080
+helm repo update
+helm upgrade dagu dagu/dagu \
+  --namespace dagu \
+  --values dagu-values.yaml \
+  --wait
 ```
 
-If you used a different release name or `fullnameOverride`, replace `dagu-ui` with the rendered UI service name.
+Inspect the proposed manifests before applying them:
+
+```bash
+helm template dagu dagu/dagu \
+  --namespace dagu \
+  --values dagu-values.yaml
+```
+
+## Verify and troubleshoot
+
+Check the release and run the chart test:
+
+```bash
+helm status dagu --namespace dagu
+kubectl --namespace dagu get pods,pvc,service,ingress
+helm test dagu --namespace dagu
+```
+
+If a pod remains pending, inspect its events and the PVC:
+
+```bash
+kubectl --namespace dagu describe pod <pod-name>
+kubectl --namespace dagu get pvc
+kubectl --namespace dagu describe pvc <pvc-name>
+kubectl get storageclass
+```
+
+If Ingress has no address, confirm that `ingress.className` selects an installed controller. If the address works but the hostname does not, check the DNS record and TLS Secret.
+
+Distributed rendering fails unless `persistence.accessMode` is `ReadWriteMany`. A successful render does not guarantee that the selected StorageClass can provision RWX volumes; verify that capability with the storage provider.
+
+## Uninstall
+
+```bash
+helm uninstall dagu --namespace dagu
+```
+
+The chart-managed PVC remains by default. See [Uninstall](/getting-started/installation/uninstall#helm) before deleting persistent data.
+
+The complete value reference is maintained with the chart in [`charts/dagu/README.md`](https://github.com/dagucloud/dagu/blob/main/charts/dagu/README.md).

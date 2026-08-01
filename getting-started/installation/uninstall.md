@@ -87,6 +87,25 @@ docker volume rm dagu    # destroys workflow history
 ## Helm
 
 ```bash
-helm uninstall dagu
-kubectl delete pvc -l app.kubernetes.io/name=dagu   # destroys workflow history
+RELEASE=dagu
+NAMESPACE=dagu
+helm uninstall "$RELEASE" --namespace "$NAMESPACE"
 ```
+
+The official chart retains its managed PVC by default, so uninstalling Dagu does not remove workflows, run history, credentials, or other persisted state.
+
+List the PVC for the release:
+
+```bash
+kubectl --namespace "$NAMESPACE" get pvc \
+  --selector "app.kubernetes.io/instance=$RELEASE"
+```
+
+If the chart created the PVC, delete it only when the data is no longer needed. Set `PVC_NAME` to the name returned by the previous command:
+
+```bash
+PVC_NAME=dagu-data
+kubectl --namespace "$NAMESPACE" delete pvc "$PVC_NAME"
+```
+
+Set `RELEASE` and `NAMESPACE` to the values used during installation. A claim configured through `persistence.existingClaim` is managed outside Helm and is never deleted by the chart; do not run the manual deletion command for that claim.

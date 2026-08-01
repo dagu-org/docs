@@ -253,4 +253,4 @@ spec:
             claimName: dagu-shared
 ```
 
-For Helm-based Kubernetes deployment, see [Kubernetes (Helm)](/server-admin/deployment/kubernetes).
+The official Helm chart uses shared-nothing workers with ephemeral local storage; only its UI server, scheduler, and coordinator share the RWX PVC. The manifests above are for a custom shared-filesystem worker deployment. For the supported chart topology, see [Kubernetes (Helm)](/server-admin/deployment/kubernetes#distributed-mode).

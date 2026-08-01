@@ -123,7 +123,7 @@ Dagu follows the XDG Base Directory specification for file organization:
 
 ## Distributed Execution Architecture
 
-Dagu supports distributed execution through a coordinator-worker model. DAG definitions are transmitted to workers via gRPC, so workers only need shared storage for execution state and logs.
+Dagu supports distributed execution through a coordinator-worker model. DAG definitions are transmitted to workers via gRPC. Shared-nothing workers also return status and logs over gRPC, while shared-filesystem workers write that data directly to common storage.
 
 ### Overview
 
