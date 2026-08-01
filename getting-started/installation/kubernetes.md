@@ -30,13 +30,20 @@ The default installation creates:
 
 The PVC is retained when the Helm release is uninstalled.
 
-If the cluster has no default StorageClass, select one explicitly:
+If the cluster has no default StorageClass, save the selection in `dagu-values.yaml`:
+
+```yaml
+persistence:
+  storageClass: standard
+```
+
+Use that file for the installation and every later upgrade:
 
 ```bash
 helm upgrade --install dagu dagu/dagu \
   --namespace dagu \
   --create-namespace \
-  --set-string persistence.storageClass=standard \
+  --values dagu-values.yaml \
   --wait
 ```
 
@@ -52,7 +59,7 @@ Open <http://localhost:8080> and complete the administrator setup. Run `helm get
 
 ## Configure Ingress
 
-Create `dagu-values.yaml` and replace the ingress class, hostname, and TLS Secret with values for the cluster:
+Create `dagu-values.yaml`, or add these settings to the existing file while preserving values such as `persistence.storageClass`. Replace the ingress class, hostname, and TLS Secret with values for the cluster:
 
 ```yaml
 ingress:
