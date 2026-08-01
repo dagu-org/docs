@@ -48,6 +48,7 @@ From a Dagu source checkout, replace `dagu/dagu` with `./charts/dagu`.
 
 For a release named `dagu`, standalone mode creates these primary resources:
 
+- `ServiceAccount/dagu`
 - `ConfigMap/dagu-config`
 - `PersistentVolumeClaim/dagu-data`, unless `persistence.existingClaim` is set
 - `Deployment/dagu-ui`
@@ -63,7 +64,7 @@ Distributed mode also creates:
 The chart uses stable selectors so upgrades do not replace workloads merely because chart metadata changes. `nameOverride` and `fullnameOverride` can change the resource-name prefix. Run `helm get manifest` or query resources by the release label when custom names are used:
 
 ```bash
-kubectl --namespace dagu get deployment,service,configmap,pvc,ingress \
+kubectl --namespace dagu get deployment,service,serviceaccount,configmap,pvc,ingress \
   --selector app.kubernetes.io/instance=dagu
 ```
 
@@ -301,6 +302,53 @@ Set an explicit tag only when a different Dagu version is required. Private regi
 imagePullSecrets:
   - name: registry-credentials
 ```
+
+## Service account and mounted files
+
+The chart creates a release-scoped ServiceAccount and assigns it to every Dagu pod. Provider-specific annotations can connect it to supported workload identity systems such as EKS IRSA or GKE Workload Identity:
+
+```yaml
+serviceAccount:
+  create: true
+  name: ""
+  annotations:
+    example.com/workload-identity: dagu
+```
+
+Use an existing ServiceAccount by disabling creation and setting its name:
+
+```yaml
+serviceAccount:
+  create: false
+  name: dagu-runtime
+```
+
+With `create: false` and an empty name, Dagu uses the namespace's `default` ServiceAccount. The chart does not create RoleBindings or grant Kubernetes API access. Bind the permissions required by workflows or the [Kubernetes Secret provider](/writing-workflows/secrets/kubernetes-provider) to the selected account separately.
+
+Additional volumes and mounts are applied to every Dagu container. This example exposes a custom CA bundle to Dagu and its workflow processes:
+
+```yaml
+extraVolumes:
+  - name: ca-bundle
+    secret:
+      secretName: dagu-ca-bundle
+
+extraVolumeMounts:
+  - name: ca-bundle
+    mountPath: /etc/ssl/certs/dagu-ca-bundle.pem
+    subPath: ca-bundle.pem
+    readOnly: true
+
+extraEnv:
+  - name: SSL_CERT_FILE
+    value: /etc/ssl/certs/dagu-ca-bundle.pem
+
+config:
+  envPassthrough:
+    - SSL_CERT_FILE
+```
+
+Use unique volume names that do not conflict with the chart-managed `data` and `config` volumes. Referenced Secrets, ConfigMaps, PVCs, and CSI resources must already be available in the release namespace where applicable.
 
 ## Pod settings and resources
 

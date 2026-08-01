@@ -23,6 +23,7 @@ helm upgrade --install dagu dagu/dagu \
 
 The default installation creates:
 
+- a release-scoped Kubernetes ServiceAccount
 - one Dagu Deployment running the server, scheduler, and local executor
 - a 10 Gi `ReadWriteOnce` PersistentVolumeClaim
 - a `ClusterIP` Service for the UI and API
