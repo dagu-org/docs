@@ -88,15 +88,15 @@ The examples below use `dagu coordinator` when showing only the coordinator gRPC
 
 In Kubernetes, expose the coordinator gRPC port with a Service and use the Service DNS name as the coordinator address.
 
-For the official Helm chart, the chart creates a coordinator `ClusterIP` Service on port `50055` and sets the coordinator advertise address to the Service DNS name:
+In the official Helm chart's distributed mode, the chart creates a coordinator `ClusterIP` Service on port `50055`, sets the coordinator advertise address to that Service name, and passes the same address to every worker. For a release named `dagu`, the worker endpoint is:
 
 ```bash
-<coordinator-service-name>.<namespace>.svc.cluster.local
+dagu-coordinator:50055
 ```
 
-The chart names the Service with Dagu's Helm `fullname` plus `-coordinator`; render the chart or run `kubectl get service` to see the exact name for a release.
+The short Service name works because the chart deploys the coordinator and workers in the same namespace. Render the chart or run `kubectl get service` to find the exact name when the release uses a different name or override.
 
-The Helm chart mounts shared storage for the server-side components and workers. Workers can discover coordinators through the shared Dagu service registry. For Helm installation details, see [Install on Kubernetes](/getting-started/installation/kubernetes).
+The UI server, scheduler, and coordinator share an RWX volume. Workers use ephemeral pod storage and send status and logs through gRPC; they do not mount the shared PVC. For Helm installation details, see [Kubernetes deployment](/server-admin/deployment/kubernetes#distributed-mode).
 
 For hand-written manifests without shared service registry access, configure workers with the Service DNS name explicitly:
 

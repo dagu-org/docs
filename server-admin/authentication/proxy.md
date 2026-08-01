@@ -279,7 +279,8 @@ auth:
 ```
 
 The chart rejects proxy authentication when `ui.replicas` is not `1`, when
-`auth.mode` is not `builtin`, or when `extraEnv` contains a
+`auth.mode` is not `builtin`, when the UI Service is not a `ClusterIP`, when
+the chart-managed Ingress is enabled, or when `extraEnv` contains a
 `DAGU_AUTH_PROXY_*` override. It uses the `Recreate` strategy for the UI
 Deployment, so UI upgrades briefly interrupt browser access.
 
@@ -288,8 +289,9 @@ Start with the chart's
 then change its namespaces and selectors. Allow the component that forwards the
 application request to Dagu, not necessarily the authentication service.
 
-Keep the UI Service as `ClusterIP`. Do not expose another `LoadBalancer`,
-`NodePort`, Ingress, Gateway, or service-mesh route that bypasses authentication.
+Keep `ui.service.type: ClusterIP` and `ingress.enabled: false`. Create the
+authenticated Ingress, Gateway, or service-mesh route separately. Do not expose
+another `LoadBalancer`, `NodePort`, or route that bypasses authentication.
 
 ## Verify the deployment
 
