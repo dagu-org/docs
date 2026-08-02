@@ -141,6 +141,10 @@ produced, or on how many times something has already been tried.
 If you can draw the graph, draw the graph. `type: graph` is cheaper, faster, and
 reproducible.
 
+For concrete shapes this fits, runbook automation, self-healing operations,
+dispatch over a workflow library, human-in-the-loop, see
+[when to reach for a controller](/writing-workflows/examples/controller#when-to-reach-for-a-controller).
+
 ## Tasks
 
 `tasks` is both the goal list and the termination condition.
