@@ -799,6 +799,10 @@ export default withMermaid(
     // Mermaid plugin configuration
     mermaid: {
       theme: "base",
+      // Measure labels with the same font the theme CSS applies to the
+      // rendered SVG; a mismatch makes node boxes clip their text.
+      fontFamily:
+        '"Hanken Grotesk", ui-sans-serif, system-ui, sans-serif',
     },
     mermaidPlugin: {
       class: "mermaid my-class", // set additional css classes for parent container
