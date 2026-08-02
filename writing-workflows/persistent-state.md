@@ -30,10 +30,8 @@ steps:
         last_id: 0
 
   - id: fetch
-    env:
-      - CURSOR_JSON: ${steps.load_cursor.outputs.value}
     run: |
-      last_id="$(printf '%s\n' "$CURSOR_JSON" | jq -r .last_id)"
+      last_id="$(printf '%s\n' "$CURSOR" | jq -r .value.last_id)"
       ./fetch-feed --after "$last_id" > result.json
     depends: load_cursor
 
@@ -53,7 +51,7 @@ steps:
     depends: parse_last_id
 ```
 
-`state.get` publishes JSON, so later steps can reference the top-level value as `${steps.load_cursor.outputs.value}` and decode nested fields in the consuming command.
+`state.get` writes a JSON envelope to stdout. String-form `output: CURSOR` captures that envelope in `$CURSOR`; the stored value is under its `value` field.
 
 ## Actions
 
@@ -82,7 +80,7 @@ Fields:
 | `scope` | no | Scope. Defaults to `dag`. |
 | `namespace` | no | Namespace override. Required when `scope: custom`. |
 
-Output:
+Stdout:
 
 ```json
 {
@@ -123,7 +121,7 @@ Fields:
 | `scope` | no | Scope. Defaults to `dag`. |
 | `namespace` | no | Namespace override. Required when `scope: custom`. |
 
-Output:
+Stdout:
 
 ```json
 {
@@ -152,7 +150,11 @@ params:
 steps:
   - id: check_snapshot
     action: state.diff
-    output: DIFF
+    output:
+      changed:
+        from: stdout
+        decode: json
+        select: .changed
     with:
       key: snapshots/feed
       value:
@@ -171,7 +173,7 @@ Fields:
 | `scope` | no | Scope. Defaults to `dag`. |
 | `namespace` | no | Namespace override. Required when `scope: custom`. |
 
-Output includes `changed`, `foundPrevious`, `current`, optional `previous`, and version/hash fields when a stored entry exists or is written.
+Stdout includes `changed`, `foundPrevious`, `current`, optional `previous`, and version/hash fields when a stored entry exists or is written. The object-form `output` above selects `changed` for structured access by later steps.
 
 <!-- dagu-example: no-validate; continuation of the state.diff workflow above -->
 
@@ -181,7 +183,7 @@ steps:
     run: ./notify.sh
     depends: check_snapshot
     preconditions:
-      - condition: "${steps.check_snapshot.outputs.changed}"
+      - condition: "${check_snapshot.output.changed}"
         expected: "true"
 ```
 
@@ -196,7 +198,7 @@ steps:
       key: cursors/feed
 ```
 
-Output:
+Stdout:
 
 ```json
 {
@@ -235,7 +237,7 @@ Fields:
 | `scope` | no | Scope. Defaults to `dag`. |
 | `namespace` | no | Namespace override. Required when `scope: custom`. |
 
-By default, list output omits values and returns metadata only:
+By default, list stdout omits values and returns metadata only:
 
 ```json
 {
@@ -314,17 +316,22 @@ steps:
       key: counters/jobs
       required: true
 
+  - id: read_version
+    run: printf '%s\n' "$STATE" | jq -r .version
+    output: VERSION
+    depends: load
+
   - id: save
     action: state.set
     with:
       key: counters/jobs
-      expected_version: "${steps.load.outputs.version}"
+      expected_version: "${env.VERSION}"
       value:
         count: "${params.NEXT_COUNT}"
-    depends: load
+    depends: read_version
 ```
 
-If the stored version changed between the read and the write, the write fails with a conflict. Handle that by retrying the step or designing the workflow so one run owns the key at a time. Use `expected_version: 0` when the write should only create a missing key.
+The `read_version` step extracts the version from the `state.get` stdout envelope. If the stored version changed between the read and the write, the write fails with a conflict. Handle that by retrying the step or designing the workflow so one run owns the key at a time. Use `expected_version: 0` when the write should only create a missing key.
 
 ## Storage Location
 
