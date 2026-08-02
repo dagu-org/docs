@@ -26,6 +26,8 @@ Each model entry requires `provider` and `name`. It can override `temperature`, 
 
 Fallback applies to `chat.completion` actions. A `type: controller` workflow accepts the same array form but drives its decision loop with the first entry only — a controller uses one model for the whole run. [Controller Internals](/writing-workflows/controller-internals#decision-calls) covers how decision calls are retried instead.
 
+Context overflow does not advance a controller to another model. When observation aging is enabled, Dagu compacts the controller transcript and retries that decision once with the same model. If the rebuilt request is still too large, the run fails. Set `llm.observation_keep_recent: 0` on the controller root to disable both aging and this recovery attempt.
+
 ## Retries and Availability
 
 Dagu's LLM clients automatically retry transient network failures, rate-limit responses (`429`), and common server failures (`500` through `504`). When model fallback is configured, Dagu tries the next model after retries for the current model are exhausted.
@@ -70,4 +72,3 @@ For each completion action, recovery happens in this order:
 - [LLM Completion](/step-types/llm/) for basic usage and configuration
 - [Providers & Endpoints](/step-types/llm/providers) for provider and fallback endpoint configuration
 - [Durable Execution](/writing-workflows/durable-execution) for step, default, and DAG retry policies
-

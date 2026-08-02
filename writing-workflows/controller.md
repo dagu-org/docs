@@ -297,11 +297,14 @@ outputs: {"verdict":"VERDICT: ISSUES (4)","aspect":"word choice"}
 child run: check (succeeded)
 ```
 
-Every report stays in the transcript and is sent again on every later turn, so
-what a step reports is paid for once per remaining turn of the run. Keeping
-reports small is the main lever on what a controller run costs —
-[Controller Internals](/writing-workflows/controller-internals) has the full
-accounting.
+The copy added to the transcript is capped by
+`llm.observation_max_bytes` (512 KiB by default). This does not change the
+step's stored output, logs, or human-task submission. Before observation aging
+starts, each report is sent again on every later turn, so keeping reports small
+still matters. Once the provider-reported prompt reaches
+`llm.max_context_tokens`, older reports become one-line summaries while the
+most recent reports stay complete. [Controller Internals](/writing-workflows/controller-internals)
+has the full accounting and recovery behavior.
 
 ### Reporting from a sub-workflow
 
@@ -546,14 +549,37 @@ that retried internally reads as the time it actually consumed. The steps table
 sits below, showing each step's latest attempt.
 
 The **Tasks** tab shows each goal, whether it is complete, and the reason the
-controller gave. The **Chat** tab has the full transcript, including the tool
-results the controller saw.
+controller gave. The **Chat** tab has the saved transcript. If observation
+aging has started, older tool results appear there as the same one-line
+summaries sent to the model on later turns.
 
 ## Limits
 
 `llm.max_tool_iterations` caps the number of decisions in one run; it defaults
 to 50 for controllers. Hitting the cap with tasks still open fails the run and
 names the tasks that were left open.
+
+The root `llm` block also controls observation size and context aging:
+
+```yaml
+llm:
+  max_tool_iterations: 50
+  observation_max_bytes: 524288
+  max_context_tokens: 200000
+  observation_keep_recent: 20
+```
+
+| Field | Default | Effect | Zero value |
+|---|---:|---|---|
+| `observation_max_bytes` | 524288 | Caps each controller-facing tool result and repeated human answer without changing the source record. | Disables the size cap. |
+| `max_context_tokens` | 200000 | Starts aging after a decision reports a prompt at or above the threshold. | Disables proactive aging. |
+| `observation_keep_recent` | 20 | Keeps this many recent tool results complete after aging starts; older results become one-line summaries. | Disables aging and overflow recovery. |
+
+Dagu does not infer the model's window, so set `max_context_tokens` low enough
+to leave room for another decision and response. If the provider reports a
+context overflow before the threshold is reached, Dagu compacts every tool
+result that can be made smaller and retries the decision once. A second
+overflow, or a request compaction cannot reduce, fails the run.
 
 If the model answers without choosing an action while tasks remain open, it gets
 one reminder. A second silent turn fails the run.

@@ -443,7 +443,7 @@ Action names in steps can refer to built-ins, local custom actions, base-config 
 | `registry_auths` | object or string | Docker registry auth configuration as a map or Docker auth JSON string. |
 | `ssh` | object | DAG-level SSH defaults. Mutually exclusive with top-level `container`. |
 | `s3` | object | DAG-level defaults for `s3.*` actions. |
-| `llm` | object | DAG-level defaults for chat completion steps. |
+| `llm` | object | DAG-level defaults for chat completion steps, or the decision model and context controls for a controller DAG. |
 | `redis` | object | DAG-level defaults for `redis.<operation>` actions. |
 | `harnesses` | object | Named harness configurations used by `harness.run`. |
 | `harness` | object | Default harness configuration used by `harness.run`. |
@@ -575,6 +575,21 @@ steps:
 Supported provider values are `openai`, `openai-codex`, `anthropic`, `gemini`, `google`, `openrouter`, `zai`, `zhipu`, `zhipuai`, `glm`, `opencode`, `local`, `ollama`, `vllm`, and `llama`.
 
 LLM config fields include `provider`, `model`, `system`, `temperature`, `max_tokens`, `top_p`, `base_url`, `api_key_name`, `stream`, `thinking`, `tools`, `max_tool_iterations`, and `web_search`.
+
+A `type: controller` DAG accepts three additional fields in its root `llm`
+block. They are invalid on a step-level LLM configuration and on the root of a
+non-controller DAG.
+
+| Field | Type | Default | Description |
+|---|---|---:|---|
+| `max_context_tokens` | integer | `200000` | Provider-reported prompt-token threshold that starts observation aging. Dagu does not infer the model's context window. `0` disables proactive aging. |
+| `observation_max_bytes` | integer | `524288` | Maximum bytes in each controller-facing tool result and repeated human answer. The source output remains unchanged, truncation preserves valid UTF-8, and `0` disables the limit. |
+| `observation_keep_recent` | integer | `20` | Recent tool results kept complete after aging starts. Older results become deterministic one-line summaries. `0` disables aging, including overflow recovery. |
+
+When an enabled controller receives a context-too-long error, it compacts every
+tool result whose summary is smaller and retries the decision once. See
+[Controller Internals](/writing-workflows/controller-internals#context-window)
+for the full trigger, persistence, and failure behavior.
 
 ### Redis
 

@@ -16,41 +16,73 @@ Each turn, the controller makes one completion request built from two parts:
   answer a person has given so far, and the rules of the loop. Task
   descriptions and collected answers are therefore paid for on every turn, not
   once.
-- **The full message history.** One assistant message per decision (the tool
+- **The conversation history.** One assistant message per decision (the tool
   call the model made), one tool result per observation, plus any reminders the
-  loop injected. Nothing is ever removed, summarized, or compressed.
+  loop injected. New observations enter at bounded size. When observation aging
+  is active, older tool results are replaced with deterministic one-line
+  summaries while their tool-call structure stays intact.
 
-History is append-only, so requests grow monotonically: an observation added on
-turn 10 of a 40-turn run is resent 30 times. That is why
+Until aging starts, requests grow with every turn: an observation added on turn
+10 of a 40-turn run may be resent 30 times. That is why
 [keeping reports small](/writing-workflows/controller#what-the-controller-sees)
 is the main cost lever — a line saved in an observation is saved once per
-remaining turn.
+remaining turn. Aging reduces the older part of the transcript, but the latest
+observations stay complete so the model can reason about recent work.
 
 ## Context window
 
-There is no context management. The transcript grows until the run settles or
-the model's context limit is reached — Dagu never trims, slides, or compacts
-the conversation to make it fit.
+Controller context management has three settings on the root `llm` block:
 
-When a request exceeds the model's window, the provider rejects it as an
-invalid request. That class of error is not retried: the decision fails and the
-run fails with the provider's error.
+```yaml
+llm:
+  max_context_tokens: 200000
+  observation_max_bytes: 524288
+  observation_keep_recent: 20
+```
 
-Overflow is terminal for that conversation. `dagu retry` restores both the
-transcript and the definition recorded with the run — the DAG is replayed from
-its snapshot, not re-read from the source file — so a retry sends the same
-oversized conversation to the same model and hits the same wall. Recovery is a
-new run with a fresh conversation; task progress does not carry over.
+`max_context_tokens` is a proactive threshold, not a declaration of the
+model's hard context window. After every successful decision, Dagu records the
+prompt-token count reported by the provider. When that count reaches the
+threshold, observation aging starts before the next decision and stays active
+for the rest of the run. Dagu does not maintain a per-model context registry,
+so lower the value when the provider needs more headroom for the next response.
 
-Prevention is the whole game:
+While aging is active, the newest `observation_keep_recent` tool results remain
+complete. Older results become deterministic summaries derived from the
+decision timeline:
+
+```text
+turn 3: run_tests → failed (exit 1)
+```
+
+The assistant tool call, result role, and tool-call ID remain in place, so the
+conversation still satisfies provider tool-calling protocols. The summaries
+are saved in the run transcript and do not expand again after suspension or
+`dagu retry`.
+
+Provider overflow errors have one recovery path. Dagu immediately ages every
+tool result whose summary would be smaller, including recent results normally
+kept complete, then retries that decision once. The rejected request does not
+consume a controller turn. If compaction cannot reduce the request, or the
+rebuilt request is still too large, the run fails with the provider error.
+
+Zero values disable the limits independently:
+
+- `observation_max_bytes: 0` keeps each new observation complete.
+- `max_context_tokens: 0` disables proactive aging, but still allows recovery
+  after a provider reports context overflow.
+- `observation_keep_recent: 0` disables observation aging entirely, including
+  overflow recovery.
+
+The safeguards reduce risk, but input size still matters:
 
 - Publish selectively from children with `outputs.write`, so internal
   variables never enter the transcript.
 - Keep `llm.system` and task descriptions tight; they are resent every turn.
 - Lower `llm.max_tool_iterations` for runs that should be short — the turn cap
   also caps how large the conversation can grow.
-- Pick a model whose window fits the expected turn count times the expected
-  observation size, with room to spare.
+- Set `max_context_tokens` below the provider's hard window so the next decision
+  and response have room to spare.
 
 ## Limits
 
@@ -62,7 +94,10 @@ Prevention is the whole game:
 | Silent turns | 1 reminder | No | A second consecutive turn without a tool call fails the run. |
 | Log observation | Last 40 lines each of stdout and stderr | No | Older lines never reach the model. |
 | Child outputs (default listing) | 2,000 characters per value | No | Longer values are cut at the limit. |
-| Published outputs | `max_output_size` (1 MiB) | Yes, per DAG | The whole published value enters the transcript. |
+| Stored step output | `max_output_size` (1 MiB) | Yes, per DAG | Captured output beyond the limit is not stored. |
+| Controller-facing observation | 512 KiB | `llm.observation_max_bytes` | The transcript copy is truncated as valid UTF-8; stored step data stays complete. |
+| Proactive aging threshold | 200,000 prompt tokens | `llm.max_context_tokens` | Older observations are compacted before the next decision. |
+| Complete observations after aging | 20 most recent | `llm.observation_keep_recent` | Older observations become one-line summaries. |
 
 Three details worth knowing:
 
@@ -72,11 +107,14 @@ Three details worth knowing:
 - **The turn counter survives suspension and retry.** A run that spent 30 turns
   before waiting on a person resumes with 20 left. Retrying a failed run
   continues the same budget; it does not reset it.
-- **Published outputs are the unbounded path.** The 40-line and 2,000-character
-  caps apply to scraped logs and default child listings. A value a step
-  publishes explicitly is trusted at full size, up to
-  [`max_output_size`](/writing-workflows/yaml-specification#history-and-output-limits) —
-  publishing a large value puts it in every remaining turn.
+- **Storage and observation limits are separate.**
+  [`max_output_size`](/writing-workflows/yaml-specification#history-and-output-limits)
+  controls what the step stores. `llm.observation_max_bytes` controls only the
+  copy added to the controller transcript. Setting either one to zero does not
+  disable the other.
+- **Human answers use the observation limit too.** Answers remain complete in
+  their human-task records, but the copy repeated in the controller's system
+  prompt is bounded by `llm.observation_max_bytes`.
 
 ## Decision calls
 
@@ -101,19 +139,21 @@ Transient failures are retried in two layers before a decision fails:
    interrupted responses — a decode failure, a connection dropped mid-body —
    and transient failures that outlived the transport retries.
 
-Authentication failures, invalid requests, unknown models, and context
-overflow are not retried. When retries are exhausted or the failure is not
-retryable, the run fails with that error. There is no step-level `retry_policy`
-for decisions — the controller is not a step you configure. Recovery is
-`dagu retry`, which resumes the conversation rather than starting over.
+Authentication failures, invalid requests, and unknown models are not retried.
+Context overflow is handled separately: when observation aging is enabled,
+Dagu compacts the transcript and retries the decision once. When retries are
+exhausted or the failure is not recoverable, the run fails with that error.
+There is no step-level `retry_policy` for decisions — the controller is not a
+step you configure. `dagu retry` resumes the saved conversation rather than
+starting over.
 
 ## Durability and recovery
 
 After every decision, the controller persists its state on the run: task
 statuses and reasons, the decision timeline, per-action run counts, the turn
-count, collected answers, and the action currently in flight. The conversation
-is stored as the run's chat transcript — the same data the **Chat** tab
-renders.
+count, collected answers, whether observation aging is active, and the action
+currently in flight. The conversation, including any compacted observations,
+is stored as the run's chat transcript — the same data the **Chat** tab renders.
 
 That persistence is what makes three things work:
 
@@ -135,10 +175,11 @@ Every decision records the provider, the model, and the prompt, completion,
 and total token counts on the assistant message. The **Chat** tab shows them
 per message, so the growth of the conversation is visible turn by turn.
 
-There is no aggregate budget: Dagu does not sum tokens per run or stop a run
-at a spend threshold. The working caps are `llm.max_tool_iterations`, which
-bounds how many completions a run can make, and observation size, which bounds
-what each one costs.
+There is no aggregate budget: Dagu does not sum tokens per run or stop a run at
+a spend threshold. The working controls are `llm.max_tool_iterations`, which
+bounds how many completions a run can make; `llm.observation_max_bytes`, which
+bounds each new observation; and `llm.max_context_tokens`, which starts aging
+the older part of the transcript.
 
 ## Secrets in the transcript
 

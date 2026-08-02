@@ -185,7 +185,7 @@ This is the shape that scales: a library of reviewed, parameterized sub-workflow
 
 ## Cost and control
 
-The controller resends the conversation each turn, so what a step prints is paid for once per remaining turn. Keep step output small, publish selectively from children with `outputs.write`, and bound the run with `llm.max_tool_iterations` (default 50). The [controller reference](/writing-workflows/controller#what-the-controller-sees) covers the levers, and [Controller Internals](/writing-workflows/controller-internals) the runtime mechanics behind them — limits, retries, and durability.
+The controller normally resends each observation on every later turn, so keep step output small and publish selectively from children with `outputs.write`. Each controller-facing observation is capped at 512 KiB by default. After the provider reports a 200,000-token prompt, older observations are compacted while the 20 most recent remain complete. Configure those values with `llm.observation_max_bytes`, `llm.max_context_tokens`, and `llm.observation_keep_recent` on the controller root. `llm.max_tool_iterations` separately bounds the run at 50 decisions by default. The [controller reference](/writing-workflows/controller#what-the-controller-sees) covers the author-facing levers, and [Controller Internals](/writing-workflows/controller-internals) the runtime mechanics behind them — limits, overflow recovery, and durability.
 
 ## Related
 
