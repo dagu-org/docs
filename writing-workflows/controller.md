@@ -439,6 +439,11 @@ names the tasks that were left open.
 If the model answers without choosing an action while tasks remain open, it gets
 one reminder. A second silent turn fails the run.
 
+These are the caps an author sets. For the full runtime picture — every limit
+in one table, context-window behavior, retry layers, and what survives a
+suspension or a retry — see
+[Controller Internals](/writing-workflows/controller-internals).
+
 ## Watching a run
 
 A controller has no dependency edges, so a graph of it carries no information.
