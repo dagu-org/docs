@@ -6,7 +6,7 @@ Commands accept either DAG names (from YAML `name` field) or file paths.
 - File path only: `dry`, `enqueue`
 - DAG name only: `restart`
 - History by DAG name or YAML path; definition by filename, stem, or configured path: `rm`
-- Local-only commands: `rm`, `profile`, `ps`, `human-task complete`
+- Local-only commands: `ls`, `rm`, `profile`, `ps`, `human-task complete`
 
 ## Global Options
 
@@ -278,6 +278,47 @@ The output includes the DAG name, run ID, attempt ID, UTC start time, process gr
 
 ```bash
 dagu --context local ps
+```
+
+### `ls`
+
+List DAG definitions in the local Dagu installation. An optional pattern filters by a substring of the DAG name or filename.
+
+```bash
+dagu ls [options] [PATTERN]
+```
+
+**Options:**
+
+- `--next, -n` - Show the next scheduled run and sort by it, earliest first
+- `--last, -l` - Show the latest run status and start time
+- `--history, -H` - Show a compact summary of the five most recent run statuses
+- `--sort-last, -t` - Sort by latest run time, newest first
+- `--reverse, -r` - Reverse the selected sort direction
+
+```bash
+# List all local DAG definitions
+dagu ls
+
+# Filter by DAG name or filename
+dagu ls nightly
+
+# Show the scheduler's next-run projection and latest run details
+dagu ls -n -l
+
+# Sort by latest run, oldest first
+dagu ls -t -r
+
+# Show recent status history for matching DAGs
+dagu ls -H batch-
+```
+
+`NEXT_RUN` follows the scheduler's recorded projection for both display and sorting. Suspended DAGs and profile-scoped schedules that are inactive for the DAG's effective default profile show `-`. A pending one-off schedule keeps its scheduled timestamp after it becomes overdue until the scheduler marks it consumed. See [Scheduling](/writing-workflows/scheduling) for schedule behavior and profile activation rules.
+
+`dagu ls` is local-only. If a remote CLI context is selected, target the built-in local context explicitly:
+
+```bash
+dagu --context local ls -n
 ```
 
 ### `history`
