@@ -34,6 +34,39 @@ const llmItems = [
   { text: "Tool Calling", link: "/features/chat/tool-calling" },
 ];
 
+const harnessItems = [
+  { text: "Overview", link: "/step-types/harness/" },
+  {
+    text: "Agents",
+    collapsed: true,
+    items: [
+      { text: "Claude Code", link: "/step-types/harness/claude" },
+      { text: "Codex", link: "/step-types/harness/codex" },
+      { text: "Copilot", link: "/step-types/harness/copilot" },
+      { text: "Hermes Agent", link: "/step-types/harness/hermes" },
+      { text: "OpenCode", link: "/step-types/harness/opencode" },
+      { text: "Pi", link: "/step-types/harness/pi" },
+      { text: "Custom Harness", link: "/step-types/harness/#custom-harness-definitions" },
+    ],
+  },
+  {
+    text: "Sandboxed Execution",
+    link: "/step-types/harness/sandbox/",
+    collapsed: true,
+    items: [
+      { text: "Overview", link: "/step-types/harness/sandbox/" },
+      { text: "Docker", link: "/step-types/harness/sandbox/docker" },
+      { text: "Podman", link: "/step-types/harness/sandbox/podman" },
+      { text: "Runner Images", link: "/step-types/harness/sandbox/images" },
+      { text: "Credentials", link: "/step-types/harness/sandbox/credentials" },
+      { text: "Codex", link: "/step-types/harness/sandbox/codex" },
+      { text: "Claude Code", link: "/step-types/harness/sandbox/claude-code" },
+      { text: "OpenCode", link: "/step-types/harness/sandbox/opencode" },
+      { text: "Custom Provider", link: "/step-types/harness/sandbox/custom-provider" },
+    ],
+  },
+];
+
 // Define the complete sidebar structure
 const fullSidebar = [
   {
@@ -165,6 +198,12 @@ const fullSidebar = [
             link: "/features/chat/",
             collapsed: true,
             items: llmItems,
+          },
+          {
+            text: "Harness",
+            link: "/step-types/harness/",
+            collapsed: true,
+            items: harnessItems,
           },
         ],
       },
@@ -344,38 +383,7 @@ const fullSidebar = [
             text: "Harness",
             link: "/step-types/harness/",
             collapsed: true,
-            items: [
-              { text: "Overview", link: "/step-types/harness/" },
-              {
-                text: "Agents",
-                collapsed: true,
-                items: [
-                  { text: "Claude Code", link: "/step-types/harness/claude" },
-                  { text: "Codex", link: "/step-types/harness/codex" },
-                  { text: "Copilot", link: "/step-types/harness/copilot" },
-                  { text: "Hermes Agent", link: "/step-types/harness/hermes" },
-                  { text: "OpenCode", link: "/step-types/harness/opencode" },
-                  { text: "Pi", link: "/step-types/harness/pi" },
-                  { text: "Custom Harness", link: "/step-types/harness/#custom-harness-definitions" },
-                ],
-              },
-              {
-                text: "Sandboxed Execution",
-                link: "/step-types/harness/sandbox/",
-                collapsed: true,
-                items: [
-                  { text: "Overview", link: "/step-types/harness/sandbox/" },
-                  { text: "Docker", link: "/step-types/harness/sandbox/docker" },
-                  { text: "Podman", link: "/step-types/harness/sandbox/podman" },
-                  { text: "Runner Images", link: "/step-types/harness/sandbox/images" },
-                  { text: "Credentials", link: "/step-types/harness/sandbox/credentials" },
-                  { text: "Codex", link: "/step-types/harness/sandbox/codex" },
-                  { text: "Claude Code", link: "/step-types/harness/sandbox/claude-code" },
-                  { text: "OpenCode", link: "/step-types/harness/sandbox/opencode" },
-                  { text: "Custom Provider", link: "/step-types/harness/sandbox/custom-provider" },
-                ],
-              },
-            ],
+            items: harnessItems,
           },
         ],
       },
