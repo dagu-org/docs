@@ -198,7 +198,7 @@ The preview response reports:
 
 ## Cleanup
 
-Artifact directories are deleted together with the corresponding DAG run during DAG run cleanup, including history-retention cleanup for root and sub-DAG runs.
+Artifact directories are deleted together with the corresponding DAG run when using [`dagu rm --history`](/getting-started/cli#rm) or automatic history-retention cleanup. This applies to root and sub-DAG runs.
 
 ## Artifacts vs Outputs
 

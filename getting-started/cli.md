@@ -5,7 +5,8 @@ Commands accept either DAG names (from YAML `name` field) or file paths.
 - Both formats: `start`, `stop`, `status`, `retry`
 - File path only: `dry`, `enqueue`
 - DAG name only: `restart`
-- Local-only commands: `profile`, `ps`, `human-task complete`
+- History by DAG name or YAML path; definition by filename, stem, or configured path: `rm`
+- Local-only commands: `rm`, `profile`, `ps`, `human-task complete`
 
 ## Global Options
 
@@ -385,7 +386,52 @@ Error: --from date (2026-02-01) must be before --to date (2026-01-01)
 
 **See Also:**
 - [`status`](#status) - Current run status
-- [`cleanup`](#cleanup) - Remove old run history
+- [`rm`](#rm) - Remove run history or a DAG definition
+
+### `rm`
+
+Remove DAG run history, the DAG YAML definition, or both. At least one of `--history` or `--definition` is required.
+
+```bash
+dagu rm [options] DAG
+```
+
+**Options:**
+
+- `--history, -H` - Delete DAG run history
+- `--definition, -d` - Delete the DAG YAML definition
+- `--older-than, -t` - With `--history`, delete runs older than a duration such as `10d`, `24h`, or `1w`; when omitted, delete all history
+- `--force, -f` - Skip the confirmation prompt
+- `--dry-run` - Preview deletions without changing history or the definition
+
+History removal also deletes the logs and artifact directories recorded for each removed run. Active runs are preserved. Definition removal is refused while the DAG has an active local or distributed run.
+
+With `--definition`, identify the DAG by its filename, file stem, or configured path. If the YAML `name` differs from its filename, Dagu resolves the definition first and removes history under the configured DAG name.
+
+```bash
+# Preview all history that would be removed
+dagu rm --history --dry-run my-workflow
+
+# Remove history older than 30 days
+dagu rm -H --older-than 30d my-workflow
+
+# Remove only the YAML definition
+dagu rm --definition my-workflow.yaml
+
+# Remove history and the YAML definition together
+dagu rm -H -d my-workflow.yaml
+
+# Skip confirmation in a non-interactive script
+dagu rm -H -t 24h --force my-workflow
+```
+
+The command prompts before making changes unless `--force` is set. `--quiet` suppresses regular output but does not bypass confirmation. Definition-only removal leaves run history intact; include `--history` to remove both.
+
+`dagu rm` is local-only. If a remote CLI context is selected, target the built-in local context explicitly:
+
+```bash
+dagu --context local rm -H my-workflow
+```
 
 ### `context`
 
@@ -686,7 +732,7 @@ dagu license deactivate
 
 ### `cleanup`
 
-Remove old DAG run history for a specified DAG.
+`cleanup` is a deprecated compatibility alias for `dagu rm --history`. It removes DAG run history only; use `dagu rm --definition` to remove a DAG YAML definition.
 
 ```bash
 dagu cleanup [options] DAG_NAME
@@ -700,20 +746,25 @@ dagu cleanup [options] DAG_NAME
 Active runs (running, queued) are never deleted for safety.
 
 ```bash
-# Delete all history (with confirmation prompt)
+# Deprecated: delete all history
 dagu cleanup my-workflow
 
-# Keep last 30 days of history
+# Preferred equivalent
+dagu rm --history my-workflow
+
+# Deprecated: keep the last 30 days
 dagu cleanup --retention-days 30 my-workflow
 
-# Preview what would be deleted
+# Preferred equivalent
+dagu rm -H --older-than 30d my-workflow
+
+# Preview without deleting
 dagu cleanup --dry-run my-workflow
+dagu rm -H --dry-run my-workflow
 
-# Delete without confirmation (for scripts)
+# Skip confirmation
 dagu cleanup -y my-workflow
-
-# Combine options
-dagu cleanup --retention-days 7 -y my-workflow
+dagu rm -H --force my-workflow
 ```
 
 **Output:**

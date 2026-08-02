@@ -275,17 +275,36 @@ Deletes:
 - Step output (.out, .err)
 - Status files (.jsonl)
 - Sub DAG logs
+- Run artifact directories
+
+For manual cleanup, use `dagu rm --history`:
+
+```bash
+# Preview all removable history
+dagu rm --history --dry-run my-workflow
+
+# Remove history older than 30 days
+dagu rm -H --older-than 30d my-workflow
+
+# Remove history and its YAML definition together
+dagu rm -H --definition my-workflow.yaml
+```
+
+The command preserves active runs and prompts before deleting unless `--force` is set. Definition removal is refused while the DAG has an active local or distributed run.
 
 #### Viewing Run History
 
-Before cleaning up logs, review execution history with `dagu history`:
+Before cleaning up logs, review execution history with `dagu history` or preview the exact deletion with `dagu rm --dry-run`:
 
 ```bash
-# Preview what cleanup would affect
+# Inspect recent history
 dagu history my-workflow --limit 100
 
 # Check run status before deletion
 dagu history my-workflow --from 2025-01-01 --to 2025-12-31
+
+# Preview history older than 30 days
+dagu rm -H -t 30d --dry-run my-workflow
 ```
 
 The `history` command helps:
@@ -293,7 +312,7 @@ The `history` command helps:
 - Verify cleanup results
 - Export run metadata before cleanup: `dagu history --format json`
 
-See [`history` CLI reference](/getting-started/cli#history) and [`cleanup` command](/getting-started/cli#cleanup).
+See the [`history` CLI reference](/getting-started/cli#history) and [`rm` command](/getting-started/cli#rm). The older [`cleanup` command](/getting-started/cli#cleanup) remains available as a deprecated history-only alias.
 
 ### Alerting
 
