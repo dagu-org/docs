@@ -145,6 +145,8 @@ steps:
   - id: ask
     action: chat.completion
     with:
+      provider: openrouter
+      model: deepseek/deepseek-v4-flash
       tools:
         - calculator
       prompt: |
@@ -160,7 +162,7 @@ steps:
     run: echo $(($1 * $2))
 ```
 
-Each name in `tools` exposes a DAG as a callable tool; its `params` become the tool's argument schema, and each call is a real child run.
+Each name in `tools` exposes a DAG as a callable tool; its `params` become the tool's argument schema, and each call is a real child run. The explicit `provider` and `model` are required here: setting any LLM field under `with` (such as `tools`) replaces the DAG-level `llm` block instead of merging with it.
 
 <a href="/features/chat/tool-calling" class="learn-more">Learn more →</a>
 
@@ -196,6 +198,10 @@ An ordered `model` list tries the next entry after retries for the current one a
 
 ```yaml
 type: controller
+
+llm:
+  provider: openrouter
+  model: deepseek/deepseek-v4-flash
 
 steps:
   - name: disk
