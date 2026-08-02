@@ -106,6 +106,38 @@ const fullSidebar = [
     ],
   },
   {
+    text: "MCP",
+    items: [
+      { text: "Overview", link: "/mcp/" },
+      { text: "Quickstart", link: "/mcp/quickstart" },
+      {
+        text: "Clients",
+        link: "/mcp/clients/",
+        collapsed: true,
+        items: [
+          { text: "Overview", link: "/mcp/clients/" },
+          { text: "Claude Code", link: "/mcp/clients/claude-code" },
+          { text: "Codex", link: "/mcp/clients/codex" },
+          { text: "Cursor", link: "/mcp/clients/cursor" },
+          { text: "VS Code", link: "/mcp/clients/vscode" },
+          { text: "Gemini CLI", link: "/mcp/clients/gemini-cli" },
+          { text: "OpenCode", link: "/mcp/clients/opencode" },
+          { text: "Zed", link: "/mcp/clients/zed" },
+          { text: "Cline", link: "/mcp/clients/cline" },
+          { text: "Windsurf", link: "/mcp/clients/windsurf" },
+          { text: "Claude Desktop & Web", link: "/mcp/clients/claude-apps" },
+          { text: "Other Clients", link: "/mcp/clients/other-clients" },
+          { text: "Team Setup", link: "/mcp/clients/team-setup" },
+        ],
+      },
+      { text: "Authentication", link: "/mcp/authentication" },
+      { text: "Architecture", link: "/mcp/architecture" },
+      { text: "Tools", link: "/mcp/tools" },
+      { text: "Resources", link: "/mcp/resources" },
+      { text: "Auditability", link: "/mcp/auditability" },
+    ],
+  },
+  {
     text: "Workflows",
     items: [
       {
@@ -117,10 +149,23 @@ const fullSidebar = [
           { text: "Base Configuration", link: "/server-admin/base-config" },
           { text: "Parameters", link: "/writing-workflows/parameters" },
           { text: "Sub-DAGs", link: "/writing-workflows/sub-dags" },
-          { text: "Controller Workflows", link: "/writing-workflows/controller" },
           { text: "Environment Variables", link: "/writing-workflows/environment-variables" },
           { text: "Labels", link: "/writing-workflows/labels" },
           { text: "Tags", link: "/writing-workflows/tags" },
+        ],
+      },
+      {
+        text: "AI",
+        collapsed: false,
+        items: [
+          { text: "Controller Workflows", link: "/writing-workflows/controller" },
+          { text: "Controller Internals", link: "/writing-workflows/controller-internals" },
+          {
+            text: "Chat & LLM",
+            link: "/features/chat/",
+            collapsed: true,
+            items: llmItems,
+          },
         ],
       },
       {
@@ -459,64 +504,10 @@ const fullSidebar = [
     ],
   },
   {
-    text: "AI",
+    text: "Embedding",
     items: [
-      {
-        text: "MCP Server",
-        link: "/mcp/",
-        collapsed: false,
-        items: [
-          { text: "Overview", link: "/mcp/" },
-          { text: "Quickstart", link: "/mcp/quickstart" },
-          {
-            text: "Clients",
-            link: "/mcp/clients/",
-            collapsed: true,
-            items: [
-              { text: "Overview", link: "/mcp/clients/" },
-              { text: "Claude Code", link: "/mcp/clients/claude-code" },
-              { text: "Codex", link: "/mcp/clients/codex" },
-              { text: "Cursor", link: "/mcp/clients/cursor" },
-              { text: "VS Code", link: "/mcp/clients/vscode" },
-              { text: "Gemini CLI", link: "/mcp/clients/gemini-cli" },
-              { text: "OpenCode", link: "/mcp/clients/opencode" },
-              { text: "Zed", link: "/mcp/clients/zed" },
-              { text: "Cline", link: "/mcp/clients/cline" },
-              { text: "Windsurf", link: "/mcp/clients/windsurf" },
-              { text: "Claude Desktop & Web", link: "/mcp/clients/claude-apps" },
-              { text: "Other Clients", link: "/mcp/clients/other-clients" },
-              { text: "Team Setup", link: "/mcp/clients/team-setup" },
-            ],
-          },
-          { text: "Authentication", link: "/mcp/authentication" },
-          { text: "Architecture", link: "/mcp/architecture" },
-          { text: "Tools", link: "/mcp/tools" },
-          { text: "Resources", link: "/mcp/resources" },
-          { text: "Auditability", link: "/mcp/auditability" },
-        ],
-      },
-      {
-        text: "Chat & LLM",
-        link: "/features/chat/",
-        collapsed: true,
-        items: llmItems,
-      },
-      {
-        text: "Controller Workflows",
-        link: "/writing-workflows/controller",
-      },
-      {
-        text: "Controller Internals",
-        link: "/writing-workflows/controller-internals",
-      },
-      {
-        text: "Embedding Dagu",
-        collapsed: true,
-        items: [
-          { text: "Go API", link: "/embedding/go-api" },
-          { text: "Licensing", link: "/embedding/licensing" },
-        ],
-      },
+      { text: "Go API", link: "/embedding/go-api" },
+      { text: "Licensing", link: "/embedding/licensing" },
     ],
   },
 ];
@@ -700,11 +691,11 @@ export default withMermaid(
       nav: [
         { text: "Quickstart", link: "/getting-started/quickstart", activeMatch: "^/(overview/(?:$|architecture|deployment-models|self-host-license|contributing|changelog)|getting-started/|migration/)" },
         { text: "Web UI", link: "/overview/web-ui", activeMatch: "^/(overview/web-ui|web-ui/)" },
-        { text: "Workflows", link: "/writing-workflows/", activeMatch: "^/writing-workflows/(?!examples/)" },
+        { text: "MCP", link: "/mcp/", activeMatch: "^/mcp/" },
+        { text: "Workflows", link: "/writing-workflows/", activeMatch: "^/(writing-workflows/(?!examples/)|features/)" },
         { text: "Examples", link: "/writing-workflows/examples/", activeMatch: "^/writing-workflows/examples/" },
         { text: "Actions", link: "/step-types/shell", activeMatch: "/(step-types|dagu-actions)/" },
         { text: "Operation", link: "/server-admin/", activeMatch: "/server-admin/" },
-        { text: "AI", link: "/mcp/", activeMatch: "/(mcp|features|embedding)/" },
         { text: "llms.txt", link: "https://raw.githubusercontent.com/dagucloud/dagu/main/llms.txt" },
       ],
 
