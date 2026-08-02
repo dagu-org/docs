@@ -185,7 +185,7 @@ This is the shape that scales: a library of reviewed, parameterized sub-workflow
 
 ## Cost and control
 
-The controller resends the conversation each turn, so what a step prints is paid for once per remaining turn. Keep step output small, publish selectively from children with `outputs.write`, and bound the run with `llm.max_tool_iterations` (default 50). The [controller reference](/writing-workflows/controller#what-the-controller-sees) covers the levers.
+The controller resends the conversation each turn, so what a step prints is paid for once per remaining turn. Keep step output small, publish selectively from children with `outputs.write`, and bound the run with `llm.max_tool_iterations` (default 50). The [controller reference](/writing-workflows/controller#what-the-controller-sees) covers the levers, and [Controller Internals](/writing-workflows/controller-internals) the runtime mechanics behind them — limits, retries, and durability.
 
 ## Related
 

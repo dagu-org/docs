@@ -24,6 +24,8 @@ steps:
 
 Each model entry requires `provider` and `name`. It can override `temperature`, `max_tokens`, `top_p`, `base_url`, and `api_key_name`. Streaming is disabled while fallback is configured so a partial response from a failed model is not mixed with the next response.
 
+Fallback applies to `chat.completion` actions. A `type: controller` workflow accepts the same array form but drives its decision loop with the first entry only — a controller uses one model for the whole run. [Controller Internals](/writing-workflows/controller-internals#decision-calls) covers how decision calls are retried instead.
+
 ## Retries and Availability
 
 Dagu's LLM clients automatically retry transient network failures, rate-limit responses (`429`), and common server failures (`500` through `504`). When model fallback is configured, Dagu tries the next model after retries for the current model are exhausted.

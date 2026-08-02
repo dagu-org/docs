@@ -88,6 +88,16 @@ the outcome comes back as the next observation, and the model decides again.
 The run ends once no task is open; the model then replies with a short summary
 instead of a tool call.
 
+```mermaid
+graph LR
+    P[Model picks one tool] --> A[Action runs]
+    A --> O[Report observed]
+    O --> P
+    P -->|set_task_status| T[Task settled]
+    T --> P
+    P -->|no task open| F[Run concludes]
+```
+
 Ordering belongs to the controller, so `depends` is not allowed, and neither
 are router steps. Steps the controller never chose are marked skipped when the
 run finishes.
@@ -529,16 +539,7 @@ A controller has no dependency edges, so a graph of it carries no information.
 The **Status** tab shows a decision timeline in that slot instead: one row per
 turn, in the order things happened.
 
-```text
-1  ▶ run_tests      failed      76.0s
-2  ▶ run_tests      failed      76.0s   #2
-3  ▶ fix_flaky      succeeded    0.0s
-4  ▶ run_tests      succeeded    0.0s   #3
-5  ✓ tests_green    task complete
-6  ▶ build_notes    succeeded    0.0s
-7  ✓ notes_drafted  task complete
-8  ⏸ sign_off       waiting
-```
+![Decision timeline of a controller run: a failed test run, the fix, the passing re-run, two completed tasks, and a sign-off waiting on a person](/controller-decision-timeline-light.png)
 
 Repeated actions carry an attempt number, and durations are wall time, so a step
 that retried internally reads as the time it actually consumed. The steps table

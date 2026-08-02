@@ -276,3 +276,5 @@ Each call is a real child DAG run with its own run ID, logs, and history. A para
 The whole conversation, including every observation, is resent to the model each turn. What a step prints is paid for once per remaining turn, so keep step output small; for sub-workflows, end the child with `outputs.write` to control exactly what crosses back. See [reporting](/writing-workflows/controller#reporting-from-a-sub-workflow).
 
 `llm.max_tool_iterations` caps decisions per run (default 50). A task the controller cannot achieve should be settled as `failed` with a reason rather than left to exhaust the limit.
+
+[Controller Internals](/writing-workflows/controller-internals) has the full runtime accounting: every limit in one table, context-window behavior, retry layers, and what survives a suspension or a retry.
