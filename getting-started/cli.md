@@ -5,7 +5,7 @@ Commands accept either DAG names (from YAML `name` field) or file paths.
 - Both formats: `start`, `stop`, `status`, `retry`
 - File path only: `dry`, `enqueue`
 - DAG name only: `restart`
-- Local-only commands: `profile`, `human-task complete`
+- Local-only commands: `profile`, `ps`, `human-task complete`
 
 ## Global Options
 
@@ -247,6 +247,37 @@ Steps:
   ○ upload       [pending]
 ```
 
+### `ps`
+
+List DAG runs with a fresh heartbeat in the local process store.
+
+```bash
+dagu ps [options]
+```
+
+**Options:**
+
+- `--dag, -d` - Filter by exact DAG name
+- `--run-id, -r` - Filter by run ID; partial matches are accepted
+
+```bash
+# List all running processes
+dagu ps
+
+# List processes for one DAG
+dagu ps --dag my-workflow
+
+# Combine the DAG filter with a partial run ID
+dagu ps -d my-workflow -r 019c1ca4
+```
+
+The output includes the DAG name, run ID, attempt ID, UTC start time, process group, and heartbeat freshness. The process group is the configured queue name, or the DAG name when the DAG does not use a queue. Stale process entries are omitted.
+
+`dagu ps` is local-only and reads the process store configured for the local Dagu installation. If the current CLI context is remote, select the built-in local context explicitly:
+
+```bash
+dagu --context local ps
+```
 
 ### `history`
 
