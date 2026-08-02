@@ -14,8 +14,7 @@ Make the proxy the only network path to the UI service. Enforce this with
 private service exposure, firewall rules, or a Kubernetes NetworkPolicy.
 :::
 
-Proxy authentication requires a self-host license with SSO. Managed server
-authentication is configured outside `config.yaml`. See the
+Proxy authentication requires a self-host license with SSO. See the
 [pricing page](https://dagu.sh/pricing) for current availability.
 
 ## Sign-in flow

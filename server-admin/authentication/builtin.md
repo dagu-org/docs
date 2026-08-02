@@ -6,8 +6,8 @@ authentication mode.
 
 ::: info License requirements
 Builtin login and the first administrator do not require a license. Creating, updating, and deleting additional users,
-creating API keys beyond the configured limit, and enabling OIDC/SSO require an active self-host license. Managed server
-includes these features. See the [pricing page](https://dagu.sh/pricing) for current availability.
+creating API keys beyond the configured limit, and enabling OIDC/SSO require an active self-host license. See the
+[pricing page](https://dagu.sh/pricing) for current availability.
 :::
 
 ## Roles and workspace access

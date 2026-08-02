@@ -2,10 +2,6 @@
 
 Deploy, configure, and operate Dagu.
 
-::: info Deployment Model
-These pages primarily document self-hosted Dagu. Managed server includes managed authentication, audit logging, and related platform features by default, so those capabilities usually do not need manual `config.yaml` setup there. See the [pricing page](https://dagu.sh/pricing) for current self-host and cloud availability.
-:::
-
 ## Configuration Methods
 
 Precedence order:

@@ -1,26 +1,25 @@
-# Deployment and License Comparison
+# License Comparison
 
-This page compares the three common ways to run Dagu. It does not list prices; see the [pricing page](https://dagu.sh/pricing) for current commercial terms.
+This page compares Community and licensed self-host. It does not list prices; see the [pricing page](https://dagu.sh/pricing) for current commercial terms.
 
 ## At a Glance
 
-| Capability | Community self-host | Licensed self-host | Hosted orchestrator instance |
-| --- | --- | --- | --- |
-| Core workflow orchestration | ✓ | ✓ | ✓ |
-| Web UI | ✓ | ✓ | ✓ |
-| Workers | ✓ | ✓ | ✓ |
-| Docker run action | ✓ | ✓ | △ Private workers |
-| API keys | △ Up to 2 | ✓ | ✓ |
-| OIDC/SSO | - | ✓ | ✓ |
-| User management | - | ✓ | ✓ |
-| Audit logs | - | ✓ | ✓ |
-| Notification routing | ✓ | ✓ | ✓ |
-| Incident routing | - | ✓ | ✓ |
+| Capability | Community self-host | Licensed self-host |
+| --- | --- | --- |
+| Core workflow orchestration | ✓ | ✓ |
+| Web UI | ✓ | ✓ |
+| Workers | ✓ | ✓ |
+| Docker run action | ✓ | ✓ |
+| API keys | △ Up to 2 | ✓ |
+| OIDC/SSO | - | ✓ |
+| User management | - | ✓ |
+| Audit logs | - | ✓ |
+| Notification routing | ✓ | ✓ |
+| Incident routing | - | ✓ |
 
 ## Notes
 
 - **Workers:** run jobs outside the server. Self-hosted workers are not licensed separately.
-- **Docker run action:** run on private workers for hosted deployments.
 - **API keys:** Community self-host supports up to 2 API keys.
 - **OIDC/SSO:** login with an external identity provider.
 - **User management:** create, update, disable, and delete users.

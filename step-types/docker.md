@@ -9,13 +9,8 @@ Run workflow steps in Docker containers for isolated, reproducible execution.
 ::: warning Docker-compatible runtime required
 Docker-based step execution requires access to a Docker-compatible container
 API. By default, Dagu uses Docker through a local Docker socket or a remote
-daemon such as `DOCKER_HOST`. Self-hosted deployments can also select Podman's
+daemon such as `DOCKER_HOST`. Deployments can also select Podman's
 Docker-compatible API with `DAGU_CONTAINER_RUNTIME=podman`.
-
-Dagu Cloud managed instances run on GKE with gVisor isolation and do not expose
-a Docker-compatible daemon socket. Docker/container actions are not supported
-inside managed instances. Use self-hosted Dagu, or route the workflow to a
-self-hosted worker, when a workflow needs container step execution.
 :::
 
 The `container` field supports two modes:

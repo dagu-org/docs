@@ -3,9 +3,8 @@
 Configure OpenID Connect under builtin authentication to add SSO while retaining Dagu user management, roles, and API
 keys.
 
-::: info Deployment model and license
-This page covers self-hosted Dagu. OIDC/SSO requires an active self-host license. Managed server includes authentication
-features and does not use this `config.yaml` setup. See the [pricing page](https://dagu.sh/pricing) for current availability.
+::: info License
+OIDC/SSO requires an active self-host license. See the [pricing page](https://dagu.sh/pricing) for current availability.
 :::
 
 ## Before enabling OIDC

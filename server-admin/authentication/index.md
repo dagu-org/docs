@@ -2,11 +2,6 @@
 
 Choose an authentication method for your Dagu instance.
 
-::: info Deployment model
-These pages cover self-hosted Dagu. Managed server includes user management and SSO, so its authentication is configured
-outside `config.yaml`. See the [pricing page](https://dagu.sh/pricing) for current availability.
-:::
-
 ## Choose an authentication method
 
 | Method | Use it when |

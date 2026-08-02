@@ -10,7 +10,6 @@ Keep your existing commands and tools. Dagu adds schedules, retries, approvals, 
 <div class="hero-section">
   <div class="hero-actions">
     <a href="#run-your-first-workflow" class="VPButton brand">Get started</a>
-    <a href="https://dagu-demo-f5e33d0e.dagu.sh/" class="VPButton alt">Try the Live Demo</a>
     <a href="/writing-workflows/examples" class="VPButton alt">View Examples</a>
   </div>
 </div>
@@ -58,8 +57,6 @@ Open <http://localhost:8080> to see the workflow, step logs, and run history. Th
 
 <video src="/cockpit-demo.mp4" poster="/cockpit-demo-poster.jpg" controls preload="none" playsinline aria-label="Dagu Cockpit demo" style="width: 100%; border-radius: 12px; margin: 8px 0 24px;"></video>
 
-Want to explore without installing anything? Open the [live demo](https://dagu-demo-f5e33d0e.dagu.sh/) and sign in with `demouser` / `demouser`.
-
 ## What Dagu adds
 
 <div class="overview-card-grid overview-strengths-grid">
@@ -106,7 +103,7 @@ Want to explore without installing anything? Open the [live demo](https://dagu-d
   </div>
   <div class="step-card">
     <h3><a href="/overview/self-host-license">Teams and licensing</a></h3>
-    <p>Compare Community, licensed self-host, and managed Dagu. Review enterprise features, support, and <a href="https://dagu.sh/pricing#self-host">pricing</a>.</p>
+    <p>Compare Community and licensed self-host. Review enterprise features, support, and <a href="https://dagu.sh/pricing#self-host">pricing</a>.</p>
   </div>
   <div class="step-card">
     <h3><a href="/mcp/">AI tools and MCP</a></h3>
