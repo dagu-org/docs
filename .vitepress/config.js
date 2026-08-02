@@ -30,6 +30,7 @@ const llmItems = [
   { text: "Local Models", link: "/step-types/llm/local-models" },
   { text: "Reliability", link: "/step-types/llm/reliability" },
   { text: "Controllers & Completions", link: "/step-types/llm/controller-completions" },
+  { text: "Controller Internals", link: "/writing-workflows/controller-internals" },
   { text: "Reasoning & Web Search", link: "/step-types/llm/reasoning-web-search" },
   { text: "Tool Calling", link: "/features/chat/tool-calling" },
 ];
@@ -118,7 +119,6 @@ const fullSidebar = [
           { text: "Parameters", link: "/writing-workflows/parameters" },
           { text: "Sub-DAGs", link: "/writing-workflows/sub-dags" },
           { text: "Controller Workflows", link: "/writing-workflows/controller" },
-          { text: "Controller Internals", link: "/writing-workflows/controller-internals" },
           { text: "Environment Variables", link: "/writing-workflows/environment-variables" },
           { text: "Labels", link: "/writing-workflows/labels" },
           { text: "Tags", link: "/writing-workflows/tags" },
