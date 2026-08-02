@@ -30,7 +30,6 @@ const llmItems = [
   { text: "Local Models", link: "/step-types/llm/local-models" },
   { text: "Reliability", link: "/step-types/llm/reliability" },
   { text: "Controllers & Completions", link: "/step-types/llm/controller-completions" },
-  { text: "Controller Internals", link: "/writing-workflows/controller-internals" },
   { text: "Reasoning & Web Search", link: "/step-types/llm/reasoning-web-search" },
   { text: "Tool Calling", link: "/features/chat/tool-calling" },
 ];
@@ -505,6 +504,10 @@ const fullSidebar = [
       {
         text: "Controller Workflows",
         link: "/writing-workflows/controller",
+      },
+      {
+        text: "Controller Internals",
+        link: "/writing-workflows/controller-internals",
       },
       {
         text: "Embedding Dagu",
