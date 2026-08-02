@@ -80,7 +80,7 @@ steps:
 
 `output` captures the completion text as a variable for downstream steps.
 
-<a href="/step-types/llm/outputs" class="learn-more">Learn more →</a>
+<a href="/writing-workflows/outputs" class="learn-more">Learn more →</a>
 
 </div>
 
@@ -106,7 +106,7 @@ steps:
 
 Chat steps inherit the conversation from the steps they depend on, so "that" resolves to the earlier answer.
 
-<a href="/step-types/llm/outputs#sessions" class="learn-more">Learn more →</a>
+<a href="/step-types/llm/#sessions" class="learn-more">Learn more →</a>
 
 </div>
 

@@ -1,49 +1,168 @@
-# LLM Completion
+# LLM Overview
 
-Send a prompt or message list to a large language model with `action: chat.completion`.
+Call a model from a step with `action: chat.completion`, and go further from there: let the completion call workflows as functions, let a model decide which step runs next, run a full coding agent as a step, or let an external AI operate Dagu.
 
-The response is written to stdout, so it can be viewed in the run log or [captured for later steps](/step-types/llm/outputs).
+## Where a model fits
 
-A `chat.completion` step is one step in a workflow you laid out. When the order
-of the work is itself the thing a model should decide, use a
-[controller workflow](/writing-workflows/controller) instead.
-
-## Basic Usage
-
-Use `prompt` for a single user message:
-
-```yaml
-steps:
-  - id: summarize
-    action: chat.completion
-    with:
-      provider: openai
-      model: gpt-4o
-      prompt: |
-        Summarize the main causes of database connection exhaustion.
-    output: SUMMARY
+```mermaid
+graph LR
+    W[Workflow] --> C[chat.completion]
+    W --> H[harness.run]
+    C --> T[DAGs as tools]
+    K[controller] --> W
+    X[AI client via MCP] --> W
 ```
 
-`SUMMARY` is a flat output variable. A dependent step can read it as `${SUMMARY}`. See [Outputs & Routing](/step-types/llm/outputs) for downstream steps, artifacts, and switch-style routing.
+- **A model call inside a step**: `action: chat.completion` sends a prompt or message list; the response streams to stdout. This page.
+- **Workflows as functions**: a completion with `tools` can call your DAGs, with arguments derived from their `params`. See [Tool Calling](/features/chat/tool-calling).
+- **A model deciding what runs**: `type: controller` inverts control; steps become a catalog and the model picks one action per turn until the goals are met. See [Controller Workflows](/writing-workflows/controller) and the [controller examples](/writing-workflows/examples/controller).
+- **A coding agent as a step**: `harness.run` launches Claude Code, Codex, Copilot, or OpenCode inside a workflow. See [Harness](/step-types/harness/).
+- **AI operating Dagu**: the [MCP server](/mcp/) is the inverse relationship; an external AI client inspects workflows, starts runs, and reads results.
 
-Use `messages` when the request needs an explicit system prompt or conversation:
+The examples below run as-is with an `OPENROUTER_API_KEY` exported; swap the `llm` block for [any configured provider](/step-types/llm/providers).
+
+## First completion
+
+```yaml
+secrets:
+  - name: OPENROUTER_API_KEY
+    provider: env
+    key: OPENROUTER_API_KEY
+
+llm:
+  provider: openrouter
+  model: deepseek/deepseek-v4-flash
+
+steps:
+  - id: ask
+    action: chat.completion
+    with:
+      prompt: |
+        What is 2+2? Reply with just the number.
+    output: ANSWER
+
+  - id: use_answer
+    run: echo "The model said ${ANSWER}"
+    depends: ask
+```
+
+Three things carry this example:
+
+- The `secrets` entry reads the key from the Dagu process environment and masks it in logs. Exporting the variable alone is not enough, because only a small set of environment variables [passes through to workflows](/step-types/llm/providers#making-the-key-reachable).
+- The DAG-level `llm` block is inherited by every chat step that sets no LLM fields of its own, so steps stay small.
+- `output: ANSWER` captures the response for any dependent step as `${ANSWER}`. Object-form `output` namespaces it to the step instead (`response: { from: stdout }`, read as `${ask.output.response}`), and a large response can [stream straight to an artifact](/writing-workflows/artifacts#stream-output-to-artifacts).
+
+## Messages and system prompts
+
+Use `messages` when the request needs an explicit conversation, and `system` to set the role:
 
 ```yaml
 steps:
   - id: diagnose
     action: chat.completion
     with:
-      provider: anthropic
-      model: claude-sonnet-4-6
+      provider: openrouter
+      model: deepseek/deepseek-v4-flash
       system: |
         Answer as a concise operations runbook author.
       messages:
         - role: user
           content: |
             Explain how to diagnose a saturated connection pool.
+            Keep it under 80 words.
 ```
 
-Specify either `prompt` or `messages`. `prompt` is converted to one `user` message. If both fields are present, `prompt` takes precedence. Message roles can be `system`, `user`, or `assistant`.
+Specify either `prompt` or `messages`; `prompt` is converted to one `user` message and takes precedence when both are present. Roles can be `system`, `user`, or `assistant`.
+
+Note the explicit `provider` and `model` here: when an action sets **any** LLM field under `with` (even just `system`), its configuration replaces the complete DAG-level `llm` block rather than merging with it.
+
+## What a completion can do
+
+Each capability below is one field away. Snippets show the shape; the [AI examples page](/writing-workflows/examples/ai) has full runnable versions of each.
+
+**Multi-turn sessions.** Chat steps inherit the conversation from the steps they depend on:
+
+```yaml
+  - id: follow_up
+    action: chat.completion
+    with:
+      prompt: Multiply that by 3.
+    depends: ask
+```
+
+See [Sessions](#sessions).
+
+**Call workflows as tools.** Names in `tools` expose DAGs as functions; each call is a real child run:
+
+```yaml
+    with:
+      tools:
+        - calculator
+      prompt: What is 15 times 23? Use the calculator tool.
+```
+
+See [Tool Calling](/features/chat/tool-calling).
+
+**Route on the answer.** Ask for a label, then branch with `router.route`:
+
+```yaml
+  - id: route_request
+    depends: [classify_request]
+    action: router.route
+    with:
+      value: ${REQUEST_TYPE}
+      routes:
+        bug: [handle_bug]
+        feature: [handle_feature]
+```
+
+Constrain the model to known labels and keep an explicit fallback route; a response that matches no route runs no handler. See [Router](/step-types/router).
+
+**Extended reasoning.** `thinking` maps to the provider's reasoning controls:
+
+```yaml
+    with:
+      thinking:
+        enabled: true
+        effort: low
+```
+
+See [Reasoning](/step-types/llm/reasoning-web-search#reasoning).
+
+**Model fallback.** An ordered `model` list tries the next entry after retries are exhausted:
+
+```yaml
+    with:
+      model:
+        - provider: openrouter
+          name: deepseek/deepseek-v4
+        - provider: openrouter
+          name: deepseek/deepseek-v4-flash
+```
+
+See [Reliability](/step-types/llm/reliability).
+
+**Web search.** Provider-integrated search grounds the answer in current results:
+
+```yaml
+    with:
+      web_search:
+        enabled: true
+        max_uses: 3
+```
+
+See [Web Search](/step-types/llm/reasoning-web-search#web-search).
+
+## Sessions
+
+The completed session is saved with the DAG run, including the provider, model, and token usage reported for assistant messages. A chat step also inherits conversation history from the steps in its `depends` list, which is what makes the multi-turn pattern above work:
+
+- History is transitive: every chat step saves its inherited messages, its own messages, and the response.
+- Histories from multiple dependencies are merged in the order listed in `depends`.
+- Only the first system message is kept when inherited histories contain several.
+- Retries continue with the session already attached to the DAG run.
+
+When [approval push-back](/writing-workflows/approval#push-back-environment) re-executes a chat step, Dagu restores the previous conversation and appends the reviewer feedback as the next user message; the workflow does not need to wire `${FEEDBACK}` itself.
 
 ## Configuration
 
@@ -75,9 +194,9 @@ Values registered as Dagu secrets are masked before messages are sent to the pro
 
 ## Next Steps
 
-- [Chat & LLM](/features/chat/) for choosing between completions, tool calling, external agent harnesses, and MCP
-- [Providers & Endpoints](/step-types/llm/providers) for credentials, OpenRouter, local models, custom endpoints, and shared defaults
-- [Reliability](/step-types/llm/reliability) for model fallback and failure retries
-- [Outputs & Routing](/step-types/llm/outputs) for consuming responses, artifacts, sessions, and conditional branches
-- [Reasoning & Web Search](/step-types/llm/reasoning-web-search) for model reasoning and provider search capabilities
-- [Tool Calling](/features/chat/tool-calling) for exposing DAGs as model tools
+- [AI Examples](/writing-workflows/examples/ai) for runnable copy-paste versions of every capability above
+- [Providers & Endpoints](/step-types/llm/providers) for credentials, custom endpoints, and shared defaults
+- [Controllers & Completions](/step-types/llm/controller-completions) for the step-by-step path from one completion to LLM-directed workflows
+- [Controller Workflows](/writing-workflows/controller) when the order of the work is itself the model's decision
+- [Harness](/step-types/harness/) for running external coding agents as steps
+- [Chat & LLM](/features/chat/) for choosing between the shapes at a glance

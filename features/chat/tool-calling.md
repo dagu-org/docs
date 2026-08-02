@@ -2,6 +2,8 @@
 
 The chat executor supports function calling (also known as tool use), allowing the LLM to execute DAG workflows as tools during sessions. This enables building AI agents that can perform actions, query data, and interact with external systems.
 
+Examples use OpenRouter; make the key reachable as shown in the [overview](/step-types/llm/#first-completion).
+
 ## How It Works
 
 1. Define tool DAGs with `name`, `description`, and `params`
@@ -34,8 +36,8 @@ Both scenarios result in successful step completion. The step only fails if the 
 steps:
   - action: chat.completion
     with:
-      provider: anthropic
-      model: claude-sonnet-4-20250514
+      provider: openrouter
+      model: deepseek/deepseek-v4-flash
       tools:
         - calculator
       messages:
@@ -113,8 +115,8 @@ Tools are discovered in this order:
 steps:
   - action: chat.completion
     with:
-      provider: openai
-      model: gpt-4o
+      provider: openrouter
+      model: deepseek/deepseek-v4-flash
       tools:
         - local_tool      # Found in local DAGs
         - database_tool   # Loaded from DAG directory
@@ -145,8 +147,8 @@ steps:
 steps:
   - action: chat.completion
     with:
-      provider: anthropic
-      model: claude-sonnet-4-20250514
+      provider: openrouter
+      model: deepseek/deepseek-v4-flash
       tools:
         - search_tool
         - calculator
@@ -165,8 +167,8 @@ steps:
 steps:
   - action: chat.completion
     with:
-      provider: openai
-      model: gpt-4o
+      provider: openrouter
+      model: deepseek/deepseek-v4-flash
       tools:
         - web_search
         - analyze_data
@@ -270,8 +272,8 @@ All major providers support tool calling with automatic API mapping:
 steps:
   - action: chat.completion
     with:
-      provider: anthropic
-      model: claude-sonnet-4-20250514
+      provider: openrouter
+      model: deepseek/deepseek-v4-flash
       tools:
         - fetch_data
         - transform_data

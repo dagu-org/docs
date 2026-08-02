@@ -1,6 +1,6 @@
 # Local Models
 
-Use Dagu with local model servers such as Ollama, vLLM, or LM Studio when they expose an OpenAI-compatible chat API.
+Use Dagu with local model servers such as Ollama, llama.cpp, vLLM, or LM Studio when they expose an OpenAI-compatible chat API.
 
 This guide covers workflow steps that use `action: chat.completion` with a local model provider.
 
@@ -25,6 +25,7 @@ Enter the **base URL**, not a full endpoint. Do not paste vendor-native endpoint
 | Value entered in Dagu | Result |
 |---|---|
 | `http://localhost:11434/v1` | Correct |
+| `http://localhost:8080/v1` | Correct for a default llama.cpp `llama-server` |
 | empty | Correct for a local Ollama server on the same machine as the Dagu process |
 | `http://localhost:11434/api/generate` | Wrong |
 | `http://localhost:11434/v1/chat/completions` | Wrong |
@@ -46,6 +47,27 @@ steps:
 ```
 
 Dagu also accepts aliases such as `ollama`, `vllm`, and `llama` in workflow YAML, but they all follow the same local-model path.
+
+## llama.cpp
+
+`llama-server` from llama.cpp exposes the same OpenAI-compatible API, serving the model it was started with:
+
+```sh
+llama-server -m ./model.gguf --port 8080
+```
+
+```yaml
+steps:
+  - action: chat.completion
+    with:
+      provider: llama
+      model: model
+      base_url: http://localhost:8080/v1
+      prompt: |
+        Summarize this repository in one paragraph.
+```
+
+`provider: llama` is an alias for `local`. The server reports the name it serves at `/v1/models`; use that as the `model` value.
 
 ## Important Networking Note
 
@@ -96,6 +118,7 @@ Check where Dagu is actually running. If Dagu runs in Docker, Kubernetes, or on 
 
 - [Ollama Quickstart](https://docs.ollama.com/quickstart)
 - [Ollama OpenAI Compatibility](https://docs.ollama.com/api/openai-compatibility)
+- [llama.cpp server](https://github.com/ggml-org/llama.cpp/tree/master/tools/server)
 
 ## Related Pages
 

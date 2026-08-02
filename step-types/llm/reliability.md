@@ -2,6 +2,8 @@
 
 Combine built-in provider retries, model fallback, and step-level retry policies to handle rate limits and temporary provider outages.
 
+Examples use OpenRouter; make the key reachable as shown in the [overview](/step-types/llm/#first-completion).
+
 ## Model Fallback
 
 Set `model` to an ordered array to try another provider or model after an error:
@@ -12,10 +14,10 @@ steps:
     action: chat.completion
     with:
       model:
-        - provider: openai
-          name: gpt-4o
-        - provider: anthropic
-          name: claude-sonnet-4-6
+        - provider: openrouter
+          name: deepseek/deepseek-v4
+        - provider: openrouter
+          name: deepseek/deepseek-v4-flash
       prompt: |
         Summarize the incident report.
 ```
@@ -33,8 +35,8 @@ steps:
   - id: summarize
     action: chat.completion
     with:
-      provider: openai
-      model: gpt-4o
+      provider: openrouter
+      model: deepseek/deepseek-v4-flash
       stream: false
       prompt: |
         Summarize the incident report.

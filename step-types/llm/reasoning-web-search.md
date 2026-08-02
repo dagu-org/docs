@@ -2,6 +2,8 @@
 
 Configure provider-specific model reasoning and built-in web search for `action: chat.completion`.
 
+Examples use OpenRouter; make the key reachable as shown in the [overview](/step-types/llm/#first-completion).
+
 ## Reasoning
 
 The `thinking` object accepts:
@@ -29,18 +31,27 @@ Anthropic and Gemini can use provider-native search. OpenRouter uses its web-sea
 
 ```yaml
 steps:
-  - id: search_release_notes
+  - id: search_news
     action: chat.completion
     with:
-      provider: anthropic
-      model: claude-sonnet-4-6
+      provider: openrouter
+      model: deepseek/deepseek-v4-flash
+      web_search:
+        enabled: true
+        max_uses: 3
+      prompt: |
+        What is the current stable version of the Linux kernel?
+        Reply with just the version number.
+```
+
+For Anthropic, domain filtering is also available:
+
+```yaml
       web_search:
         enabled: true
         max_uses: 3
         allowed_domains:
           - example.com
-      prompt: |
-        Find the latest release notes and summarize the changes.
 ```
 
 | Field | Type | Description |

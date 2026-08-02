@@ -28,9 +28,8 @@ const llmItems = [
   { text: "Overview", link: "/step-types/llm/" },
   { text: "Providers & Endpoints", link: "/step-types/llm/providers" },
   { text: "Local Models", link: "/step-types/llm/local-models" },
-  { text: "OpenCode", link: "/step-types/llm/opencode" },
   { text: "Reliability", link: "/step-types/llm/reliability" },
-  { text: "Outputs & Routing", link: "/step-types/llm/outputs" },
+  { text: "Controllers & Completions", link: "/step-types/llm/controller-completions" },
   { text: "Reasoning & Web Search", link: "/step-types/llm/reasoning-web-search" },
   { text: "Tool Calling", link: "/features/chat/tool-calling" },
 ];
@@ -279,7 +278,7 @@ const fullSidebar = [
             ],
           },
           {
-            text: "LLM (chat.completion)",
+            text: "LLM",
             link: "/step-types/llm/",
             collapsed: true,
             items: llmItems,

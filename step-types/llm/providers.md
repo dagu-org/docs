@@ -27,7 +27,17 @@ Dagu does not pass your whole shell environment through to a workflow. Only
 `OPENROUTER_API_KEY` in your shell is not enough on its own: the request goes out
 without an `Authorization` header and the provider answers `401`.
 
-Bind the key in the workflow:
+The recommended form is a `secrets` entry, which reads the key from the Dagu
+process environment and masks the value in logs:
+
+```yaml
+secrets:
+  - name: OPENROUTER_API_KEY
+    provider: env
+    key: OPENROUTER_API_KEY
+```
+
+Alternatively, bind the key as a plain environment variable in the workflow:
 
 ```yaml
 env:
@@ -51,12 +61,12 @@ steps:
     action: chat.completion
     with:
       provider: openrouter
-      model: anthropic/claude-sonnet-4
+      model: deepseek/deepseek-v4-flash
       prompt: |
         Summarize the incident report.
 ```
 
-This configuration uses `https://openrouter.ai/api/v1` and reads the API key from `OPENROUTER_API_KEY`; neither `base_url` nor `api_key_name` is required.
+This configuration uses `https://openrouter.ai/api/v1` and reads the API key from `OPENROUTER_API_KEY`; neither `base_url` nor `api_key_name` is required. The same key reaches model ids from any vendor on the gateway.
 
 For another gateway, proxy, or hosted service that implements OpenAI's Chat Completions API, use the `openai` provider with a custom endpoint:
 
@@ -99,8 +109,8 @@ Put shared model settings in the top-level `llm` block:
 
 ```yaml
 llm:
-  provider: openai
-  model: gpt-4o
+  provider: openrouter
+  model: deepseek/deepseek-v4-flash
   temperature: 0.2
 
 steps:
@@ -117,5 +127,4 @@ If an action sets any LLM configuration field under `with`, its action-level LLM
 
 - [LLM Completion](/step-types/llm/) for basic usage and the configuration reference
 - [Local Models](/step-types/llm/local-models) for Ollama and other OpenAI-compatible local servers
-- [OpenCode](/step-types/llm/opencode) for OpenCode setup and models
 - [Reasoning & Web Search](/step-types/llm/reasoning-web-search) for provider-specific capabilities
