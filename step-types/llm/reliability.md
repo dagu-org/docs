@@ -24,9 +24,24 @@ steps:
 
 Each model entry requires `provider` and `name`. It can override `temperature`, `max_tokens`, `top_p`, `base_url`, and `api_key_name`. Streaming is disabled while fallback is configured so a partial response from a failed model is not mixed with the next response.
 
-Fallback applies to `chat.completion` actions. A `type: controller` workflow accepts the same array form but drives its decision loop with the first entry only — a controller uses one model for the whole run. [Controller Internals](/writing-workflows/controller-internals#decision-calls) covers how decision calls are retried instead.
+Fallback applies to both `chat.completion` actions and `type: controller`
+decision calls. A controller starts with the first entry and advances in order
+when the current model fails. Once a fallback succeeds, later decisions in the
+same process start with that model instead of probing the primary again.
 
-Context overflow does not advance a controller to another model. When observation aging is enabled, Dagu compacts the controller transcript and retries that decision once with the same model. If the rebuilt request is still too large, the run fails. Set `llm.observation_keep_recent: 0` on the controller root to disable both aging and this recovery attempt.
+A failed decision request does not consume a controller turn or append an
+assistant message. The next model receives the same provider-agnostic
+transcript, including every earlier decision and observation. A controller
+process created by resume or `dagu retry` starts from the configured primary
+again, while keeping the saved transcript. Successful decisions record the
+provider and model that actually answered.
+
+Context-overflow recovery runs before controller failover. When observation
+aging is enabled, Dagu compacts the transcript and retries the current model
+once. If compaction cannot reduce the request or the retry still fails, Dagu
+advances to the next model. With `llm.observation_keep_recent: 0`, the recovery
+attempt is disabled and a context-overflow error advances directly to the next
+model. The run fails only after no configured model remains.
 
 ## Retries and Availability
 
@@ -61,11 +76,21 @@ Do not use `repeat_policy` for failure recovery. A repeat policy intentionally r
 
 ## Retry Order
 
-For each completion action, recovery happens in this order:
+For a `chat.completion` action, recovery happens in this order:
 
 1. The selected provider retries retryable HTTP and transport failures.
 2. If configured, Dagu tries the next fallback model.
 3. After all models fail, the step's `retry_policy` can rerun the complete action.
+
+For each controller decision:
+
+1. The current model receives the provider and logical retry layers described in
+   [Controller Internals](/writing-workflows/controller-internals#decision-calls).
+2. A context-overflow response can trigger one compaction and retry of that
+   model.
+3. Dagu advances through the remaining models in order.
+
+Controller decisions do not have a step-level `retry_policy`.
 
 ## Related
 

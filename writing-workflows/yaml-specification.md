@@ -576,6 +576,23 @@ Supported provider values are `openai`, `openai-codex`, `anthropic`, `gemini`, `
 
 LLM config fields include `provider`, `model`, `system`, `temperature`, `max_tokens`, `top_p`, `base_url`, `api_key_name`, `stream`, `thinking`, `tools`, `max_tool_iterations`, and `web_search`.
 
+`model` accepts either a model-name string paired with `provider`, or an
+ordered array used by `chat.completion` actions and controller decisions:
+
+```yaml
+llm:
+  model:
+    - provider: openrouter
+      name: deepseek/deepseek-v4-flash
+    - provider: anthropic
+      name: claude-sonnet-4-5
+```
+
+Each array entry requires `provider` and `name` and can override
+`temperature`, `max_tokens`, `top_p`, `base_url`, and `api_key_name`. The first
+entry is primary; failures advance through later entries in order. A controller
+keeps a successful fallback selected for later decisions in the same process.
+
 A `type: controller` DAG accepts three additional fields in its root `llm`
 block. They are invalid on a step-level LLM configuration and on the root of a
 non-controller DAG.
@@ -587,7 +604,8 @@ non-controller DAG.
 | `observation_keep_recent` | integer | `20` | Recent tool results kept complete after aging starts. Older results become deterministic one-line summaries. `0` disables aging, including overflow recovery. |
 
 When an enabled controller receives a context-too-long error, it compacts every
-tool result whose summary is smaller and retries the decision once. See
+tool result whose summary is smaller and retries the current model once before
+advancing through any remaining fallback models. See
 [Controller Internals](/writing-workflows/controller-internals#context-window)
 for the full trigger, persistence, and failure behavior.
 

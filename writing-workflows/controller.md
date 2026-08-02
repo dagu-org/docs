@@ -74,6 +74,32 @@ the credential variable each provider reads;
 [Local Models](/step-types/llm/local-models) covers what a local base URL has
 to look like.
 
+### Model fallback
+
+Set `llm.model` to an ordered array when the controller should continue after
+a model or provider failure:
+
+```yaml
+llm:
+  model:
+    - provider: openrouter
+      name: deepseek/deepseek-v4-flash
+    - provider: anthropic
+      name: claude-sonnet-4-5
+```
+
+The first entry is primary. After its request retries are exhausted, Dagu tries
+the remaining entries in order. A successful fallback stays active for later
+decisions in the same process, so an unavailable primary is not retried every
+turn. Failed requests do not consume a turn or change the transcript, and each
+successful decision records the provider and model that answered.
+
+Each provider still needs its own credential binding. A process created after
+suspension or by `dagu retry` begins with the primary again and continues from
+the saved transcript. See [Reliability](/step-types/llm/reliability) for retry
+order and [Controller Internals](/writing-workflows/controller-internals#decision-calls)
+for the complete decision-call behavior.
+
 ## The loop
 
 Every declared step becomes one tool the model can call, named after the step
@@ -578,8 +604,9 @@ llm:
 Dagu does not infer the model's window, so set `max_context_tokens` low enough
 to leave room for another decision and response. If the provider reports a
 context overflow before the threshold is reached, Dagu compacts every tool
-result that can be made smaller and retries the decision once. A second
-overflow, or a request compaction cannot reduce, fails the run.
+result that can be made smaller and retries the current model once. A second
+overflow, or a request compaction cannot reduce, advances to the next configured
+model. The run fails if no model remains.
 
 If the model answers without choosing an action while tasks remain open, it gets
 one reminder. A second silent turn fails the run.
