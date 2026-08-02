@@ -21,5 +21,6 @@ Use these examples as copy-paste starting points for common Dagu workflow patter
 
 ## AI
 
+- [Controller](/writing-workflows/examples/controller) - Goal-driven workflows where an LLM picks each step: judgment, failure recovery, human questions, and dispatching sub-workflows.
 - [Chat & LLM](/writing-workflows/examples/ai) - Chat completions, DAG-level LLM configuration, sessions, and extended thinking.
 - [Harness Run](/writing-workflows/examples/harness-run) - Run Codex, OpenCode, and Pi as workflow steps.

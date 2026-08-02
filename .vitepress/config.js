@@ -142,6 +142,7 @@ const fullSidebar = [
             link: "/writing-workflows/examples/ai",
             collapsed: false,
             items: [
+              { text: "Controller", link: "/writing-workflows/examples/controller" },
               { text: "Chat & LLM", link: "/writing-workflows/examples/ai" },
               { text: "Harness Run", link: "/writing-workflows/examples/harness-run" },
             ],

@@ -6,7 +6,9 @@ decide the order.
 
 Set `type: controller`, configure an `llm`, and declare a `tasks` list. Your
 steps stop being a plan and become a catalog of actions the model can choose
-from. The run succeeds once every task is marked complete.
+from. The run succeeds once every task is marked complete. For runnable
+workflows that build the feature up capability by capability, see
+[Controller Examples](/writing-workflows/examples/controller).
 
 ```yaml
 type: controller
