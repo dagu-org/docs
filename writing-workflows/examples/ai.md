@@ -1,57 +1,86 @@
 # AI Examples
 
-Examples for chat completions, DAG-level LLM configuration, sessions, and extended thinking.
+Chat completions with OpenRouter and a secret-managed key, DAG-level defaults with a custom endpoint, response reuse, sessions, extended thinking, workflows as tools, and model fallback. Every example runs as-is with an `OPENROUTER_API_KEY` exported. Cards that omit `secrets` and `llm` assume the setup block from the first card.
 
 <div class="examples-grid">
 
 <div class="example-card">
 
-### Chat / LLM Request
+### Provider Setup with a Secret
 
 ```yaml
+secrets:
+  - name: OPENROUTER_API_KEY
+    provider: env
+    key: OPENROUTER_API_KEY
+
+llm:
+  provider: openrouter
+  model: deepseek/deepseek-v4-flash
+
 steps:
-  - action: chat.completion
+  - id: ask
+    action: chat.completion
     with:
-      provider: openai
-      model: gpt-4o
-      messages:
-        - role: user
-          content: |
-            What is 2+2?
-    output: ANSWER
+      prompt: |
+        What is 2+2? Reply with just the number.
 ```
 
-<a href="/features/chat/" class="learn-more">Learn more →</a>
+The `secrets` entry resolves the key at run time and masks it in logs. The DAG-level `llm` block is inherited by every chat step that sets no LLM fields of its own.
+
+<a href="/step-types/llm/providers" class="learn-more">Learn more →</a>
 
 </div>
 
 <div class="example-card">
 
-### Chat with DAG-Level Config
+### Endpoint and Defaults at DAG Level
 
 ```yaml
-params:
-  - name: topic
-    default: Dagu workflows
-
 llm:
-  provider: openai
-  model: gpt-4o
+  provider: openrouter
+  model: deepseek/deepseek-v4-flash
+  base_url: https://openrouter.ai/api/v1
+  api_key_name: OPENROUTER_API_KEY
   system: |
-    You are a helpful assistant.
+    Answer in one short sentence.
+  temperature: 0.2
+  max_tokens: 200
 
 steps:
-  - action: chat.completion
+  - id: ask
+    action: chat.completion
     with:
-      messages:
-        - role: user
-          content: |
-            Explain ${params.topic} briefly.
+      prompt: What does a DAG scheduler do?
 ```
 
-Steps inherit LLM config from DAG level.
+`base_url` points at any [OpenAI-compatible endpoint](/step-types/llm/providers#openai-compatible-endpoints) (shown with OpenRouter's own URL made explicit; the same field targets [vLLM, Ollama, or LM Studio](/step-types/llm/local-models) or a corporate proxy), `api_key_name` picks the environment variable holding the key, and `system` plus the sampling fields become defaults for every chat step. The [full field list](/step-types/llm/#configuration) has the rest.
 
-<a href="/step-types/llm/providers#dag-level-defaults" class="learn-more">Learn more →</a>
+<a href="/step-types/llm/providers#openai-compatible-endpoints" class="learn-more">Learn more →</a>
+
+</div>
+
+<div class="example-card">
+
+### Use the Response in a Later Step
+
+```yaml
+steps:
+  - id: ask
+    action: chat.completion
+    with:
+      prompt: |
+        What is 2+2? Reply with just the number.
+    output: ANSWER
+
+  - id: use_answer
+    run: echo "The model said ${ANSWER}"
+    depends: ask
+```
+
+`output` captures the completion text as a variable for downstream steps.
+
+<a href="/step-types/llm/outputs" class="learn-more">Learn more →</a>
 
 </div>
 
@@ -64,26 +93,18 @@ steps:
   - id: ask
     action: chat.completion
     with:
-      provider: openai
-      model: gpt-4o
-      messages:
-        - role: user
-          content: |
-            What is 2+2?
+      prompt: |
+        What is 2+2? Reply with just the number.
 
   - id: follow_up
     action: chat.completion
     with:
-      provider: openai
-      model: gpt-4o
-      messages:
-        - role: user
-          content: |
-            Now multiply that by 3.
+      prompt: |
+        Multiply that by 3. Reply with just the number.
     depends: ask
 ```
 
-Steps inherit session history from previous steps.
+Chat steps inherit the conversation from the steps they depend on, so "that" resolves to the earlier answer.
 
 <a href="/step-types/llm/outputs#sessions" class="learn-more">Learn more →</a>
 
@@ -91,26 +112,81 @@ Steps inherit session history from previous steps.
 
 <div class="example-card">
 
-### Extended Thinking Mode
+### Extended Thinking
 
 ```yaml
 steps:
-  - action: chat.completion
+  - id: reason
+    action: chat.completion
     with:
-      provider: anthropic
-      model: claude-sonnet-4-20250514
+      provider: openrouter
+      model: deepseek/deepseek-v4-flash
       thinking:
         enabled: true
-        effort: high
-      messages:
-        - role: user
-          content: |
-            Analyze this complex problem...
+        effort: low
+      prompt: |
+        A bat and a ball cost 1.10 in total. The bat costs
+        1.00 more than the ball. How much does the ball
+        cost? Reply with just the amount.
 ```
 
-Enable deeper reasoning for complex tasks.
+`thinking` maps to the provider's reasoning controls; raise `effort` for harder problems.
 
 <a href="/step-types/llm/reasoning-web-search#reasoning" class="learn-more">Learn more →</a>
+
+</div>
+
+<div class="example-card">
+
+### Workflows as Tools
+
+```yaml
+steps:
+  - id: ask
+    action: chat.completion
+    with:
+      tools:
+        - calculator
+      prompt: |
+        What is 15 times 23? Use the calculator tool,
+        then reply with just the number.
+
+---
+name: calculator
+description: Multiply two numbers.
+params: "a b"
+steps:
+  - id: multiply
+    run: echo $(($1 * $2))
+```
+
+Each name in `tools` exposes a DAG as a callable tool; its `params` become the tool's argument schema, and each call is a real child run.
+
+<a href="/features/chat/tool-calling" class="learn-more">Learn more →</a>
+
+</div>
+
+<div class="example-card">
+
+### Model Fallback
+
+```yaml
+steps:
+  - id: summarize
+    action: chat.completion
+    with:
+      model:
+        - provider: openrouter
+          name: deepseek/deepseek-v4
+        - provider: openrouter
+          name: deepseek/deepseek-v4-flash
+      prompt: |
+        Reply with the single word "ready".
+```
+
+An ordered `model` list tries the next entry after retries for the current one are exhausted.
+
+<a href="/step-types/llm/reliability#model-fallback" class="learn-more">Learn more →</a>
 
 </div>
 
@@ -121,34 +197,22 @@ Enable deeper reasoning for complex tasks.
 ```yaml
 type: controller
 
-env:
-  - ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
-
-llm:
-  provider: anthropic
-  model: claude-sonnet-4-20250514
-
 steps:
-  - name: run_tests
-    description: Run the test suite.
-    run: |
-      test -f /tmp/dagu-flaky-cleared || { echo "FAIL"; exit 1; }
-      echo "all green"
-
-  - name: fix_flaky
-    description: Quarantine the known flaky test.
-    run: touch /tmp/dagu-flaky-cleared
+  - name: disk
+    description: Show filesystem usage.
+    run: df -h
+  - name: load
+    description: Show uptime and load average.
+    run: uptime
 
 tasks:
-  - name: tests_green
-    description: Finished when run_tests succeeded on its most recent run.
+  - name: checked
+    description: Finished when both disk and load have been checked.
 ```
 
-The steps become a catalog of actions, and `tasks` says when the run is done.
-The model picks what runs next, so a failing test can be fixed and retried
-without wiring that path yourself.
+Steps become a catalog of actions and `tasks` state the goals; the model decides what runs next. Built up example by example on the [controller examples page](/writing-workflows/examples/controller).
 
-<a href="/writing-workflows/controller" class="learn-more">Learn more →</a>
+<a href="/writing-workflows/examples/controller" class="learn-more">Learn more →</a>
 
 </div>
 
