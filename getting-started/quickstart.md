@@ -148,10 +148,6 @@ docker run --rm \
 Visit <http://localhost:8080>. The UI shows live run status, logs per step, execution history, and a YAML editor.
 The `--dags .` flag keeps `hello.yaml` in the workflow list while the server runs.
 
-::: tip Using Dagu?
-Star Dagu on GitHub to bookmark the repository and signal your support: [★ Star Dagu on GitHub](https://github.com/dagucloud/dagu).
-:::
-
 On first launch against an empty DAGs directory, Dagu creates five example workflows (`example-01-basic-sequential.yaml` through `example-05-template-and-file.yaml`). The default binary directory is `~/.config/dagu/dags/`; the Docker commands above mount `~/.dagu/dags/` at `/var/lib/dagu/dags/`. Set `DAGU_SKIP_EXAMPLES=true` or `skip_examples: true` in `config.yaml` to disable the examples.
 
 ## Core pieces

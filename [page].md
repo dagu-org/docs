@@ -50,10 +50,6 @@ dagu start-all --dags .
 
 Open <http://localhost:8080> to see the workflow, step logs, and run history. The [full quickstart](/getting-started/quickstart) includes expected output, Docker commands, validation, and common next steps.
 
-::: tip Dagu working for you?
-[Star Dagu on GitHub](https://github.com/dagucloud/dagu) so other developers can find the project.
-:::
-
 ## See the Web UI
 
 <video src="/cockpit-demo.mp4" poster="/cockpit-demo-poster.jpg" controls preload="none" playsinline aria-label="Dagu Cockpit demo" style="width: 100%; border-radius: 12px; margin: 8px 0 24px;"></video>
@@ -121,9 +117,6 @@ Want to explore without installing anything? Open the [live demo](https://dagu-d
 ## Community
 
 <div class="community-links">
-  <a href="https://github.com/dagucloud/dagu" class="community-link">
-    <span class="icon">★ Star Dagu on GitHub</span>
-  </a>
   <a href="https://discord.gg/gpahPUjGRk" class="community-link">
     <span class="icon">Discord</span>
   </a>

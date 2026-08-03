@@ -246,6 +246,3 @@ Other built-in actions cover [HTTP requests](/step-types/http), [SQL](/step-type
 | Start from copyable workflows | [Examples](/writing-workflows/examples) |
 | Look up every supported field | [YAML Specification](/writing-workflows/yaml-specification) |
 
-::: tip Dagu working for you?
-[Star Dagu on GitHub](https://github.com/dagucloud/dagu) to bookmark the project and help other engineers discover it.
-:::
