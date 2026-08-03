@@ -25,30 +25,52 @@ curl -fsSL https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/install
 
 The installer can add Dagu to your `PATH`, set up a background service, and create the first admin account. See [Installation](/getting-started/installation/) for Windows, Docker, Homebrew, npm, and manual options.
 
-Save this as `hello.yaml`:
+Save this as `health.yaml`. Two probes run in parallel, an LLM summarizes their output, and a human approves before anything is published:
 
 ```yaml
+secrets:
+  - name: OPENROUTER_API_KEY
+    provider: env
+    key: OPENROUTER_API_KEY
+
+llm:
+  provider: openrouter
+  model: deepseek/deepseek-v4-flash
+
 steps:
-  - id: hello
-    run: echo "Hello from Dagu!"
-  - id: done
-    run: echo "Workflow finished"
-    depends: hello
+  - id: disk
+    run: df -h | head -5
+    output: DISK
+  - id: load
+    run: uptime
+    output: LOAD
+  - id: summarize
+    action: chat.completion
+    with:
+      prompt: |
+        Summarize this machine's health in three sentences:
+        ${DISK}
+        ${LOAD}
+    output: SUMMARY
+    depends: [disk, load]
+  - id: approve
+    action: human.task
+    with:
+      prompt: Publish this health summary?
+    depends: summarize
+  - id: publish
+    run: echo "$SUMMARY"
+    depends: approve
 ```
 
-Run it from the terminal:
+Export an API key (any [LLM provider](/step-types/llm/providers) works, including local models), then start the scheduler and Web UI in the same directory:
 
 ```bash
-dagu start hello.yaml
-```
-
-Then start the Web UI with the same directory:
-
-```bash
+export OPENROUTER_API_KEY=your-key
 dagu start-all --dags .
 ```
 
-Open <http://localhost:8080> to see the workflow, step logs, and run history. The [full quickstart](/getting-started/quickstart) includes expected output, Docker commands, validation, and common next steps.
+Open <http://localhost:8080> and start `health` from the UI. The run pauses at `approve`; click Approve, and the model's summary prints in the `publish` step's log. The dependency graph, per-step logs, and full run history are all there. Prefer to start without an API key? The [full quickstart](/getting-started/quickstart) covers the basics offline.
 
 ## See the Web UI
 
