@@ -1,6 +1,6 @@
 # Harness Run Examples
 
-`harness.run` runs an external agent CLI as a Dagu step. The provider CLI must be installed and authenticated on the worker, or provided by a containerized harness.
+`harness.run` runs an external agent CLI as a Dagu step. The provider CLI must be installed and authenticated on the worker, provided by a containerized harness, or, for agent CLIs that authenticate with an environment variable, installed per-DAG with [`tools`](/writing-workflows/tools).
 
 These examples keep the workflow shape small and store agent output as run artifacts. `stdout.artifact` and `${context.paths.artifacts_dir}` enable artifact storage automatically.
 
@@ -81,37 +81,36 @@ fails if stdout includes logs, Markdown fences, JSONL events, or data that does
 not match the schema. This is a step-level feature, so it works with both
 built-in providers and custom harness definitions.
 
-## OpenCode Implementation Plan
+## Zero-Install OpenCode Review
 
-Use the artifact directory for handoff between a setup step and the agent. OpenCode model names use `provider/model` format.
+Declare the agent under DAG-level [`tools`](/writing-workflows/tools) and Dagu installs the pinned OpenCode release before the run starts, with nothing preinstalled on the worker. The reply is stored as a run artifact.
 
 ```yaml
-steps:
-  - id: write_issue
-    run: |
-      mkdir -p "${context.paths.artifacts_dir}/inputs"
-      cat > "${context.paths.artifacts_dir}/inputs/issue.md" <<'EOF'
-      Skip empty rows during CSV import and write malformed rows to a quarantine file.
-      EOF
+working_dir: .
 
-  - id: plan_change
-    depends: [write_issue]
+tools:
+  - anomalyco/opencode@v1.18.11
+
+secrets:
+  - name: OPENROUTER_API_KEY
+    provider: env
+    key: OPENROUTER_API_KEY
+
+steps:
+  - id: review
     action: harness.run
     with:
       provider: opencode
       # OpenCode expects model IDs in `provider/model` format.
-      model: anthropic/claude-sonnet-4-5-20250929
-      # Provider-specific reasoning preset.
-      variant: high
-      # Include thinking output when the selected provider supports it.
-      thinking: true
-      # Keep stdout minimal so the artifact is easy to read.
-      bare: true
+      model: openrouter/deepseek/deepseek-v4-flash
       prompt: |
-        Read ${context.paths.artifacts_dir}/inputs/issue.md and write the smallest implementation plan.
+        Review the most recent commit in this repository.
+        Reply with: what changed, one risk, a verdict.
     stdout:
-      artifact: ai/opencode-plan.md
+      artifact: ai/opencode-review.md
 ```
+
+The `secrets` block is required: Dagu does not propagate arbitrary shell variables to steps, and a zero-install worker has no OpenCode auth store to fall back on.
 
 ## Pi Summary From Stdin
 

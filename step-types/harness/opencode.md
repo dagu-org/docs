@@ -46,8 +46,9 @@ opencode run "<prompt>"
 
 | Flag | Type | Description |
 |------|------|-------------|
-| `--model` | string | Model to use |
-| `--bare` | boolean | Minimal output mode |
+| `--model` | string | Model in `provider/model` format |
+| `--variant` | string | Provider-specific reasoning effort, such as `high` |
+| `--pure` | boolean | Run without external plugins |
 
 ## Example
 
