@@ -8,6 +8,34 @@ See the [OpenCode installation guide](https://opencode.ai).
 
 For containerized Dagu runs, see [Run OpenCode in a Container](./sandbox/opencode).
 
+## Zero-Install via Tools
+
+Declare OpenCode under DAG-level [`tools`](/writing-workflows/tools) and Dagu installs the pinned release before the run starts, with nothing preinstalled on the worker:
+
+```yaml
+working_dir: .
+
+tools:
+  - anomalyco/opencode@v1.18.11
+
+secrets:
+  - name: OPENROUTER_API_KEY
+    provider: env
+    key: OPENROUTER_API_KEY
+
+steps:
+  - id: review
+    action: harness.run
+    with:
+      provider: opencode
+      model: openrouter/deepseek/deepseek-v4-flash
+      prompt: |
+        Review the most recent commit in this repository.
+        Reply with: what changed, one risk, a verdict.
+```
+
+The managed toolset is prepended to `PATH`, so the pinned release wins even when another OpenCode version is installed on the worker. OpenCode reads the OpenRouter credential from the environment; the `secrets` block is required because Dagu does not propagate arbitrary shell variables to steps.
+
 ## Base Invocation
 
 ```text

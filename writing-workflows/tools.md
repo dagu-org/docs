@@ -38,9 +38,33 @@ Use `tools` for portable CLIs where the exact binary version affects correctness
 - converters and small build utilities available through the aqua registry
 - profiling or diagnostic tools such as `pprof`
 
-Do not use `tools` for commands that intentionally depend on user or worker preconfiguration, local profiles, plugins, login state, or credentials. Treat those commands as worker prerequisites instead. Examples include `gcloud`, cloud CLIs with local profiles, and AI agent CLIs such as Claude Code, Codex, Gemini CLI, OpenCode, or Aider.
+Do not use `tools` for commands that depend on user or worker preconfiguration, local profiles, plugins, or login state. Treat those commands as worker prerequisites instead. Examples include `gcloud`, cloud CLIs with local profiles, and agent CLIs that authenticate through a subscription login, such as Claude Code.
 
-If a CLI can be installed as a pure binary but still needs credentials, `tools` only handles the binary. Provide credentials separately with [environment variables](/writing-workflows/environment-variables) or [secrets](/writing-workflows/secrets).
+If a CLI installs as a pure binary and takes its credential from an environment variable, `tools` works, including agent CLIs. `tools` handles the binary; provide the credential separately with [environment variables](/writing-workflows/environment-variables) or [secrets](/writing-workflows/secrets). This DAG installs a pinned OpenCode release and reviews the latest commit with nothing preinstalled on the worker:
+
+```yaml
+working_dir: .
+
+tools:
+  - anomalyco/opencode@v1.18.11
+
+secrets:
+  - name: OPENROUTER_API_KEY
+    provider: env
+    key: OPENROUTER_API_KEY
+
+steps:
+  - id: review
+    action: harness.run
+    with:
+      provider: opencode
+      model: openrouter/deepseek/deepseek-v4-flash
+      prompt: |
+        Review the most recent commit in this repository.
+        Reply with: what changed, one risk, a verdict.
+```
+
+The managed toolset directory is prepended to `PATH`, so the pinned release wins even when a different version of the same CLI is installed on the worker.
 
 ## Syntax
 
@@ -80,6 +104,27 @@ tools:
 
 Tags are convenient, but a commit SHA is a stronger reproducibility boundary when the package supports it.
 
+## Digest Pinning
+
+A version pins which release to download; it does not pin the artifact, because release assets can be replaced under the same tag. To pin the artifact itself, append its SHA-256 to the shorthand:
+
+```yaml
+tools:
+  - jqlang/jq@jq-1.7.1#sha256:<64-hex-artifact-digest>
+```
+
+Or use the object form:
+
+```yaml
+tools:
+  packages:
+    - package: jqlang/jq
+      version: jq-1.7.1
+      digest: sha256:<64-hex-artifact-digest>
+```
+
+After installing, Dagu verifies the digest against the checksum aqua recorded for the downloaded artifact and fails the run on a mismatch. Digests are per-platform: the same version downloads different assets per OS and architecture, so a digest-pinned toolset targets one platform. Take the value from the upstream release checksums, or from `aqua-checksums.json` in the toolset environment after a first install.
+
 ## Package Object Form
 
 Use object form when you need an explicit display name or command list:
@@ -106,15 +151,15 @@ Fields:
 
 ## Registry
 
-When `registry` is omitted, Dagu uses its pinned standard aqua registry commit. This gives a stable registry snapshot without making every DAG repeat the registry ref.
+When `registry` is omitted, Dagu resolves the standard aqua registry to its latest release. The release tag is resolved to a commit SHA and cached on disk for 24 hours. If the latest release cannot be fetched, Dagu falls back to the most recently cached ref regardless of age, and as a last resort to a registry ref compiled into the binary, so registry resolution itself never fails a run.
 
-You can override the standard registry ref:
+To opt out of latest-release resolution, pin the standard registry to a release tag or commit SHA:
 
 ```yaml
 tools:
   registry:
     type: standard
-    ref: 5e2f56743d66abe9dfc7c56d35086511b7dc92d8
+    ref: v4.400.0
   packages:
     - jqlang/jq@jq-1.7.1
 ```
