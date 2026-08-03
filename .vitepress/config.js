@@ -3,7 +3,7 @@ import { withMermaid } from "vitepress-plugin-mermaid";
 import { issueLinksPlugin } from "./theme/plugins/issueLinks.js";
 
 const siteUrl = "https://docs.dagu.sh";
-const socialImage = `${siteUrl}/og-e3ab0a63.png`;
+const socialImage = `${siteUrl}/og-a736f269.png`;
 const siteDescription =
   "Local-first workflow orchestration in declarative YAML. One open-source binary with schedules, retries, approvals, logs, and a Web UI. No external database, no framework.";
 

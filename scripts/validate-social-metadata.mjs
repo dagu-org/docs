@@ -3,7 +3,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { basename, join, resolve } from "node:path";
 
 const SITE_URL = "https://docs.dagu.sh";
-const SOCIAL_IMAGE = `${SITE_URL}/og-7c9f9ca5.png`;
+const SOCIAL_IMAGE = `${SITE_URL}/og-a736f269.png`;
 const TITLE_LIMIT = 70;
 const DESCRIPTION_LIMIT = 200;
 const outputRoot = resolve(process.argv[2] || ".vitepress/dist");
