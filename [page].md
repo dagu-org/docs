@@ -1,11 +1,11 @@
 ---
-title: Turn scripts into reliable workflows
-description: Turn existing scripts and commands into reliable YAML workflows with one open-source binary, a built-in Web UI, and no external database or message broker.
+title: Local-first orchestration that just works
+description: Local-first workflow orchestration in declarative YAML. One open-source binary with schedules, retries, approvals, logs, and a Web UI. No external database, no framework.
 ---
 
-# Turn scripts into reliable workflows
+# Local-first orchestration that just works
 
-Keep your existing commands and tools. Dagu adds schedules, retries, approvals, logs, and a Web UI in one open-source binary. Local file-backed state means there is no database or message broker to operate.
+Define workflows in declarative YAML over your existing commands and tools. One open-source binary adds schedules, retries, approvals, logs, and a Web UI, with state in local files. No database, no decorators, no framework. The same engine runs AI: coding agents as steps, LLM calls, and human approval gates.
 
 <div class="hero-section">
   <div class="hero-actions">
@@ -89,6 +89,10 @@ Want to explore without installing anything? Open the [live demo](https://dagu-d
     <p>Install Dagu, run a workflow, and open the Web UI.</p>
   </div>
   <div class="step-card">
+    <h3><a href="/getting-started/quickstart-ai">AI workflows</a></h3>
+    <p>Run coding agents as steps, call LLMs, or let a controller pick the path. Five minutes to your first AI workflow.</p>
+  </div>
+  <div class="step-card">
     <h3><a href="/writing-workflows/examples">Workflow examples</a></h3>
     <p>Start from practical YAML for scripts, data jobs, containers, and operations.</p>
   </div>
@@ -109,8 +113,8 @@ Want to explore without installing anything? Open the [live demo](https://dagu-d
     <p>Compare Community and licensed self-host. Review enterprise features, support, and <a href="https://dagu.sh/pricing#self-host">pricing</a>.</p>
   </div>
   <div class="step-card">
-    <h3><a href="/mcp/">AI tools and MCP</a></h3>
-    <p>Connect an MCP client or run an external agent CLI after the basic workflow is working.</p>
+    <h3><a href="/mcp/">MCP server</a></h3>
+    <p>Let MCP clients inspect workflows, start runs, and read results through the built-in endpoint.</p>
   </div>
 </div>
 

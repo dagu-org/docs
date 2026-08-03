@@ -3,9 +3,9 @@ import { withMermaid } from "vitepress-plugin-mermaid";
 import { issueLinksPlugin } from "./theme/plugins/issueLinks.js";
 
 const siteUrl = "https://docs.dagu.sh";
-const socialImage = `${siteUrl}/og-7c9f9ca5.png`;
+const socialImage = `${siteUrl}/og-e3ab0a63.png`;
 const siteDescription =
-  "Turn scripts and commands into reliable YAML workflows with schedules, retries, logs, and a Web UI. One self-hosted binary, no external database.";
+  "Local-first workflow orchestration in declarative YAML. One open-source binary with schedules, retries, approvals, logs, and a Web UI. No external database, no framework.";
 
 function canonicalUrl(pageData) {
   let relativePath = pageData.relativePath;
@@ -625,14 +625,14 @@ export default withMermaid(
         ["meta", { property: "og:image", content: socialImage }],
         ["meta", { property: "og:image:secure_url", content: socialImage }],
         ["meta", { property: "og:image:type", content: "image/png" }],
-        ["meta", { property: "og:image:width", content: "1280" }],
-        ["meta", { property: "og:image:height", content: "640" }],
-        ["meta", { property: "og:image:alt", content: "Dagu: turn scripts into reliable workflows" }],
+        ["meta", { property: "og:image:width", content: "1200" }],
+        ["meta", { property: "og:image:height", content: "630" }],
+        ["meta", { property: "og:image:alt", content: "Dagu: built for teams whose main work is not orchestration" }],
         ["meta", { name: "twitter:card", content: "summary_large_image" }],
         ["meta", { name: "twitter:title", content: title }],
         ["meta", { name: "twitter:description", content: description }],
         ["meta", { name: "twitter:image", content: socialImage }],
-        ["meta", { name: "twitter:image:alt", content: "Dagu: turn scripts into reliable workflows" }],
+        ["meta", { name: "twitter:image:alt", content: "Dagu: built for teams whose main work is not orchestration" }],
       ];
     },
 
