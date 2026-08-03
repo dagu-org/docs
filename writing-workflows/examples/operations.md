@@ -6,6 +6,71 @@ Examples for retention, logs, timeouts, monitoring, tracing, execution control, 
 
 <div class="example-card">
 
+### Remote Runbook over SSH
+
+```yaml
+ssh:
+  user: deploy
+  host: web-1.internal
+  key: ~/.ssh/deploy_key
+
+steps:
+  - id: health
+    run: curl -f http://localhost:8080/health
+    retry_policy:
+      limit: 3
+      interval_sec: 10
+  - id: restart
+    run: systemctl restart myapp
+    depends: health
+```
+
+Declare `ssh` once and every `run` step executes on that host, with retries, logs, and history kept in Dagu.
+
+<a href="/step-types/ssh" class="learn-more">Learn more →</a>
+
+</div>
+
+<div class="example-card">
+
+### Patch a Fleet in Parallel
+
+```yaml
+steps:
+  - id: patch
+    action: dag.run
+    with:
+      dag: patch-host
+      params:
+        host: ${ITEM}
+    parallel:
+      items:
+        - web-1.internal
+        - web-2.internal
+        - db-1.internal
+      max_concurrent: 2
+
+---
+name: patch-host
+params:
+  - name: host
+    type: string
+ssh:
+  user: deploy
+  host: ${params.host}
+steps:
+  - id: apply
+    run: apt-get update -q && apt-get upgrade -y
+```
+
+One sub-DAG per host, each with its own logs, status, and retries.
+
+<a href="/step-types/ssh" class="learn-more">Learn more →</a>
+
+</div>
+
+<div class="example-card">
+
 ### History Retention
 
 ```yaml
