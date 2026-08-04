@@ -1,6 +1,6 @@
 # Multi-Environment Deployments
 
-Run a separate Dagu deployment for each environment when development, staging, and production must have independent execution boundaries. Each deployment can synchronize reviewed workflow definitions from Git while keeping its scheduler, workers, storage, credentials, and runtime configuration separate.
+Run a separate Dagu deployment for each environment when development, staging, and production must have independent execution boundaries. Each deployment can synchronize reviewed workflows and documents from Git while keeping its scheduler, workers, storage, credentials, and runtime configuration separate.
 
 ::: warning Do Not Use Workspaces as Environments
 [Workspaces](/web-ui/workspaces) organize and authorize workflows inside one Dagu installation. They do not create separate schedulers, local execution environments, coordinators, workers, queues, storage, or Git Sync configurations.
@@ -32,17 +32,17 @@ Do not mount the same writable data directory into independent environments. Sha
 
 ## Promote Workflows with Git Sync
 
-[Git Sync](/server-admin/git-sync) distributes DAG definitions from a repository. Use a branch promotion workflow so each deployment advances only after the workflow version has passed the preceding environment.
+[Git Sync](/server-admin/git-sync) distributes DAG definitions, Markdown documents, and workflow-authoring skills from a repository. Use a branch promotion workflow so each deployment advances only after the repository version has passed the preceding environment.
 
 A typical flow is:
 
-1. Author and validate a workflow in development.
+1. Author and validate a workflow or its operational documents in development.
 2. Review the change in Git.
 3. Promote the reviewed commit to the branch tracked by staging.
 4. Validate the workflow and its integrations in staging.
 5. Promote the approved commit to the branch tracked by production.
 
-Configure each deployed environment to track its own branch. Staging and production should normally be read-only so workflow edits cannot publish directly from those installations.
+Configure each deployed environment to track its own branch. Staging and production should normally be read-only so workflow and document edits cannot publish directly from those installations.
 
 ```yaml
 # Staging config.yaml

@@ -1,6 +1,6 @@
 # Web UI
 
-Use Dagu's web UI to run workflows, inspect results, edit DAGs, review logs, and manage the server from a browser.
+Use Dagu's web UI to run workflows, inspect results, edit DAGs, maintain Markdown documents, review logs, and manage the server from a browser.
 
 ## Start the UI
 
@@ -21,18 +21,19 @@ dagu start-all --host 0.0.0.0 --port 9000
 Dagu's UI is organized around a few everyday jobs:
 
 - **Cockpit** for a live board of recent runs
+- **Documents** for Markdown runbooks, Mermaid diagrams, and operational notes
 - **Dashboard** for recent activity and trends
 - **Definitions** for the list of workflows
 - **Run details** for human tasks, approvals, outputs, artifacts, logs, and retries
 - **Notifications** for Slack, email, Telegram, and webhook routing
 - **Incidents** for PagerDuty and SolarWinds Incident Response routing
 - **Profiles** for runtime variables and secrets selected when a run starts
-- **Search** for finding workflows quickly
+- **Search** for finding workflows and document content quickly
 - **System Status** for scheduler, coordinator, worker, and resource health
 
 ## Workspace Selector
 
-The workspace selector sits at the top of the navigation and affects workspace-aware pages such as Cockpit, Dashboard, Definitions, Runs, Search, and Design.
+The workspace selector sits at the top of the navigation and affects workspace-aware pages such as Cockpit, Documents, Dashboard, Definitions, Runs, Search, and Design.
 
 ![Workspace selector](/web-ui-workspace-selector-demo.png)
 
@@ -58,6 +59,24 @@ Use it when you want to:
 - start or enqueue workflows from the template picker
 
 See [Cockpit](/web-ui/cockpit) for the dedicated guide.
+
+## Documents
+
+Documents gives runbooks and workflow notes a first-class home in Dagu.
+
+![Documents editor](/documents.png)
+
+Use it to:
+
+- organize Markdown files in a nested tree
+- work across several documents with tabs
+- edit and preview Markdown, including Mermaid diagrams
+- navigate long documents from their heading outline
+- search file names and contents
+- keep documents scoped to a workspace
+- publish and pull documents with Git Sync
+
+Unsaved drafts are kept in browser storage, and the editor reports external changes before they can overwrite local work. See [Documents](/web-ui/documents) for file operations, workspace behavior, storage configuration, runtime paths, and Git Sync.
 
 ## Dashboard
 
@@ -197,6 +216,7 @@ Search helps when you know roughly what you need but not exactly where it lives.
 You can search:
 
 - **DAGs** for workflow definitions
+- **Documents** for Markdown files and matching lines
 
 ## Profiles & Secrets
 
@@ -310,6 +330,7 @@ ui:
 
 - [Workspaces](/web-ui/workspaces)
 - [Cockpit](/web-ui/cockpit)
+- [Documents](/web-ui/documents)
 - [Profiles and profile-owned secrets](/web-ui/profiles)
 - [Notifications](/web-ui/notifications)
 - [Incident Routing](/web-ui/incidents)

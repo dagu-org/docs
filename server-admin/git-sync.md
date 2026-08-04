@@ -1,13 +1,16 @@
 # Git Sync
 
-Git Sync keeps Dagu workflows and workflow-authoring skill files aligned with a Git repository.
+Git Sync keeps Dagu workflows, Markdown documents, and workflow-authoring skill files aligned with a Git repository.
 
 ## What It Syncs
 
 Git Sync can track:
 
 - DAG files
+- Markdown documents
 - skills
+
+DAG files live at the configured repository root, documents live under `docs/`, and skills live under `skills/`. Pulling a repository routes each kind to its configured local storage directory.
 
 ## Tracked Items And IDs
 
@@ -17,6 +20,7 @@ Git Sync refers to each tracked file by an `itemId`. You will see that term in t
 |---|---|---|
 | `my-dag.yaml` | `my-dag` | `dag` |
 | `subdir/report.yml` | `subdir/report` | `dag` |
+| `docs/operations/runbook.md` | `docs/operations/runbook` | `doc` |
 | `skills/review/SKILL.md` | `skills/review/SKILL` | `skill` |
 
 ## Basic Configuration
@@ -115,6 +119,7 @@ dagu sync pull
 
 ```bash
 dagu sync publish my-dag -m "Update workflow"
+dagu sync publish docs/operations/runbook -m "Update operations runbook"
 dagu sync publish skills/review -m "Update review skill"
 dagu sync publish --all -m "Batch update"
 ```
@@ -137,6 +142,7 @@ dagu sync cleanup
 ```bash
 dagu sync delete my-dag -m "Remove old workflow"
 dagu sync mv old-dag new-dag -m "Rename workflow"
+dagu sync mv docs/operations/runbook docs/operations/deploy -m "Rename runbook"
 ```
 
 ## REST API
@@ -173,6 +179,7 @@ Write operations are blocked when Git Sync is configured as read-only (`push_ena
 ## Operational Notes
 
 - Manage Git Sync through the UI, CLI, or API rather than editing its internal state directly.
+- Documents edited in the Web UI appear as `doc` items in Git Sync status, diff, publish, discard, delete, and move operations.
 - Pull before publishing when multiple people or systems may change the same repository.
 - Use clear commit messages because Git Sync publishes normal Git commits.
 - For staging and production, prefer read-only Git Sync configurations and promote reviewed workflow versions between environment branches. See [Multi-Environment Deployments](/server-admin/deployment/multi-environment).
@@ -180,4 +187,5 @@ Write operations are blocked when Git Sync is configured as read-only (`push_ena
 ## Related Pages
 
 - [Server Administration](/server-admin/)
+- [Documents](/web-ui/documents)
 - [Multi-Environment Deployments](/server-admin/deployment/multi-environment)

@@ -866,6 +866,7 @@ Provide either an item ID or `--all`, not both.
 
 ```bash
 dagu sync publish my-dag -m "Update dag"
+dagu sync publish docs/operations/runbook -m "Update runbook"
 dagu sync publish skills/review -m "Update review skill"
 dagu sync publish --all -m "Batch update"
 dagu sync publish my-dag --force -m "Overwrite remote"
@@ -944,6 +945,7 @@ Provide either an item ID or `--all-missing`, not both. Untracked items cannot b
 
 ```bash
 dagu sync delete my-dag -m "Remove old dag"
+dagu sync delete docs/operations/runbook -m "Remove old runbook"
 dagu sync delete my-dag --force -m "Remove despite modifications"
 dagu sync delete --all-missing -m "Clean up missing"
 dagu sync delete my-dag --dry-run
@@ -968,6 +970,7 @@ Both source and destination must be of the same kind.
 
 ```bash
 dagu sync mv old-dag new-dag -m "Rename workflow"
+dagu sync mv docs/operations/runbook docs/operations/deploy -m "Rename runbook"
 dagu sync mv old-dag new-dag --force -m "Move despite conflict"
 dagu sync mv old-dag new-dag --dry-run
 ```
