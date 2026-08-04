@@ -17,19 +17,19 @@ Define workflows in declarative YAML over your existing commands and tools. One 
 
 ## Why Dagu exists
 
-Most teams that end up on this page are not shopping for a workflow platform. They have scripts and containers that already work, and a scheduler situation that has started to eat the time it was supposed to save.
+Most teams that land here are not looking for a workflow platform. Their scripts and containers already work. The scheduler around them is the problem: it takes more time to operate than it saves.
 
-The complaints behind Dagu are specific.
+The same complaints come up in every conversation:
 
-Orchestration is not your main work. A scheduler exists to serve your jobs. When it brings its own database, its own worker fleet, and its own on-call surprises, the relationship inverts and you start working for the orchestrator.
+**Orchestration is not your main work.** A big platform brings its own database, its own worker fleet, its own upgrades and alerts. You wanted to schedule some jobs. Now you operate a second system.
 
-A workflow is configuration, not a program. Order, retries, schedules, approvals: these are declarations. Write them as Python and the workflow definition itself starts having bugs and dependency conflicts.
+**A workflow is configuration, not a program.** Order, retries, schedules, approvals: you declare them; there is no logic to write. Written in Python, the workflow definition itself starts having bugs and dependency conflicts.
 
-Decorators pull the engine into your code. After `@dag` and `@task` spread through a codebase, the orchestrator is no longer next to your logic. It is inside it, and getting it back out is a migration.
+**Decorators lock the engine into your code.** Once `@dag` and `@task` are on every function, the orchestrator lives inside your business logic. Removing it means a rewrite.
 
-And the script that moves data has no reason to know what schedules it or who approved it.
+**A script should not know its schedule.** The script that moves data does not need to know when it runs or who approved it.
 
-Dagu takes the opposite bet: the workflow is a file. YAML declares the structure, your scripts and containers do the work in whatever language they are already written in, and the engine is one process writing state to local files.
+Dagu's answer: the workflow is one YAML file. It holds the structure: order, schedule, retries, approvals. Your scripts and containers do the work, unchanged, in whatever language they are written in. The engine is one binary writing state to local files.
 
 ## The idea in one file
 
