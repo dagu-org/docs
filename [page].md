@@ -15,6 +15,50 @@ Define workflows in declarative YAML over your existing commands and tools. One 
   </div>
 </div>
 
+## Why Dagu exists
+
+Most teams that end up on this page are not shopping for a workflow platform. They have scripts and containers that already work, and a scheduler situation that has started to eat the time it was supposed to save.
+
+The complaints behind Dagu are specific.
+
+Orchestration is not your main work. A scheduler exists to serve your jobs. When it brings its own database, its own worker fleet, and its own on-call surprises, the relationship inverts and you start working for the orchestrator.
+
+A workflow is configuration, not a program. Order, retries, schedules, approvals: these are declarations. Write them as Python and the workflow definition itself starts having bugs and dependency conflicts.
+
+Decorators pull the engine into your code. After `@dag` and `@task` spread through a codebase, the orchestrator is no longer next to your logic. It is inside it, and getting it back out is a migration.
+
+And the script that moves data has no reason to know what schedules it or who approved it.
+
+Dagu takes the opposite bet: the workflow is a file. YAML declares the structure, your scripts and containers do the work in whatever language they are already written in, and the engine is one process writing state to local files.
+
+## The idea in one file
+
+Your repository already has the logic:
+
+```text
+scripts/extract.py
+scripts/build-report.sh
+```
+
+Add one file that holds only the structure:
+
+```yaml
+schedule: "0 2 * * *"
+
+steps:
+  - id: extract
+    run: python scripts/extract.py
+    retry_policy:
+      limit: 3
+      interval_sec: 30
+
+  - id: report
+    run: ./scripts/build-report.sh
+    depends: extract
+```
+
+That is the entire integration. No imports, no decorators, nothing rewritten. Delete the YAML and your scripts still run. Keep it, and every run gets a dependency graph, retries, per-step logs, history, and a Web UI.
+
 ## Run your first workflow
 
 Install Dagu on macOS or Linux:
@@ -98,6 +142,12 @@ Want to explore without installing anything? Open the [live demo](https://dagu-d
     <p>Use local file-backed state first. Add queues or distributed workers later if the workload outgrows one machine.</p>
   </div>
 </div>
+
+## What Dagu is not
+
+- Dagu is not a durable-execution SDK. If you want workflow logic as typed code with replay guarantees inside your application, use Temporal; that is what it is built for.
+- It is not a Python data platform either. Teams that live inside Airflow operators and providers get real value from that ecosystem, and Dagu does not try to replace it.
+- It does not manage infrastructure. Dagu runs commands wherever you put the binary, and provisioning the machines stays your job.
 
 ## Choose your next step
 
