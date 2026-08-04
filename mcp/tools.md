@@ -22,6 +22,9 @@ Use `dagu_read` for current Dagu state.
 | `workspace` | `all`, `default`, or a workspace name for document targets. Required for `doc`; optional for `docs` and `doc_search`. |
 | `path` | Document path without `.md`; required for `doc` |
 | `search` | Search text; required for `doc_search` |
+| `prefix` | Document path prefix without `.md`; optional for `docs` and `doc_search` |
+| `cursor` | Opaque cursor from the preceding `doc_search` result page |
+| `limit` | Maximum `doc_search` results from 1 to 50; defaults to 20 |
 | `uri` | Direct resource URI, such as `dagu://reference/authoring` |
 
 Examples:
@@ -40,9 +43,12 @@ List documents in one workspace:
 {
   "target": "docs",
   "workspace": "operations",
-  "query": "flat=true&perPage=100"
+  "prefix": "runbooks",
+  "query": "flat=true&perPage=100&sort=mtime&order=desc"
 }
 ```
+
+In tree mode, `page` and `perPage` select direct children of the workspace or `prefix`, and each returned directory includes its descendants. In flat mode, they select individual documents. Document lists accept up to 200 entries per page.
 
 Read or search Markdown documents:
 
@@ -51,8 +57,16 @@ Read or search Markdown documents:
 ```
 
 ```json
-{ "target": "doc_search", "workspace": "all", "search": "database failover" }
+{
+  "target": "doc_search",
+  "workspace": "operations",
+  "prefix": "runbooks",
+  "search": "database failover",
+  "limit": 20
+}
 ```
+
+Search results include matching snippets and `modifiedAt`. If `hasMore` is true, pass `nextCursor` as `cursor` in the next call and keep `search`, `workspace`, and `prefix` unchanged.
 
 ```json
 { "uri": "dagu://runs/nightly-report/latest/logs?tail=100" }

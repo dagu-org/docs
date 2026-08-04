@@ -33,7 +33,15 @@ Document resources use an explicit workspace so an identical path in two workspa
 dagu://docs/operations/runbooks%2Frestart
 ```
 
-The `dagu_read` list and search targets return these canonical URIs. `dagu://docs` and workspace collection resources accept the same `page`, `perPage`, `flat`, `sort`, and `order` query parameters as `target=docs`.
+The `dagu_read` list and search targets return these canonical URIs. `dagu://docs` and workspace collection resources accept the same `page`, `perPage`, `flat`, `sort`, `order`, and `prefix` query parameters as `target=docs`. Document lists accept up to 200 entries per page.
+
+In tree mode, pagination selects direct children of the workspace or `prefix`; a returned directory still contains its descendants. In flat mode, pagination selects individual documents.
+
+For example, this resource lists the newest individual documents below `runbooks` in the `operations` workspace:
+
+```text
+dagu://docs/operations?prefix=runbooks&flat=true&sort=mtime&order=desc&perPage=20
+```
 
 Log resources accept query parameters supported by Dagu's log readers, such as `tail=100`:
 
