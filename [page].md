@@ -134,6 +134,10 @@ Want to explore without installing anything? Open the [live demo](https://dagu-d
     <p>Use the Web UI to inspect live status, read step logs, review history, retry failures, and edit workflow YAML.</p>
   </div>
   <div class="overview-card">
+    <h3><a href="/web-ui/documents">Keep runbooks with workflows</a></h3>
+    <p>Write Markdown, preview Mermaid diagrams, organize nested documents, search their contents, and synchronize them through Git.</p>
+  </div>
+  <div class="overview-card">
     <h3><a href="/writing-workflows/error-handling">Make jobs reliable</a></h3>
     <p>Add dependencies, schedules, retries, timeouts, approvals, notifications, and artifacts in the workflow file.</p>
   </div>
@@ -163,6 +167,10 @@ Want to explore without installing anything? Open the [live demo](https://dagu-d
   <div class="step-card">
     <h3><a href="/writing-workflows/examples">Workflow examples</a></h3>
     <p>Start from practical YAML for scripts, data jobs, containers, and operations.</p>
+  </div>
+  <div class="step-card">
+    <h3><a href="/web-ui/documents">Documents and runbooks</a></h3>
+    <p>Keep operational Markdown, diagrams, and troubleshooting guides next to the workflows they explain.</p>
   </div>
   <div class="step-card">
     <h3><a href="/getting-started/concepts">Core concepts</a></h3>

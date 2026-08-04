@@ -54,8 +54,8 @@
 /features/data-flow/ /writing-workflows/data-flow 301
 /features/distributed-execution /server-admin/distributed/ 301
 /features/distributed-execution/ /server-admin/distributed/ 301
-/features/documents /overview/web-ui 301
-/features/documents/ /overview/web-ui 301
+/features/documents /web-ui/documents 301
+/features/documents/ /web-ui/documents 301
 /features/email-notifications /writing-workflows/email-notifications 301
 /features/email-notifications/ /writing-workflows/email-notifications 301
 /features/exec /migration/from-cron 301
@@ -128,8 +128,6 @@
 /step-types/harness /step-types/harness/ 301
 /server-admin/mcp /mcp/ 301
 /server-admin/mcp/ /mcp/ 301
-/web-ui/documents /overview/web-ui 301
-/web-ui/documents/ /overview/web-ui 301
 
 # Earlier guide hierarchy
 /github-integration /dagu-actions/official/github-cli 301

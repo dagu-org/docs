@@ -2,7 +2,7 @@
 
 Workspaces organize workflows and runs inside one Dagu installation. Use them to separate workflows by team, business function, product, or operational responsibility, such as `finance`, `data-platform`, `customer-support`, or `platform-ops`.
 
-Workspaces can also scope access, managed secrets, profile defaults, notifications, and incident routing.
+Workspaces can also scope access, documents, managed secrets, profile defaults, notifications, and incident routing.
 
 ![Workspace selector](/web-ui-workspace-selector-demo.png)
 
@@ -16,6 +16,7 @@ Use workspaces when you want to:
 
 - keep the DAG list focused on one team or business function
 - review only the runs that belong to a project
+- keep runbooks and operational notes with the team that owns them
 - keep Web UI-managed secrets scoped to the workflows that use them
 - route notifications to the responsible team's channels
 - route incidents to the responsible team's PagerDuty or SolarWinds connections
@@ -39,13 +40,13 @@ The scheduler loads and evaluates workflows across the deployment regardless of 
 
 ## Selecting a Workspace
 
-The workspace selector is in the left navigation above the remote node selector. It affects workspace-aware pages such as Cockpit, Dashboard, Definitions, Runs, Search, Design, Notifications, and Incident Routing.
+The workspace selector is in the left navigation above the remote node selector. It affects workspace-aware pages such as Cockpit, Documents, Dashboard, Definitions, Runs, Search, Design, Notifications, and Incident Routing.
 
 | Selection | What You See |
 | --- | --- |
-| **All workspaces** | Everything your account can access. |
-| **Default** | Workflows that do not have a workspace label. |
-| **Named workspace** | Only workflows and runs for that workspace. |
+| **All workspaces** | Everything your account can access across workflows, runs, and documents. Document changes are disabled in this aggregate view. |
+| **Default** | Workflows without a workspace label and documents outside named-workspace directories. |
+| **Named workspace** | Only workflows, runs, and documents for that workspace. |
 
 The selector stays on your last choice in the browser, so switching from `finance` to Runs keeps the same focus.
 
@@ -76,6 +77,21 @@ steps:
 After saving the DAG, select `finance` in the Web UI to see it with the matching runs. A workflow with no workspace label appears under **Default**.
 
 When you start or enqueue a workflow from Cockpit while a named workspace is selected, Dagu adds the matching workspace label to the run so it appears in the same workspace view.
+
+## Documents in Workspaces
+
+The [Documents](/web-ui/documents) page uses the same workspace selector as workflows and runs. Default documents live directly under `paths.docs_dir`; documents in a named workspace live under `<paths.docs_dir>/<workspace>/`.
+
+```text
+<paths.docs_dir>/
+|-- shared-runbook.md             # Default
+`-- finance/
+    `-- month-end-close.md        # finance workspace
+```
+
+Workspace access filters the document tree, content search, and global search results. **All workspaces** combines the documents the current account can access for browsing and search. Select **Default** or one named workspace before creating, renaming, moving, or deleting a document.
+
+Documents cannot be dragged across workspace boundaries. Renaming a workspace moves its document directory to the new name. Deletion is blocked while the workspace still contains documents, which prevents them from losing their workspace ownership.
 
 ## Secrets in Workspaces
 
@@ -150,12 +166,15 @@ See [User Management](/server-admin/authentication/user-management) and [API Key
 
 ## Deleting a Workspace
 
-Deleting a workspace removes it from the selector. It does not delete DAG files, run history, users, or API keys.
+Deleting a workspace removes it from the selector. It does not delete DAG files, documents, run history, users, or API keys.
 
 Before deleting a workspace, check whether:
 
+- its Documents tree is empty; move or remove its documents first
 - any DAGs still use `workspace=<name>`
 - users or API keys are scoped to that workspace
+
+Dagu rejects the deletion while documents remain in the workspace. This keeps those files from becoming visible as default documents after their workspace disappears.
 
 After deletion, update affected DAG labels and access grants so future work stays easy to find.
 
@@ -175,6 +194,7 @@ For request and response details, see [REST API](/web-ui/api).
 ## Related
 
 - [Cockpit](/web-ui/cockpit)
+- [Documents](/web-ui/documents)
 - [Notifications](/web-ui/notifications)
 - [Incident Routing](/web-ui/incidents)
 - [DAG Secret Refs](/web-ui/secrets)

@@ -3335,6 +3335,51 @@ Retrieves information about connected workers in the distributed execution syste
 }
 ```
 
+## Documents Endpoints
+
+Documents endpoints accept optional `workspace` and `remoteNode` query parameters. Document paths are relative to the selected workspace and omit the `.md` extension. All authenticated users can list, read, and search documents they can access. Mutations require `permissions.write_dags` and a write-capable workspace role.
+
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| `GET` | `/api/v1/docs` | List the document tree, or use `flat=true` for a flat list. |
+| `POST` | `/api/v1/docs` | Create a Markdown document. |
+| `GET` | `/api/v1/docs/search?q=...` | Search document content. |
+| `GET` | `/api/v1/docs/doc?path=...` | Read one document. |
+| `PATCH` | `/api/v1/docs/doc?path=...` | Replace one document's content. |
+| `DELETE` | `/api/v1/docs/doc?path=...` | Delete one document. |
+| `POST` | `/api/v1/docs/doc/rename?path=...` | Rename or move a document or directory. |
+| `POST` | `/api/v1/docs/delete-batch` | Delete several documents or directories. |
+
+Create a document in the `operations` directory of the default workspace:
+
+```bash
+curl -X POST "http://localhost:8080/api/v1/docs?workspace=default" \
+  -H "Content-Type: application/json" \
+  -d '{"id":"operations/runbook","content":"# Operations runbook\n"}'
+```
+
+Read or update the same document:
+
+```bash
+curl "http://localhost:8080/api/v1/docs/doc?workspace=default&path=operations%2Frunbook"
+
+curl -X PATCH "http://localhost:8080/api/v1/docs/doc?workspace=default&path=operations%2Frunbook" \
+  -H "Content-Type: application/json" \
+  -d '{"content":"# Updated operations runbook\n"}'
+```
+
+Rename and batch-delete requests use `newPath` and `paths` respectively:
+
+```json
+{"newPath":"operations/deploy"}
+```
+
+```json
+{"paths":["operations/deploy","legacy"]}
+```
+
+See [Documents](/web-ui/documents) for Web UI behavior, workspace ownership, storage, and Git Sync.
+
 ## Git Sync Endpoints
 
 All sync endpoints accept an optional `remoteNode` query parameter.

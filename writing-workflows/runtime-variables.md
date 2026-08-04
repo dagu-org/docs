@@ -27,6 +27,7 @@ Use `${context.*}` references in value-resolved fields such as `run`, `with`, `e
 | `${context.trigger.actor}` | Runs started by an attributable actor | None |
 | `${context.paths.log_file}` | All steps and handlers | `DAG_RUN_LOG_FILE` |
 | `${context.paths.work_dir}` | When a per-run work directory is available | `DAG_RUN_WORK_DIR` |
+| `${context.paths.docs_dir}` | All steps and handlers | `DAG_DOCS_DIR` |
 | `${context.paths.artifacts_dir}` | When artifact storage is active | `DAG_RUN_ARTIFACTS_DIR` |
 | `${context.paths.step_stdout_file}` | Current executable step after stdout is assigned | `DAG_RUN_STEP_STDOUT_FILE` |
 | `${context.paths.step_stderr_file}` | Current executable step after stderr is assigned | `DAG_RUN_STEP_STDERR_FILE` |
@@ -66,6 +67,7 @@ Values are refreshed for each step, so `DAG_RUN_STEP_NAME`, `DAG_RUN_STEP_STDOUT
 | `DAG_WAITING_STEPS` | Wait handler only | Comma-separated list of step names currently waiting for human-task completion or approval. | `release_review,security_review` |
 | `PWD` | Current step only | Working directory for the step. Defaults to DAG's `working_dir` or the DAG file's directory. | `/home/user/project` |
 | `DAG_RUN_WORK_DIR` | All steps & handlers | Absolute path to the per-DAG-run working directory. Each run gets its own isolated directory. In local mode, this is `<dag-run-dir>/work/`. In shared-nothing (distributed) mode, this is a temporary directory under the system temp dir. Not set during dry runs. | `/data/dagu/dag-runs/daily-backup/dag-run_20241012_040000Z_c1f4b2/work` |
+| `DAG_DOCS_DIR` | All steps & handlers | Absolute path to the current DAG's document directory. Named-workspace DAGs include the workspace directory. | `/opt/dagu/dags/docs/platform/daily-backup` |
 | `DAG_RUN_ARTIFACTS_DIR` | All steps & handlers when artifact storage is active | Absolute path to the per-DAG-run artifact directory, or a worker-local staging directory in shared-nothing mode. Artifact storage is active when enabled explicitly or auto-enabled by `${context.paths.artifacts_dir}` references, artifact actions, or artifact stream outputs. | `/data/dagu/artifacts/daily-backup/dag-run_20241012_040000Z_c1f4b2` |
 | `DAG_PARAMS_JSON` | All steps & handlers | JSON string containing the resolved parameter map. Resolved DAG params are serialized as strings; if the run was started with raw JSON parameters, the original payload is preserved. Not set when the DAG has no resolved parameters. | `{"ENVIRONMENT":"prod","batchSize":"1000"}` |
 | `DAG_PUSHBACK` | Steps re-executed after approval push-back only | JSON string containing the current push-back iteration, latest inputs, authenticated actor, server timestamp, and chronological history. Not set on the initial execution. | `{"iteration":2,"by":"reviewer","at":"2026-04-26T06:18:43Z","inputs":{"FEEDBACK":"Tighten summary"},"history":[...]}` |
@@ -121,6 +123,29 @@ steps:
     depends:
       - build
 ```
+
+## Documents Directory (`${context.paths.docs_dir}`)
+
+`${context.paths.docs_dir}` points to the document directory associated with the current DAG. Processes receive the same path through `DAG_DOCS_DIR`.
+
+```yaml
+steps:
+  - id: show_runbook
+    run: cat "${context.paths.docs_dir}/runbook.md"
+```
+
+The path is derived from the server's `paths.docs_dir` and the DAG identity:
+
+| DAG scope | Runtime document directory |
+| --- | --- |
+| Default workspace, DAG `operations` | `<paths.docs_dir>/operations` |
+| Workspace `platform`, DAG `operations` | `<paths.docs_dir>/platform/operations` |
+
+This directory is shared across runs of the same DAG, unlike `${context.paths.work_dir}` and `${context.paths.artifacts_dir}`, which are run-specific. It is suitable for durable Markdown instructions and other documents managed from the [Documents Web UI](/web-ui/documents).
+
+`DAGU_DOCS_DIR` is the process configuration variable that overrides the server-wide root. `DAG_DOCS_DIR` is the per-DAG runtime projection supplied to steps and handlers.
+
+See [Documents](/web-ui/documents) for editing, workspace scoping, and Git Sync, and [Configuration](/server-admin/configuration#documents-directory) for the storage root.
 
 ## Artifacts Directory (`${context.paths.artifacts_dir}`)
 

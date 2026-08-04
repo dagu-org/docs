@@ -56,6 +56,7 @@ auth:
 
 paths:
   dags_dir: /opt/dagu/dags
+  docs_dir: /opt/dagu/dags/docs
   log_dir: /var/log/dagu
   data_dir: /var/lib/dagu/data
   dag_state_dir: /var/lib/dagu/data/dag-state
@@ -69,6 +70,7 @@ Configuration fields can be overridden with `DAGU_` environment variables. Neste
 export DAGU_HOST=0.0.0.0
 export DAGU_PORT=8080
 export DAGU_DAGS_DIR=/opt/dagu/dags
+export DAGU_DOCS_DIR=/opt/dagu/dags/docs
 export DAGU_DAG_DISCOVERY_RECURSIVE=true
 export DAGU_DATA_DIR=/var/lib/dagu/data
 export DAGU_DAG_STATE_DIR=/var/lib/dagu/data/dag-state
@@ -84,6 +86,7 @@ Common examples:
 | `DAGU_PORT` | `port` | Web UI port |
 | `DAGU_PUBLIC_URL` | `public_url` | External URL used in generated links |
 | `DAGU_DAGS_DIR` | `paths.dags_dir` | DAG definition directory |
+| `DAGU_DOCS_DIR` | `paths.docs_dir` | Markdown document directory |
 | `DAGU_DAG_DISCOVERY_RECURSIVE` | `dag_discovery.recursive` | Discover DAG definitions in subdirectories |
 | `DAGU_DATA_DIR` | `paths.data_dir` | Data directory used by derived stores |
 | `DAGU_LOG_DIR` | `paths.log_dir` | Log directory |
@@ -127,6 +130,7 @@ Typical layout:
 |-- config.yaml
 |-- base.yaml
 |-- dags/
+|   `-- docs/
 |-- logs/
 `-- data/
     |-- artifacts/
@@ -145,6 +149,7 @@ Most persistent runtime data is stored under `paths.data_dir` by default.
 | Config field | Default | Purpose |
 | --- | --- | --- |
 | `paths.dags_dir` | `~/.config/dagu/dags` | DAG definitions |
+| `paths.docs_dir` | `{dags_dir}/docs` | Markdown documents and runbooks |
 | `paths.log_dir` | `~/.local/share/dagu/logs` | DAG logs |
 | `paths.data_dir` | `~/.local/share/dagu/data` | Base directory for runtime data |
 | `paths.tools_dir` | `{data_dir}/tools` | Managed DAG tool cache |
@@ -157,6 +162,35 @@ Most persistent runtime data is stored under `paths.data_dir` by default.
 | `paths.users_dir` | `{data_dir}/users` | Builtin auth users |
 | `paths.contexts_dir` | `{data_dir}/contexts` | CLI contexts |
 | `paths.workspaces_dir` | `{data_dir}/workspaces` | Web UI workspaces |
+
+## Documents Directory
+
+`paths.docs_dir` is the storage root for Markdown files managed by the Documents Web UI and Git Sync:
+
+```yaml
+paths:
+  dags_dir: /opt/dagu/dags
+  docs_dir: /srv/dagu/documents
+```
+
+The equivalent environment variable is:
+
+```bash
+export DAGU_DOCS_DIR=/srv/dagu/documents
+```
+
+When `paths.docs_dir` is not configured, Dagu uses `<paths.dags_dir>/docs`. Default-workspace documents live directly in that directory. Named workspaces use a directory named after the workspace:
+
+```text
+/srv/dagu/documents/
+|-- shared-runbook.md
+`-- finance/
+    `-- month-end-close.md
+```
+
+`shared-runbook.md` belongs to Default. The second path is owned by the `finance` workspace when that workspace exists. Treat the document root and workspace records as related state when designing backups. Dagu moves the matching document directory when a workspace is renamed and blocks workspace deletion until its documents are removed.
+
+Each workflow run also receives a per-DAG document path as `${context.paths.docs_dir}` and `DAG_DOCS_DIR`. See [Documents](/web-ui/documents) and [Runtime Context and Variables](/writing-workflows/runtime-variables#documents-directory-context-paths-docs-dir).
 
 ## Recursive DAG Discovery
 
@@ -240,3 +274,4 @@ Do not put `paths`, `auth`, `coordinator`, `worker`, or other server process set
 - [Queue Configuration](/server-admin/queues)
 - [Distributed Execution](/server-admin/distributed/)
 - [Persistent State](/writing-workflows/persistent-state)
+- [Documents](/web-ui/documents)
