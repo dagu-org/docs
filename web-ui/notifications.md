@@ -120,6 +120,10 @@ Common tokens:
 | <code v-pre>{{run.id}}</code> or <code v-pre>{{dagRunId}}</code> | DAG run ID |
 | <code v-pre>{{run.status}}</code> or <code v-pre>{{status}}</code> | Run status |
 | <code v-pre>{{run.error}}</code> or <code v-pre>{{error}}</code> | Error message, when present |
+| <code v-pre>{{run.failed_steps}}</code> | Comma-separated failed steps |
+| <code v-pre>{{run.partially_succeeded_steps}}</code> | Comma-separated partially succeeded steps |
+| <code v-pre>{{run.aborted_steps}}</code> | Comma-separated aborted steps |
+| <code v-pre>{{run.succeeded_steps}}</code> | Comma-separated succeeded steps |
 | <code v-pre>{{run.path}}</code> or <code v-pre>{{runPath}}</code> | Relative Web UI path for the DAG run |
 | <code v-pre>{{run.url}}</code> or <code v-pre>{{runUrl}}</code> | Absolute Web UI URL for the DAG run, when `public_url` is configured |
 | <code v-pre>{{run.link}}</code> or <code v-pre>{{runLink}}</code> | `Run: ...` line when an absolute run URL is available |
@@ -131,6 +135,8 @@ Common tokens:
 | <code v-pre>{{event.type}}</code> or <code v-pre>{{eventType}}</code> | Notification event type |
 | <code v-pre>{{event.observedAt}}</code> | Time the event was observed |
 
+The step-list tokens render as an empty string when no step has that status. For fan-out steps, each entry identifies the individual item or child run, such as `process[customer-a]` or `deploy[child-workflow (ENV=production)]`.
+
 Example Slack or Telegram message:
 
 ```text
@@ -138,6 +144,7 @@ DAG {{dag.name}} {{run.status}}
 Run: {{run.id}}
 Workspace: {{workspace}}
 Error: {{run.error}}
+Failed steps: {{run.failed_steps}}
 {{run.link}}
 ```
 
