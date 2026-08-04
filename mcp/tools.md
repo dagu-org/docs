@@ -106,7 +106,7 @@ Apply writes only after validation succeeds:
 }
 ```
 
-Create or update a document:
+Preview a document create or update:
 
 ```json
 {
