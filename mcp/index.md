@@ -2,7 +2,7 @@
 
 Dagu includes a built-in Model Context Protocol (MCP) server. There is no separate Dagu MCP package to install: run the Dagu HTTP server and point an MCP client at the `/mcp` endpoint.
 
-Use MCP when an AI tool should operate a running Dagu server: inspect workflows, read run state, preview workflow edits, apply DAG changes, or control DAG runs through the same authenticated server boundary as the REST API.
+Use MCP when an AI tool should operate a running Dagu server: inspect workflows, maintain Markdown documents, read run state, preview changes, apply DAG or document edits, or control DAG runs through the same authenticated server boundary as the REST API.
 
 ## What Dagu Exposes
 
@@ -10,9 +10,9 @@ The MCP server is intentionally compact:
 
 | Surface | Purpose |
 |---------|---------|
-| Tools | `dagu_read`, `dagu_change`, and `dagu_execute` cover reading state, editing DAG YAML, and controlling runs. |
-| Resources | `dagu://...` resources expose DAG specs, run details, run logs, and built-in MCP references. |
-| Prompts | Built-in prompts guide common authoring, editing, and failed-run debugging workflows. |
+| Tools | `dagu_read`, `dagu_change`, and `dagu_execute` cover reading state, maintaining documents and DAG YAML, and controlling runs. |
+| Resources | `dagu://...` resources expose DAG specs, Markdown documents, run details, run logs, and built-in MCP references. |
+| Prompts | Built-in prompts guide DAG and document authoring, editing, and failed-run debugging workflows. |
 | Audit events | MCP requests, tool calls, subscriptions, and downstream DAG actions are audit-attributed to the accepted credential. |
 
 The server uses Streamable HTTP. The default local URL is:
@@ -42,6 +42,6 @@ The Dagu skill and the Dagu MCP server solve related but different problems.
 | Integration | Configure | Best for |
 |-------------|-----------|----------|
 | Dagu skill | `gh skill install dagucloud/dagu dagu` | Teaching AI coding tools how to write valid Dagu workflow YAML. |
-| Dagu MCP server | `http://localhost:8080/mcp` | Letting MCP clients read Dagu state, validate or apply DAG edits, and control runs. |
+| Dagu MCP server | `http://localhost:8080/mcp` | Letting MCP clients read Dagu state and documents, apply scoped edits, and control runs. |
 
 Most AI-assisted workflow authoring setups benefit from both: install the skill for authoring guidance, then connect MCP when the tool should operate a running Dagu server.

@@ -12,8 +12,8 @@ MCP audit entries use the `mcp` category and include MCP-specific fields when av
 | `surface` | Accepted credential surface. MCP API-key requests use `mcp`. |
 | `result` | Outcome such as `received`, `started`, `succeeded`, `failed`, or `denied`. |
 | `correlation_id` | Shared ID that connects MCP attempt events with downstream domain events. |
-| `resource_type` | Affected resource class such as `dag`, `run`, `run_logs`, `dag_run_step_log`, or `mcp_request`. |
-| `resource_id` | Affected resource identifier, such as a DAG name, `dagName/dagRunId`, or `dagName/dagRunId/stepName`. |
+| `resource_type` | Affected resource class such as `dag`, `doc`, `run`, `run_logs`, `dag_run_step_log`, or `mcp_request`. |
+| `resource_id` | Affected resource identifier, such as a DAG name, document path, `dagName/dagRunId`, or `dagName/dagRunId/stepName`. |
 | `workspace` | Canonical workspace used for audit filtering. |
 | `credential_id` | Accepted credential identifier, independent of the user or service-account subject. |
 | `credential_type` | Credential class such as `api_key`, `session`, `basic`, or `none`. |
@@ -45,7 +45,7 @@ Authentication and subscription behavior is also auditable:
 
 ## Correlating With DAG Events
 
-MCP tools call the same internal API service used by the Web UI and REST API. When `dagu_change` applies a DAG update or `dagu_execute` starts, enqueues, retries, or stops a run, the downstream DAG audit event keeps the MCP source context.
+MCP tools call the same internal API service used by the Web UI and REST API. When `dagu_change` applies a DAG or document update, or `dagu_execute` starts, enqueues, retries, or stops a run, the downstream domain audit event keeps the MCP source context. Document mutations therefore produce both the MCP tool lifecycle events and the normal `doc_create`, `doc_update`, `doc_rename`, or `doc_delete` event without recording Markdown content.
 
 Filter audit logs by:
 
