@@ -4,8 +4,8 @@ Dagu intentionally exposes three MCP tools.
 
 | Tool | Purpose |
 |------|---------|
-| `dagu_read` | Read DAG specs, DAG details, DAG-run details, logs, list views, and Dagu MCP reference resources. |
-| `dagu_change` | Validate and optionally apply a DAG YAML upsert. |
+| `dagu_read` | Read DAGs, Markdown documents, DAG runs, logs, list views, and Dagu MCP reference resources. |
+| `dagu_change` | Preview or apply DAG YAML and workspace-aware document changes. |
 | `dagu_execute` | Start, enqueue, retry, or stop DAG runs. |
 
 ## `dagu_read`
@@ -14,11 +14,14 @@ Use `dagu_read` for current Dagu state.
 
 | Input | Values |
 |-------|--------|
-| `target` | `dags`, `dag`, `dag_spec`, `runs`, `run`, `run_logs`, `step_log`, or `reference` |
+| `target` | `dags`, `dag`, `dag_spec`, `docs`, `doc`, `doc_search`, `runs`, `run`, `run_logs`, `step_log`, or `reference` |
 | `name` | DAG name for DAG and run targets |
 | `dagRunId` | DAG-run ID for run and log targets |
 | `stepName` | Step name for the `step_log` target |
 | `query` | URL query string for list and log targets, such as `page=1&perPage=100` or `tail=100` |
+| `workspace` | `all`, `default`, or a workspace name for document targets. Required for `doc`; optional for `docs` and `doc_search`. |
+| `path` | Document path without `.md`; required for `doc` |
+| `search` | Search text; required for `doc_search` |
 | `uri` | Direct resource URI, such as `dagu://reference/authoring` |
 
 Examples:
@@ -29,6 +32,26 @@ Examples:
 
 ```json
 { "target": "dag_spec", "name": "nightly-report" }
+```
+
+List documents in one workspace:
+
+```json
+{
+  "target": "docs",
+  "workspace": "operations",
+  "query": "flat=true&perPage=100"
+}
+```
+
+Read or search Markdown documents:
+
+```json
+{ "target": "doc", "workspace": "operations", "path": "runbooks/restart" }
+```
+
+```json
+{ "target": "doc_search", "workspace": "all", "search": "database failover" }
 ```
 
 ```json
@@ -48,14 +71,18 @@ Read stdout and stderr for one step:
 
 ## `dagu_change`
 
-Use `dagu_change` for DAG YAML edits. The only current change type is `upsert_dag`.
+Use `dagu_change` for DAG YAML and Markdown document changes. Preview does not write; apply uses the same workspace authorization, path validation, Git Sync write policy, mutation notifications, and audit path as the REST API.
 
 | Input | Values |
 |-------|--------|
 | `mode` | `preview` or `apply`; defaults to `preview` |
-| `type` | `upsert_dag`; defaults to `upsert_dag` |
-| `name` | DAG name to create or update |
-| `spec` | Full DAG YAML specification |
+| `type` | `upsert_dag`, `upsert_doc`, `rename_doc`, or `delete_doc`; defaults to `upsert_dag` |
+| `name` | DAG name for `upsert_dag` |
+| `spec` | Full DAG YAML specification for `upsert_dag` |
+| `workspace` | `default` or a named workspace for document changes; `all` is not allowed |
+| `path` | Document or directory path without `.md` for document changes |
+| `content` | Full Markdown content for `upsert_doc`; empty content is allowed |
+| `newPath` | Destination document or directory path for `rename_doc` |
 
 Preview validates the spec without writing it:
 
@@ -76,6 +103,41 @@ Apply writes only after validation succeeds:
   "type": "upsert_dag",
   "name": "nightly-report",
   "spec": "steps:\n  - name: hello\n    command: echo hello\n"
+}
+```
+
+Preview a document create or update:
+
+```json
+{
+  "mode": "preview",
+  "type": "upsert_doc",
+  "workspace": "operations",
+  "path": "runbooks/restart",
+  "content": "# Restart procedure\n\n..."
+}
+```
+
+Rename or move a document or directory:
+
+```json
+{
+  "mode": "apply",
+  "type": "rename_doc",
+  "workspace": "operations",
+  "path": "runbooks",
+  "newPath": "procedures"
+}
+```
+
+Delete a document or directory:
+
+```json
+{
+  "mode": "preview",
+  "type": "delete_doc",
+  "workspace": "operations",
+  "path": "procedures/obsolete"
 }
 ```
 

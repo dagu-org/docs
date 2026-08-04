@@ -8,7 +8,7 @@ flowchart LR
   route --> auth["Auth middleware"]
   auth --> mcp["MCP server"]
   mcp --> api["Dagu API service"]
-  api --> stores["DAG, run, queue, and log stores"]
+  api --> stores["DAG, document, run, queue, and log stores"]
   api --> runtime["Runtime and scheduler operations"]
   auth --> audit["Audit context"]
   mcp --> audit
@@ -29,8 +29,8 @@ The route honors the server base path. With `base_path: /dagu`, the route is `/d
 
 Dagu exposes a small tool surface by design:
 
-- `dagu_read` reads state and reference resources.
-- `dagu_change` validates and optionally writes DAG YAML.
+- `dagu_read` reads state, Markdown documents, and reference resources.
+- `dagu_change` validates and optionally writes DAG YAML or workspace-aware document changes.
 - `dagu_execute` starts, enqueues, retries, or stops DAG runs.
 
 This keeps client instructions stable and avoids exposing every REST endpoint as a separate MCP tool.
@@ -44,11 +44,14 @@ The MCP server exposes resource templates for current Dagu state:
 | Resource | Backing operation |
 |----------|-------------------|
 | `dagu://dags/{name}/spec` | Current DAG YAML from the DAG spec API |
+| `dagu://docs` | Document tree from the Documents API across accessible workspaces |
+| `dagu://docs/{workspace}` | Document tree for one workspace |
+| `dagu://docs/{workspace}/{path}` | Markdown content for one document |
 | `dagu://runs/{name}/{dagRunId}` | DAG-run details from the run details API |
 | `dagu://runs/{name}/{dagRunId}/logs` | DAG-run logs from the logs API |
 | `dagu://reference/{topic}` | Built-in MCP guidance bundled with the server |
 
-Run resources can be subscribed to. Dagu watches subscribed run resources and sends a resource update notification when a run reaches a terminal state.
+Run resources can be subscribed to. Dagu watches subscribed run resources and sends a resource update notification when a run reaches a terminal state. Document resources are read on demand; successful document mutations continue to notify the Web UI through the existing Documents API notifier.
 
 ## Audit Context
 
