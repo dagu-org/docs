@@ -69,52 +69,50 @@ curl -fsSL https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/install
 
 The installer can add Dagu to your `PATH`, set up a background service, and create the first admin account. See [Installation](/getting-started/installation/) for Windows, Docker, Homebrew, npm, and manual options.
 
-Save this as `health.yaml`. Two probes run in parallel, an LLM summarizes their output, and a human approves before anything is published:
+Save this as `health.yaml`. Two checks run in parallel, then Dagu turns their output into a Markdown artifact:
 
 ```yaml
-secrets:
-  - name: OPENROUTER_API_KEY
-    provider: env
-    key: OPENROUTER_API_KEY
-
-llm:
-  provider: openrouter
-  model: deepseek/deepseek-v4-flash
-
 steps:
+  - id: system
+    run: uname -a
+    output: SYSTEM
+
   - id: disk
-    run: df -h | head -5
+    run: df -h .
     output: DISK
-  - id: load
-    run: uptime
-    output: LOAD
-  - id: summarize
-    action: chat.completion
+
+  - id: report
+    action: template.render
     with:
-      prompt: |
-        Summarize this machine's health in three sentences:
-        ${DISK}
-        ${LOAD}
-    output: SUMMARY
-    depends: [disk, load]
-  - id: approve
-    action: human.task
-    with:
-      prompt: Publish this health summary?
-    depends: summarize
-  - id: publish
-    run: echo "$SUMMARY"
-    depends: approve
+      template: |
+        # System health
+
+        ## System
+
+        ~~~text
+        {{ .system }}
+        ~~~
+
+        ## Disk usage
+
+        ~~~text
+        {{ .disk }}
+        ~~~
+      data:
+        system: ${SYSTEM}
+        disk: ${DISK}
+    stdout:
+      artifact: health-report.md
+    depends: [system, disk]
 ```
 
-Export an API key (any [LLM provider](/step-types/llm/providers) works, including local models), then start the scheduler and Web UI in the same directory:
+Start the scheduler and Web UI in the same directory:
 
 ```bash
-export OPENROUTER_API_KEY=your-key
 dagu start-all --dags .
 ```
 
-Open <http://localhost:8080> and start `health` from the UI. The run pauses at `approve`; click Approve, and the model's summary prints in the `publish` step's log. The dependency graph, per-step logs, and full run history are all there. Prefer to start without an API key? The [full quickstart](/getting-started/quickstart) covers the basics offline.
+Open <http://localhost:8080> and start `health` from the UI. The `system` and `disk` steps run in parallel, and `report` waits for both. Open the run's **Artifacts** tab to preview or download `health-report.md`. The dependency graph, per-step logs, and full run history are all there. The [full quickstart](/getting-started/quickstart) covers command-line runs, Docker, parameters, retries, and other fundamentals.
 
 ## See the Web UI
 
