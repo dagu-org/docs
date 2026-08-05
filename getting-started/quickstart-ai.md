@@ -1,10 +1,17 @@
 ---
-description: Run an LLM-directed workflow in under five minutes with OpenRouter, a controller that triages the machine it runs on and explains its decisions.
+description: Run an AI workflow in under five minutes. Launch a coding agent with harness.run, or let an LLM direct the workflow with a controller.
 ---
 
 # AI Quickstart
 
-From zero to an LLM-directed workflow in under five minutes: a controller that checks this machine's health, decides for itself what to inspect, and writes the summary.
+Dagu supports two different roles for AI:
+
+| What you want | Start with |
+|---|---|
+| Run Codex, Claude Code, Copilot, OpenCode, or another agent inside a predictable workflow | [`harness.run`](#_3-run-a-coding-agent) |
+| Let an LLM decide which declared action should run next | [`type: controller`](#_4-try-an-adaptive-controller) |
+
+Start with `harness.run` when the workflow order is known and the agent has a specific job. Reach for a controller when choosing the next action is itself part of the problem. This quickstart tries both with one OpenRouter key.
 
 ## 1. Install Dagu
 
@@ -16,17 +23,68 @@ Other platforms and methods: [Quickstart](/getting-started/quickstart) and the [
 
 ## 2. Get an OpenRouter key
 
-One [OpenRouter](https://openrouter.ai) key reaches models from every major vendor, and it is the key every example in these docs uses. Sign in, create a key under **Keys**, and export it:
+One [OpenRouter](https://openrouter.ai) key reaches models from every major vendor. Sign in, create a key under **Keys**, and export it:
 
 ```bash
 export OPENROUTER_API_KEY=sk-or-...
 ```
 
-The model below costs well under a cent per run. To try without adding payment at all, OpenRouter also serves free model variants; see step 3.
+The examples below use a low-cost model. To try without adding payment, OpenRouter also serves free model variants.
 
-## 3. Create the workflow
+::: tip No payment method?
+Swap the model for a free variant such as `openrouter/openai/gpt-oss-20b:free` in the harness workflow and `openai/gpt-oss-20b:free` in the controller workflow. Free variants are rate-limited and the lineup changes; browse the current list at [openrouter.ai/models](https://openrouter.ai/models).
+:::
 
-Save as `triage.yaml`:
+## 3. Run a coding agent
+
+Save this as `review.yaml` in a Git repository. It installs a pinned OpenCode CLI for the run, asks it to review the latest commit without modifying files, and stores the response as a Markdown artifact:
+
+```yaml
+working_dir: .
+
+tools:
+  - anomalyco/opencode@v1.18.11
+
+secrets:
+  - name: OPENROUTER_API_KEY
+    provider: env
+    key: OPENROUTER_API_KEY
+
+steps:
+  - id: review
+    action: harness.run
+    with:
+      provider: opencode
+      model: openrouter/deepseek/deepseek-v4-flash
+      prompt: |
+        Review the most recent commit in this repository.
+        Do not modify any files.
+        Return short Markdown with: summary, risks, and verdict.
+    stdout:
+      artifact: ai/repository-review.md
+```
+
+Run it:
+
+```bash
+dagu start review.yaml
+```
+
+The first run downloads the pinned OpenCode release. `harness.run` is an ordinary workflow step, so it composes with dependencies, retries, approvals, and every other graph feature. The agent's response is stored at `ai/repository-review.md` in the run's artifacts.
+
+Start the Web UI from the same directory:
+
+```bash
+dagu start-all --dags .
+```
+
+Open <http://localhost:8080>, select the `review` run, and open the **Artifacts** tab to preview or download the result.
+
+Already have Codex, Claude Code, Copilot, or another agent installed and authenticated? Remove the `tools` block and choose that provider instead. The [Harness Run examples](/writing-workflows/examples/harness-run) cover those setups, structured results, custom harnesses, and more artifact patterns.
+
+## 4. Try an adaptive controller
+
+A controller solves a different problem: the model chooses which declared step runs next. Save this as `triage.yaml`:
 
 ```yaml
 type: controller
@@ -41,18 +99,21 @@ llm:
   model: deepseek/deepseek-v4-flash
 
 steps:
-  - name: disk
+  - id: disk
     description: Show filesystem usage.
     run: df -h
     output: DISK
-  - name: load
+
+  - id: load
     description: Show uptime and load average.
     run: uptime
     output: LOAD
-  - name: processes
+
+  - id: processes
     description: List processes with CPU and memory usage.
     run: ps aux | head -20
-  - name: summarize
+
+  - id: summarize
     description: Write the health summary. Run last, after the checks.
     action: chat.completion
     with:
@@ -70,48 +131,31 @@ tasks:
 
 There is no `depends` anywhere: the steps are a catalog, the task states the goal, and the model picks what runs next.
 
-The `secrets` block matters. Dagu does not pass your shell environment through to workflows, so an exported key alone produces a `401`; the `secrets` entry reads the key from the Dagu process and masks it in logs. See [making the key reachable](/step-types/llm/providers#making-the-key-reachable).
-
-::: tip No payment method?
-Swap the model line for a free variant such as `model: openai/gpt-oss-20b:free`. Free variants are rate-limited and the lineup changes; browse the current list at [openrouter.ai/models](https://openrouter.ai/models).
-:::
-
-## 4. Run it
+Run it:
 
 ```bash
 dagu start triage.yaml
 ```
 
-The run prints each decision as it happens. On a healthy machine the controller checks disk and load, skips the process listing, runs `summarize` last, and settles the task with a reason in its own words:
+On a healthy machine the controller checks disk and load, skips the process listing, runs `summarize` last, and settles the task with a reason in its own words. Under load it can inspect processes first. Run it twice and the order can differ; the goal is what stays fixed.
 
-```text
-├─disk (0s)      [succeeded]
-├─load (0s)      [succeeded]
-├─processes      [skipped]
-├─summarize (5s) [succeeded]
-│  └─ The system is stable with moderate load averages. The primary
-│     volume is 5% full, but the main data volume is 72% utilized...
-```
+The run page shows each decision in a timeline. Its **Chat** tab holds the full transcript: what the controller saw after each step and why it settled the task.
 
-Under load it inspects processes first and says so. Run it twice and the order can differ; the goal is what stays fixed.
+## How the patterns differ
 
-## 5. Watch it think
+| | `harness.run` | `type: controller` |
+|---|---|---|
+| AI's job | Perform one scoped task | Choose the next workflow action |
+| Workflow order | Declared with normal graph dependencies | Decided at runtime from the step catalog |
+| Best fit | Coding, review, research, or generation inside a predictable pipeline | Triage and other workflows whose path depends on what earlier actions reveal |
+| Output | Step logs, declared outputs, or artifacts | Decision timeline, transcript, and results from chosen steps |
 
-```bash
-dagu start-all
-```
-
-Open `http://localhost:8080`, find the `triage` run, and open it. The run page shows the decision timeline (which action, which turn, what happened), and the **Chat** tab holds the full transcript: what the controller saw after each step and why it settled the task. Start another run from the UI to watch it live.
-
-## What just happened
-
-- Every step was offered to the model as a callable tool, described by its `description`. The model picked one action per turn and observed each result.
-- The task description steered judgment: "inspect processes only if disk or load looks unhealthy" is the entire branching logic. No edges, no conditions.
-- The `summarize` step is a `chat.completion` call inside the catalog, sharing the workflow's `llm` block: one model decides, the same model writes.
+The patterns also compose: a controller can dispatch a graph workflow containing a `harness.run` step when both adaptive planning and agent execution are useful.
 
 ## Next steps
 
-- [Controller Examples](/writing-workflows/examples/controller) builds every capability step by step: failure recovery, asking a person, dispatching sub-workflows.
-- [Controllers & Completions](/step-types/llm/controller-completions) walks from a single completion to LLM at both layers.
-- [LLM Overview](/step-types/llm/) covers `chat.completion` and everything it can do.
-- [AI Examples](/writing-workflows/examples/ai) has runnable copy-paste cards for each pattern.
+- [Harness Run Examples](/writing-workflows/examples/harness-run) covers Codex patch review, validated JSON, zero-install OpenCode, and custom harnesses.
+- [Harness](/step-types/harness/) covers providers, configuration, approvals, fallbacks, and sandboxed execution.
+- [Controller Examples](/writing-workflows/examples/controller) builds controller capabilities step by step: failure recovery, asking a person, and dispatching sub-workflows.
+- [Controllers & Completions](/step-types/llm/controller-completions) shows how scheduling decisions and LLM generation fit together.
+- [LLM Overview](/step-types/llm/) covers `chat.completion`, local models, and provider configuration.
