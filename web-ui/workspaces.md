@@ -136,7 +136,7 @@ Notification rules can be Global or workspace-scoped.
 - A named workspace can either inherit Global rules or configure its own routes.
 - A DAG can still override the workspace when it needs a one-off destination.
 
-Use workspace notification rules when each business function or team has its own Slack channel, email list, Telegram chat, or webhook endpoint. A workflow with `labels: [workspace=finance]` uses the `finance` workspace rules when they are configured; otherwise it falls back to Global.
+Use workspace notification rules when each business function or team has its own Microsoft Teams or Slack channel, email list, Telegram chat, or webhook endpoint. A workflow with `labels: [workspace=finance]` uses the `finance` workspace rules when they are configured; otherwise it falls back to Global.
 
 See [Notifications](/web-ui/notifications) for the full routing model.
 

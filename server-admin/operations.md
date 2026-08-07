@@ -316,7 +316,7 @@ See the [`history` CLI reference](/getting-started/cli#history) and [`rm` comman
 
 ### Alerting
 
-For team-managed notification routes, use [Notifications](/web-ui/notifications) in the Web UI. It supports reusable Slack, email, Telegram, and webhook channels with Global and workspace rules.
+For team-managed notification routes, use [Notifications](/web-ui/notifications) in the Web UI. It supports reusable Microsoft Teams, Slack, email, Telegram, and webhook channels with Global and workspace rules.
 
 For managed provider incidents, use [Incident Routing](/web-ui/incidents). On self-hosted Dagu, incident routing requires an active license or trial.
 

@@ -1,8 +1,8 @@
 # Notifications
 
-Notifications route DAG-run events to team destinations without hard-coding Slack webhooks, email recipients, Telegram chats, or webhook endpoints in every DAG file.
+Notifications route DAG-run events to team destinations without hard-coding Microsoft Teams or Slack webhooks, email recipients, Telegram chats, or webhook endpoints in every DAG file.
 
-Use notifications for ordinary message delivery: Slack, Google Chat, email, Telegram, or custom webhooks. Use [Incident Routing](/web-ui/incidents) only for systems that manage an incident lifecycle, such as PagerDuty or SolarWinds Incident Response.
+Use notifications for ordinary message delivery: Microsoft Teams, Slack, Google Chat, email, Telegram, or custom webhooks. Use [Incident Routing](/web-ui/incidents) only for systems that manage an incident lifecycle, such as PagerDuty or SolarWinds Incident Response.
 
 ![Notification rules in light mode](/notification-rules-light.png)
 
@@ -10,7 +10,7 @@ Use notifications for ordinary message delivery: Slack, Google Chat, email, Tele
 
 Notifications have two parts:
 
-- **Channels** are reusable destinations, such as Slack, email, Telegram, or a generic webhook.
+- **Channels** are reusable destinations, such as Microsoft Teams, Slack, email, Telegram, or a generic webhook.
 - **Rules** decide which DAG-run events are sent to which channels.
 
 Rules can be configured at three levels:
@@ -52,13 +52,31 @@ Open **Notifications > Channels** to create destinations before adding rules.
 | Channel Type | Use It For |
 | --- | --- |
 | **Slack** | Send messages through a Slack incoming webhook. |
+| **Microsoft Teams** | Send MessageCard notifications through a Teams Workflow or legacy incoming webhook. |
 | **Email** | Send to one or more recipients through the configured SMTP transport. |
 | **Generic Webhook** | POST a structured payload to an incident system, chat relay, or internal service. |
 | **Telegram** | Send messages through a Telegram bot token and chat ID, optionally targeting a forum topic. |
 
-For Google Chat or another chat service without a dedicated channel type, use a generic webhook when the receiver can accept Dagu's JSON payload, or point the generic webhook at a small relay that converts the payload into that service's expected format.
+For Google Chat or another service without a dedicated channel type, use a generic webhook and customize its JSON body to match the receiver's payload format.
 
 Channel secrets such as webhook URLs, HMAC secrets, SMTP passwords, and bot tokens are stored encrypted. The UI shows redacted previews after save.
+
+### Microsoft Teams
+
+Dagu sends Teams notifications as MessageCards. This format works with current Teams Workflows and legacy Microsoft 365 connector URLs, and provides useful notification preview text without requiring a card-format setting in Dagu.
+
+To create a Teams channel:
+
+1. Open **Workflows** in Microsoft Teams and choose an incoming-webhook template for a chat or channel.
+2. Select the destination and authentication options, then save the Workflow.
+3. Copy the generated webhook URL. See [Microsoft's incoming-webhook setup guide](https://support.microsoft.com/en-US/Workflows/send-messages-in-teams-using-incoming-webhooks) for the complete Teams steps.
+4. In Dagu, open **Notifications > Channels**, select **Add**, and choose **Microsoft Teams**.
+5. Paste the HTTPS webhook URL and optionally customize the message template.
+6. Save the channel and use **Send test** before adding it to notification rules.
+
+Teams webhook URLs must use HTTPS. Dagu encrypts the URL at rest and shows only a redacted preview after it is saved. Editing a channel without entering another URL preserves the saved value.
+
+The default Teams message includes <code v-pre>{{run.link}}</code>. Configure [`public_url`](#dag-run-links) when recipients should be able to open the DAG run from Teams.
 
 ### Telegram Forum Topics
 
@@ -137,7 +155,7 @@ Common tokens:
 
 The step-list tokens render as an empty string when no step has that status. For fan-out steps, each entry identifies the individual item or child run, such as `process[customer-a]` or `deploy[child-workflow (ENV=production)]`.
 
-Example Slack or Telegram message:
+Example Microsoft Teams, Slack, or Telegram message:
 
 ```text
 DAG {{dag.name}} {{run.status}}
@@ -177,7 +195,7 @@ When `public_url` is not configured, <code v-pre>{{run.url}}</code> and <code v-
 
 ## Generic Webhook Payload
 
-Generic webhook channels send JSON. If a message template is configured, Dagu includes the rendered message alongside the structured event data.
+Generic webhook channels send JSON. Leave **Webhook JSON body template** blank to use Dagu's default payload. If a message template is configured, Dagu includes the rendered message alongside the structured event data.
 
 ```json
 {
@@ -197,6 +215,27 @@ Generic webhook channels send JSON. If a message template is configured, Dagu in
   ]
 }
 ```
+
+### Custom JSON Body
+
+Set **Webhook JSON body template** when the receiving service expects a different JSON shape. For example, many chat webhooks accept a single `text` field:
+
+```json
+{
+  "text": "{{message}}"
+}
+```
+
+The body template supports all [message-template tokens](#message-templates), plus <code v-pre>{{message}}</code> for the rendered webhook message. Token values are escaped as JSON string content, so quotes and line breaks in names or error messages do not break a surrounding JSON string.
+
+Custom bodies have these delivery rules:
+
+- The rendered body must be valid JSON. Invalid output fails delivery without retrying it as a transient network error.
+- Dagu validates every body in the current notification batch before sending the first request, so one invalid event cannot cause a partially delivered batch.
+- Dagu sends one request per event. A transient failure retries only that request instead of resending events already accepted by the receiver.
+- Custom headers and HMAC signing still apply. `X-Dagu-Signature` signs the exact rendered request body.
+
+Keep string-valued tokens inside JSON quotes, as shown above. Leaving the body template blank restores the default batched payload.
 
 Use HMAC signing when the receiving service needs to verify that Dagu sent the webhook.
 

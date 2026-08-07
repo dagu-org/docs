@@ -4,7 +4,7 @@
 Incident routing requires an active Dagu self-host license or trial. Existing self-host licenses include this feature; no separate incident add-on or new feature claim is required. See the [pricing page](https://dagu.sh/pricing) for current availability.
 :::
 
-Incident routing opens and resolves incidents in incident-management systems when workflow failures need an operational response. Use it for PagerDuty and SolarWinds Incident Response. Use [Notifications](/web-ui/notifications) when you only need Slack, Google Chat, email, Telegram, or generic webhook messages.
+Incident routing opens and resolves incidents in incident-management systems when workflow failures need an operational response. Use it for PagerDuty and SolarWinds Incident Response. Use [Notifications](/web-ui/notifications) when you only need Microsoft Teams, Slack, Google Chat, email, Telegram, or generic webhook messages.
 
 ![Incident routing in the Web UI](/incident-routing-light.png)
 
@@ -29,12 +29,12 @@ Notifications and incidents solve different problems:
 
 | Feature | Use It For |
 | --- | --- |
-| **Notifications** | Chat, email, Telegram, and generic webhook messages for DAG-run events such as failed, waiting, rejected, aborted, or succeeded. Use this for ordinary destinations such as Slack and Google Chat. |
+| **Notifications** | Chat, email, Telegram, and generic webhook messages for DAG-run events such as failed, waiting, rejected, aborted, or succeeded. Use this for ordinary destinations such as Microsoft Teams, Slack, and Google Chat. |
 | **Incident Routing** | Provider incidents that open on final failure, deduplicate repeated failures, and resolve when the DAG recovers. |
 
 Use both when operators should receive a chat message and an incident should also be opened in the escalation system.
 
-Do not add chat tools as incident connections unless they manage an incident lifecycle. Slack, Google Chat, email, and simple webhooks are notification destinations; PagerDuty and SolarWinds Incident Response are incident connections because they support trigger, deduplication, and resolve semantics.
+Do not add chat tools as incident connections unless they manage an incident lifecycle. Microsoft Teams, Slack, Google Chat, email, and simple webhooks are notification destinations; PagerDuty and SolarWinds Incident Response are incident connections because they support trigger, deduplication, and resolve semantics.
 
 ## Setup
 

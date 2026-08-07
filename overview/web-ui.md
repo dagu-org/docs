@@ -25,7 +25,7 @@ Dagu's UI is organized around a few everyday jobs:
 - **Dashboard** for recent activity and trends
 - **Definitions** for the list of workflows
 - **Run details** for human tasks, approvals, outputs, artifacts, logs, and retries
-- **Notifications** for Slack, email, Telegram, and webhook routing
+- **Notifications** for Microsoft Teams, Slack, email, Telegram, and webhook routing
 - **Incidents** for PagerDuty and SolarWinds Incident Response routing
 - **Profiles** for runtime variables and secrets selected when a run starts
 - **Search** for finding workflows and document content quickly
@@ -134,7 +134,7 @@ The Notifications section manages team messages from the Web UI.
 
 Use it to:
 
-- create reusable Slack, email, Telegram, and webhook channels
+- create reusable Microsoft Teams, Slack, email, Telegram, and webhook channels
 - set Global notification defaults for all DAGs
 - override Global rules for one workspace
 - configure per-DAG exceptions from the DAG detail page
