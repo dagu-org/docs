@@ -148,6 +148,8 @@ Rules:
 
 In a `type: incremental` workflow, `${inputs.name}` resolves to a declared input's absolute final path. `${outputs.name}` resolves to a fresh staging path and is available only while the owning command or shell attempt executes. After a successful commit or reuse, `${steps.step_id.outputs.name}` exposes the final output path to dependencies.
 
+<!-- dagu-example: no-validate; requires incremental workflow support from dagu#2515 -->
+
 ```yaml
 type: incremental
 working_dir: /srv/build

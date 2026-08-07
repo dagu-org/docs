@@ -8,6 +8,8 @@ Incremental workflows avoid repeating file transformations whose recipe, declare
 
 Set `type: incremental`, declare file inputs with `inputs`, and give a reusable step one path-backed output:
 
+<!-- dagu-example: no-validate; requires incremental workflow support from dagu#2515 -->
+
 ```yaml
 type: incremental
 working_dir: /srv/report-pipeline

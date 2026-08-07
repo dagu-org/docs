@@ -133,6 +133,8 @@ Use names such as `version`, `image_tag`, `artifact_url`, or `record_count`.
 
 Path-backed outputs are available only in `type: incremental` workflows:
 
+<!-- dagu-example: no-validate; requires incremental workflow support from dagu#2515 -->
+
 ```yaml
 type: incremental
 working_dir: /srv/build

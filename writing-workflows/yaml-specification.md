@@ -162,6 +162,8 @@ steps:
 
 `incremental` schedules a graph from explicit dependencies and matching file paths. Eligible steps reuse a prior materialization when their recipe, declared inputs, and existing output still match. See [Incremental Workflows](/writing-workflows/incremental-workflows).
 
+<!-- dagu-example: no-validate; requires incremental workflow support from dagu#2515 -->
+
 ```yaml
 type: incremental
 working_dir: /srv/build
@@ -1020,6 +1022,8 @@ steps:
 `output_schema` must be an inline JSON Schema object. It is not a path. When present, Dagu captures stdout, decodes it as JSON, validates it, and fails the step on invalid JSON or schema mismatch.
 
 In an incremental workflow, an input declaration requires `name` and `path`. An output declaration can use `path` instead of `type`:
+
+<!-- dagu-example: no-validate; requires incremental workflow support from dagu#2515 -->
 
 ```yaml
 type: incremental
