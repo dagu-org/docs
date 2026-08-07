@@ -119,7 +119,7 @@ function collectMarkdown(path) {
 function isWorkflow(yaml) {
   return (
     /^steps:\s*(?:#.*)?$/m.test(yaml) ||
-    /^type:\s*(?:graph|chain|controller|agent)\b/m.test(yaml)
+    /^type:\s*(?:graph|chain|controller|incremental|agent)\b/m.test(yaml)
   );
 }
 

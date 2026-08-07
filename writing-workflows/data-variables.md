@@ -188,6 +188,8 @@ Strict step-output references address declared top-level output names. Nested pa
 
 Use files for larger data. Use artifacts when the run should retain the file for preview or download.
 
+Use an [incremental workflow](/writing-workflows/incremental-workflows) when file-producing steps use stable paths and should be reused while their recipes and input contents remain unchanged.
+
 ```yaml
 steps:
   - id: generate_report
@@ -217,6 +219,7 @@ Older workflows may still use unscoped variables such as `${FOO}`, legacy step r
 ## See Also
 
 - [Outputs](/writing-workflows/outputs)
+- [Incremental Workflows](/writing-workflows/incremental-workflows)
 - [Environment Variables](/writing-workflows/environment-variables)
 - [Parameters](/writing-workflows/parameters)
 - [Value References, Quoting, and Escaping](/writing-workflows/quoting-and-escaping)

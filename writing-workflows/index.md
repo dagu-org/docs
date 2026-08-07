@@ -240,9 +240,9 @@ Other built-in actions cover [HTTP requests](/step-types/http), [SQL](/step-type
 |---|---|
 | Learn step fields, scripts, dependencies, and defaults | [Workflow Basics](/writing-workflows/basics) |
 | Pass parameters, outputs, and files between steps | [Data & Variables](/writing-workflows/data-variables) |
+| Reuse unchanged file-producing steps across runs | [Incremental Workflows](/writing-workflows/incremental-workflows) |
 | Add conditions, loops, parallel iteration, or sub-DAGs | [Control Flow](/writing-workflows/control-flow) |
 | Configure retries, timeouts, handlers, and failure behavior | [Durable Execution](/writing-workflows/durable-execution) and [Error Handling](/writing-workflows/error-handling) |
 | Run HTTP, SQL, SSH, Docker, Kubernetes, or other actions | [Built-in Actions](/step-types/shell) |
 | Start from copyable workflows | [Examples](/writing-workflows/examples) |
 | Look up every supported field | [YAML Specification](/writing-workflows/yaml-specification) |
-

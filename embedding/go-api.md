@@ -104,8 +104,11 @@ Run options apply to a single `RunFile` or `RunYAML` call.
 | `WithWorkerSelector(map[string]string)` | Sets the distributed worker selector for one run. |
 | `WithLabels(labels...)` | Adds labels to one run. |
 | `WithDryRun(enabled)` | Enables or disables dry-run mode. |
+| `WithNoReuse(enabled)` | Recomputes eligible incremental steps instead of reusing prior materializations. |
 
 `WithTags(tags...)` remains available as a deprecated alias for `WithLabels`.
+
+Incremental workflows require local execution. When `RunYAML` contains relative incremental paths, pass `WithDefaultWorkingDir` so those paths have a stable base. See [Incremental Workflows](/writing-workflows/incremental-workflows).
 
 ## Run Status And Cancellation
 
@@ -182,6 +185,8 @@ A custom executor is registered only in the current Go process. In distributed m
 ## Distributed Execution
 
 Embedded distributed execution dispatches a loaded DAG to an existing Dagu coordinator. The public embedded API does not start a coordinator; start one with Dagu server commands such as `dagu coordinator` or `dagu start-all` with coordinator settings.
+
+`type: incremental` workflows cannot use distributed execution. Run them with `ExecutionModeLocal`; distributed requests are rejected because materialization fencing is local-only.
 
 The embedded coordinator client requires TLS configuration unless plaintext is explicitly enabled. For a local plaintext coordinator:
 

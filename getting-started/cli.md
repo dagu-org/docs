@@ -109,6 +109,7 @@ dagu start [options] DAG_NAME_OR_FILE [-- PARAMS...]
 - `--run-id, -r` - Custom run ID
 - `--from-run-id` - Re-run using the DAG snapshot and parameters captured from a historic run
 - `--profile` - Runtime profile to apply to this run
+- `--no-reuse` - Recompute eligible incremental steps instead of reusing prior materializations
 
 > **Note:** `--from-run-id` cannot be combined with `--params`, `--parent`, or `--root`. Provide exactly one DAG name or file so the command can look up the historic run.
 
@@ -124,6 +125,9 @@ dagu start --run-id batch-001 etl.yaml
 
 # Select a runtime profile
 dagu start --profile prod etl.yaml
+
+# Recompute every eligible incremental step
+dagu start --no-reuse report-pipeline.yaml
 
 # Override DAG name
 dagu start --name my_custom_name my-workflow.yaml
@@ -615,12 +619,14 @@ dagu dry [options] DAG_FILE [-- PARAMS...]
 - `--params, -p` - Parameters as JSON
 - `--name, -N` - Override the DAG name (default: name from DAG definition or filename)
 - `--profile` - Runtime profile to use during the dry run
+- `--no-reuse` - Preview an incremental run with reuse disabled
 
 ```bash
 dagu dry my-workflow.yaml
 dagu dry etl.yaml -- DATE=2024-01-01  # With parameters
 dagu dry --name my_custom_name my-workflow.yaml  # Override DAG name
 dagu dry --profile prod my-workflow.yaml
+dagu dry --no-reuse report-pipeline.yaml
 ```
 
 ### `enqueue`
@@ -637,6 +643,7 @@ dagu enqueue [options] DAG_FILE [-- PARAMS...]
 - `--name, -N` - Override the DAG name (default: name from DAG definition or filename)
 - `--queue, -u` - Override DAG-level queue name for this enqueue
 - `--profile` - Runtime profile to apply when the queued run starts
+- `--no-reuse` - Recompute eligible incremental steps when the queued run starts
 
 ```bash
 dagu enqueue my-workflow.yaml
@@ -647,7 +654,10 @@ dagu enqueue --queue=high-priority my-workflow.yaml
 dagu enqueue --name my_custom_name my-workflow.yaml
 # Select a runtime profile
 dagu enqueue --profile prod my-workflow.yaml
+dagu enqueue --no-reuse report-pipeline.yaml
 ```
+
+See [Incremental Workflows](/writing-workflows/incremental-workflows) for reuse decisions and dry-run behavior.
 
 ### `profile`
 

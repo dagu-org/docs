@@ -184,6 +184,10 @@ export DAGU_DEFAULT_EXECUTION_MODE=distributed
 
 When set to `distributed`, every DAG is dispatched to a worker through the coordinator — even if it has no `worker_selector`. DAGs with a `worker_selector` are always dispatched to a matching worker regardless of this setting.
 
+::: warning Incremental workflows are local-only
+`type: incremental` requires local file fencing and is rejected in distributed mode. When the server default is distributed, set `worker_selector: local` on each incremental workflow. See [Incremental Workflows](/writing-workflows/incremental-workflows).
+:::
+
 ### Human Tasks on Distributed Workers
 
 Root DAGs containing [`action: human.task`](/writing-workflows/human-tasks) use normal dispatch rules. They may select a worker with a label-based DAG-level `worker_selector`, follow `default_execution_mode: distributed`, or remain local.

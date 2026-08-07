@@ -14,6 +14,8 @@ Dagu-owned value references are scoped:
 | `${params.name}` | Named runtime parameter |
 | `${env.NAME}` | Value from the current environment scope |
 | `${steps.step_id.outputs.name}` | Declared output from a completed dependency step |
+| `${inputs.name}` | Final path of a declared input in an incremental step |
+| `${outputs.name}` | Per-attempt staging path of a declared incremental output |
 | `${context.run.id}` | Dagu-managed metadata for the current run, attempt, step, trigger, path, profile, or push-back scope |
 
 These forms are validated more precisely than bare `${NAME}` text. They let Dagu identify unknown params, missing environment values, unknown step ids, unknown output names, and missing dependencies.
@@ -141,6 +143,31 @@ Rules:
 - The producing step must complete successfully before the consuming step starts.
 - The consuming step must depend directly or transitively on the producing step.
 - Step output references do not create dependencies.
+
+## Incremental File Paths
+
+In a `type: incremental` workflow, `${inputs.name}` resolves to a declared input's absolute final path. `${outputs.name}` resolves to a fresh staging path and is available only while the owning command or shell attempt executes. After a successful commit or reuse, `${steps.step_id.outputs.name}` exposes the final output path to dependencies.
+
+```yaml
+type: incremental
+working_dir: /srv/build
+
+steps:
+  - id: compile
+    inputs:
+      - name: source
+        path: source.txt
+    outputs:
+      - name: binary
+        path: app.bin
+    run: compiler "${inputs.source}" -o "${outputs.binary}"
+
+  - id: inspect
+    depends: compile
+    run: file "${steps.compile.outputs.binary}"
+```
+
+See [Incremental Workflows](/writing-workflows/incremental-workflows) for path resolution, inferred dependencies, and reuse behavior.
 
 ## Escaping Dagu References
 

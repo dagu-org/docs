@@ -525,7 +525,8 @@ Creates and starts a DAG run with optional parameters.
   "params": "{\"env\": \"production\", \"version\": \"1.2.3\"}",
   "dagRunId": "custom-run-id",
   "dagName": "on-demand-data-load",
-  "singleton": false
+  "singleton": false,
+  "noReuse": false
 }
 ```
 
@@ -536,6 +537,7 @@ Creates and starts a DAG run with optional parameters.
 | dagRunId | string | Custom run ID | No |
 | dagName | string | Override the DAG name used for this run (must satisfy DAG name validation) | No |
 | singleton | boolean | If true, prevent starting if DAG is already running (returns 409) | No |
+| noReuse | boolean | If true, recompute eligible incremental steps instead of reusing prior materializations | No |
 
 > **Tip:** Overriding the DAG name changes the identifier used for queue grouping, which is useful for ad-hoc executions that should not collide with scheduled runs.
 
@@ -572,7 +574,8 @@ Creates and starts a DAG run, waits for it to complete (or timeout), and returns
   "params": "{\"env\": \"production\"}",
   "dagRunId": "custom-run-id",
   "dagName": "sync-execution",
-  "singleton": false
+  "singleton": false,
+  "noReuse": false
 }
 ```
 
@@ -584,6 +587,7 @@ Creates and starts a DAG run, waits for it to complete (or timeout), and returns
 | dagRunId | string | Custom run ID | No |
 | dagName | string | Override the DAG name used for this run | No |
 | singleton | boolean | If true, prevent starting if DAG is already running (returns 409) | No |
+| noReuse | boolean | If true, recompute eligible incremental steps instead of reusing prior materializations | No |
 
 **Response (200)** - DAG completed or reached waiting status:
 ```json
@@ -645,7 +649,8 @@ Adds a DAG run to the queue for later execution.
   "params": "{\"key\": \"value\"}",
   "dagRunId": "optional-custom-id",
   "dagName": "queued-ad-hoc-run",
-  "queue": "optional-queue-override"
+  "queue": "optional-queue-override",
+  "noReuse": false
 }
 ```
 
@@ -656,6 +661,7 @@ Adds a DAG run to the queue for later execution.
 | dagRunId | string | Custom run ID | No |
 | dagName | string | Override the DAG name used for the queued run (must satisfy DAG name validation) | No |
 | queue | string | Queue name override | No |
+| noReuse | boolean | If true, recompute eligible incremental steps when the queued run starts | No |
 
 > **Tip:** When you override the DAG name, the queued run is tracked under the new identifier for both queue management and history records.
 
@@ -995,7 +1001,8 @@ Creates and starts a DAG-run directly from an inline YAML specification without 
   "name": "ad-hoc-extract",
   "params": "{\"env\":\"prod\"}",
   "dagRunId": "20241101_010203_custom",
-  "singleton": true
+  "singleton": true,
+  "noReuse": false
 }
 ```
 
@@ -1007,6 +1014,7 @@ Creates and starts a DAG-run directly from an inline YAML specification without 
 | params | string | JSON string persisted with the DAG-run and exposed to steps | No |
 | dagRunId | string | Explicit run identifier. If omitted, one is generated | No |
 | singleton | boolean | When true, aborts with `409` if the DAG already has active or queued runs | No |
+| noReuse | boolean | If true, recompute eligible incremental steps instead of reusing prior materializations | No |
 
 **Response (200)**:
 ```json
@@ -1060,7 +1068,8 @@ Queues a DAG-run from an inline YAML spec without persisting a DAG file. The run
   "name": "queued-sleeper",
   "params": "{\"duration\":60}",
   "dagRunId": "queue_20241101_010203",
-  "queue": "low-priority"
+  "queue": "low-priority",
+  "noReuse": false
 }
 ```
 
@@ -1072,6 +1081,7 @@ Queues a DAG-run from an inline YAML spec without persisting a DAG file. The run
 | params | string | JSON string saved with the queued run | No |
 | dagRunId | string | Explicit run ID. When omitted, one is generated | No |
 | queue | string | Queue name override for this run only | No |
+| noReuse | boolean | If true, recompute eligible incremental steps when the queued run starts | No |
 
 **Response (200)**:
 ```json
@@ -1177,6 +1187,40 @@ When the returned DAG run is still `queued`, `dagRun.conditions` can contain que
   }
 }
 ```
+
+#### Incremental Execution Data
+
+For `type: incremental` workflows, the DAG-run object includes `noReuse`, and each node includes an `incremental` decision:
+
+```json
+{
+  "dagRun": {
+    "noReuse": false,
+    "nodes": [
+      {
+        "statusLabel": "succeeded",
+        "incremental": {
+          "decision": "reuse",
+          "phase": "complete",
+          "reason": "matched",
+          "detail": "recipe, inputs, and output match the committed manifest",
+          "fingerprint": "sha256:...",
+          "materializationKey": "...",
+          "producerRun": {
+            "name": "report-pipeline",
+            "id": "previous-run-id"
+          },
+          "producerAttemptId": "previous-attempt-id"
+        }
+      }
+    ]
+  }
+}
+```
+
+`decision` is one of `none`, `always`, `execute`, `reuse`, or `deferred`. `phase` is one of `precondition`, `evaluate`, `execute`, `verify`, `commit`, or `complete`. `reason` is stable for programmatic handling, while `detail` is the user-facing explanation. Producer fields are present for reused materializations.
+
+See [Incremental Workflows](/writing-workflows/incremental-workflows) for the decision rules.
 
 ### Stop or Cancel DAG Run
 

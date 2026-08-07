@@ -1,6 +1,6 @@
 # Outputs
 
-Use step outputs when one step needs to pass a validated value to a later step.
+Use step outputs when one step needs to pass a validated value or a materialized file path to a later step.
 
 The current validated reference form is:
 
@@ -8,7 +8,9 @@ The current validated reference form is:
 ${steps.<step_id>.outputs.<output_name>}
 ```
 
-For command steps, the producer must have an `id`, declare each output name in `outputs`, and write the value to `DAGU_OUTPUT_FILE`. Built-in actions can provide their own output contract. For example, a [human task](/writing-workflows/human-tasks) derives outputs from its form properties and publishes the validated operator input without an authored `outputs` field or `DAGU_OUTPUT_FILE`.
+For value outputs from command steps, the producer must have an `id`, declare each output name in `outputs`, and write the value to `DAGU_OUTPUT_FILE`. Built-in actions can provide their own output contract. For example, a [human task](/writing-workflows/human-tasks) derives outputs from its form properties and publishes the validated operator input without an authored `outputs` field or `DAGU_OUTPUT_FILE`.
+
+An [incremental workflow](/writing-workflows/incremental-workflows) can instead declare `path` on an output. The command writes the file to `${outputs.<name>}`, and dependent steps receive its final absolute path through `${steps.<id>.outputs.<name>}`. Path outputs are not written to `DAGU_OUTPUT_FILE`.
 
 ## Basic Example
 
@@ -126,6 +128,27 @@ Output names must match:
 ```
 
 Use names such as `version`, `image_tag`, `artifact_url`, or `record_count`.
+
+## Path Outputs
+
+Path-backed outputs are available only in `type: incremental` workflows:
+
+```yaml
+type: incremental
+working_dir: /srv/build
+
+steps:
+  - id: compile
+    inputs:
+      - name: source
+        path: source.txt
+    outputs:
+      - name: artifact
+        path: artifact.bin
+    run: compiler "${inputs.source}" -o "${outputs.artifact}"
+```
+
+`path` and `type` are mutually exclusive on one output declaration. An eligible reusable step declares exactly one output and that output is path-backed. See [Incremental Workflows](/writing-workflows/incremental-workflows) for dependency inference, staging, reuse, and eligibility rules.
 
 ## Large Results
 
