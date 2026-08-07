@@ -2,7 +2,7 @@
 
 Runtime profiles let you choose a named set of environment variables and secrets when a DAG run starts. They are useful when the same DAG should run against different runtime contexts, such as `dev`, `staging`, and `prod`, without copying environment values into the DAG file.
 
-A runtime profile is not part of the DAG YAML. It is selected at run time from the Web UI, CLI, or REST API. The selected profile name is recorded in run history, and the profile values are resolved when each run attempt starts.
+A runtime profile is not part of the DAG YAML. It is selected at run time from the Web UI, CLI, REST API, or an authorized webhook request. The selected profile name is recorded in run history, and the profile values are resolved when each run attempt starts.
 
 Runtime profiles are configuration overlays within a Dagu deployment. They do not isolate the scheduler, local execution host, coordinator, workers, queues, or storage. Run [separate Dagu deployments](/server-admin/deployment/multi-environment) when development, staging, and production require independent execution boundaries.
 
@@ -25,7 +25,7 @@ Runtime profiles support inherited default layers. These layers are resolved aut
 | --- | --- | --- |
 | Global defaults | Every DAG run | Installation-wide fallback variables and secrets |
 | Workspace defaults | DAGs with `labels: [workspace=<name>]` | Team- or environment-specific fallback values |
-| Selected profile | Runs started with `--profile`, `profileName`, or the Web UI selector | Explicit runtime environment chosen for that run |
+| Selected profile | Runs started with `--profile`, `profileName`, the Web UI selector, or an allowlisted webhook header | Explicit runtime environment chosen for that run |
 
 Resolution order is:
 
@@ -105,6 +105,20 @@ curl -X POST "http://localhost:8080/api/v1/dags/etl.yaml/start" \
 ```
 
 The same `profileName` field is accepted by start, synchronous start, enqueue, and inline DAG-run execution endpoints.
+
+### Webhook Runs
+
+An admin can allow specific runtime profiles on each webhook. Once configured, the caller selects one by sending `X-Dagu-Profile`:
+
+```bash
+curl -X POST http://localhost:8080/api/v1/webhooks/etl.yaml \
+  -H "Authorization: Bearer $WEBHOOK_TOKEN" \
+  -H "X-Dagu-Profile: prod"
+```
+
+The profile must be in that webhook's allowlist and must still exist and be active. Omitting the header keeps the DAG's normal default-profile resolution. Changes to the allowlist take effect without a server restart.
+
+Webhook credentials can select every profile in their allowlist, including protected profiles, so admins should grant only the profiles the integration needs. See [Webhooks](/server-admin/authentication/webhooks#select-a-runtime-profile) for configuration, HMAC signing, and error behavior.
 
 ## Scheduled Runs
 

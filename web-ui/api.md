@@ -3025,7 +3025,7 @@ Webhooks expose a DAG-specific trigger endpoint and a separate set of management
 
 **Endpoint**: `POST /api/v1/webhooks/{fileName}`
 
-The trigger endpoint uses webhook-token authentication instead of regular API authentication.
+The trigger endpoint uses the webhook's configured authentication mode instead of regular API authentication. New webhooks default to token-only authentication; other modes can require HMAC or both token and HMAC.
 
 **Path Parameters**:
 | Parameter | Type | Description |
@@ -3035,7 +3035,9 @@ The trigger endpoint uses webhook-token authentication instead of regular API au
 **Request Headers**:
 | Header | Description |
 |--------|-------------|
-| Authorization | `Bearer dagu_wh_<token>` |
+| Authorization | `Bearer dagu_wh_<token>`. Required when the webhook auth mode includes token authentication. |
+| X-Dagu-Signature | HMAC-SHA256 signature as `sha256=<hex>`. Required when strict HMAC enforcement is active. |
+| X-Dagu-Profile | Optional runtime profile for the run. The profile must be in the webhook's profile-selection allowlist. |
 
 **Request Body** (optional):
 ```json
@@ -3062,6 +3064,14 @@ Payload behavior is slightly broader than the schema shape:
 - If you want a custom `dagRunId` without mixing it into `WEBHOOK_PAYLOAD`, use the wrapper form shown above.
 - The maximum accepted request body is controlled by `webhooks.max_payload_size` in `config.yaml` and defaults to `1048576` bytes.
 
+If `X-Dagu-Profile` is omitted, Dagu uses the DAG's normal default-profile resolution. When HMAC is enabled, sign the exact raw request body if the profile header is absent. If the header is present, sign:
+
+```text
+x-dagu-profile:<profile>\n<raw-request-body>
+```
+
+The prefix contains the lowercase literal `x-dagu-profile`, a colon, the selected profile, and one newline byte. The header and body are therefore both covered by the signature. See [Select a Runtime Profile](/server-admin/authentication/webhooks#select-a-runtime-profile) for a complete example.
+
 **Response (200)**:
 ```json
 {
@@ -3080,6 +3090,8 @@ Payload behavior is slightly broader than the schema shape:
 
 Another `401` response is `invalid webhook token`.
 
+Missing or invalid HMAC signatures also return `401` when strict HMAC enforcement is active.
+
 **Error Response (403)**:
 ```json
 {
@@ -3097,6 +3109,12 @@ Another `401` response is `invalid webhook token`.
 ```
 
 Other `404` responses include `no webhook configured for this DAG` and `webhook triggering is not configured on this server`.
+
+Profile-selection errors include:
+
+- `400 Bad Request` for an invalid or repeated `X-Dagu-Profile` header, or a disabled selected profile
+- `403 Forbidden` when the selected profile is not in the webhook allowlist
+- `404 Not Found` when an allowlisted profile no longer exists
 
 **Error Response (409)**:
 ```json
@@ -3124,6 +3142,14 @@ Webhook management endpoints return the same public webhook object:
   "dagName": "my-dag",
   "tokenPrefix": "dagu_wh_7Kq9",
   "enabled": true,
+  "authMode": "token_only",
+  "hmac": {
+    "enabled": false,
+    "secretConfigured": false
+  },
+  "profileSelection": {
+    "allowedProfiles": ["staging", "prod"]
+  },
   "createdAt": "2026-04-29T10:00:00Z",
   "updatedAt": "2026-04-29T10:15:00Z",
   "createdBy": "user-id",
@@ -3134,6 +3160,7 @@ Webhook management endpoints return the same public webhook object:
 Notes:
 
 - `tokenPrefix` is the stored identification prefix from the full token, currently the first 12 characters when available.
+- `profileSelection.allowedProfiles` lists the runtime profiles callers may select with `X-Dagu-Profile`. An empty list disables caller selection.
 
 ### List All Webhooks
 
@@ -3196,6 +3223,31 @@ Creates the webhook record and returns the full token once. Requires developer, 
 ```
 
 The `token` field is returned only at creation and token-regeneration time.
+
+### Configure Webhook Profile Selection
+
+**Endpoint**: `PUT /api/v1/dags/{fileName}/webhook/profile-selection`
+
+Replaces the runtime profiles that callers may select with `X-Dagu-Profile`. This endpoint is admin-only.
+
+**Request Body**:
+
+```json
+{
+  "allowedProfiles": ["staging", "prod"]
+}
+```
+
+`allowedProfiles` is required. Each profile must exist and be active. Send `[]` to explicitly clear the policy and disable caller selection. Missing or `null` `allowedProfiles` values return `400 Bad Request`.
+
+**Response (200)**: The updated [webhook details](#webhook-details-shape).
+
+Policy changes apply to subsequent trigger requests immediately; the server does not need to be restarted.
+
+**Error Responses**:
+
+- `400 Bad Request`: invalid, disabled, or missing profile input
+- `404 Not Found`: webhook or requested runtime profile not found
 
 ### Regenerate Webhook Token
 

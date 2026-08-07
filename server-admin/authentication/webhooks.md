@@ -18,7 +18,7 @@ Behavior when builtin auth is not available:
 - Management endpoints return `401 Unauthorized`
 - The trigger endpoint returns `404 Not Found`
 
-Webhook management endpoints require developer, manager, or admin role.
+Most webhook management endpoints require developer, manager, or admin role. Configuring which runtime profiles webhook callers may select is admin-only.
 
 ## Create a Webhook
 
@@ -42,6 +42,14 @@ Response:
     "dagName": "my-dag",
     "tokenPrefix": "dagu_wh_7Kq9",
     "enabled": true,
+    "authMode": "token_only",
+    "hmac": {
+      "enabled": false,
+      "secretConfigured": false
+    },
+    "profileSelection": {
+      "allowedProfiles": []
+    },
     "createdAt": "2026-04-29T10:00:00Z",
     "updatedAt": "2026-04-29T10:00:00Z",
     "createdBy": "user-id"
@@ -54,7 +62,7 @@ The full `token` value is only returned when the webhook is created or when the 
 
 ## Trigger Requests
 
-Trigger requests use the webhook token:
+New webhooks use token authentication by default. Trigger requests send the webhook token as a bearer token:
 
 ```bash
 curl -X POST http://localhost:8080/api/v1/webhooks/my-dag \
@@ -78,6 +86,71 @@ Response:
   "dagName": "my-dag"
 }
 ```
+
+## Select a Runtime Profile
+
+Webhook callers can select a [runtime profile](/writing-workflows/runtime-profiles) only when an admin has added that profile to the webhook's allowlist. Without an allowlist, the `X-Dagu-Profile` header is rejected.
+
+In the Web UI, open the DAG's **Webhook** tab, find **Runtime profile selection**, select the active profiles callers may use, and save the policy. Non-admin users can view the policy, but only admins can change it.
+
+The same policy can be replaced through the API:
+
+```bash
+curl -X PUT http://localhost:8080/api/v1/dags/my-dag/webhook/profile-selection \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"allowedProfiles":["staging","prod"]}'
+```
+
+`allowedProfiles` is required. Every listed profile must exist and be active when the policy is saved. Send an explicit empty list to disable caller selection:
+
+```json
+{
+  "allowedProfiles": []
+}
+```
+
+Once a profile is allowed, select it on a trigger request:
+
+```bash
+curl -X POST http://localhost:8080/api/v1/webhooks/my-dag \
+  -H "Authorization: Bearer $WEBHOOK_TOKEN" \
+  -H "X-Dagu-Profile: staging" \
+  -H "Content-Type: application/json" \
+  -d '{"payload":{"branch":"main"}}'
+```
+
+Dagu verifies the allowlist and confirms that the selected profile still exists and is active before starting the run. If `X-Dagu-Profile` is omitted, the run uses the DAG's normal default-profile resolution. Policy changes take effect on subsequent trigger requests without restarting the server.
+
+Treat the webhook credential as permission to use every profile in its allowlist, including protected profiles. Keep each allowlist as narrow as possible and rotate the credential if it is exposed.
+
+When managing or triggering a webhook through a remote node, include the same `remoteNode` query parameter on the management and trigger URLs.
+
+### Sign Requests That Select a Profile
+
+For webhooks with HMAC enabled, the signature input depends on whether the request selects a profile:
+
+- Without `X-Dagu-Profile`, sign the exact raw request body.
+- With `X-Dagu-Profile`, sign `x-dagu-profile:<profile>\n<raw-request-body>`.
+
+The prefix uses the lowercase literal `x-dagu-profile`, followed by a colon, the selected profile, one newline byte, and the exact raw body. Send the lowercase hexadecimal digest as `X-Dagu-Signature: sha256=<hex>`.
+
+```bash
+body='{"payload":{"branch":"main"}}'
+profile='staging'
+signature_input=$(printf 'x-dagu-profile:%s\n%s' "$profile" "$body")
+signature=$(printf '%s' "$signature_input" | \
+  openssl dgst -sha256 -hmac "$DAGU_HMAC_SECRET" -hex | sed 's/^.* //')
+
+curl -X POST http://localhost:8080/api/v1/webhooks/my-dag \
+  -H "Authorization: Bearer $WEBHOOK_TOKEN" \
+  -H "X-Dagu-Profile: $profile" \
+  -H "X-Dagu-Signature: sha256=$signature" \
+  -H "Content-Type: application/json" \
+  -d "$body"
+```
+
+Changing either the selected profile or the body invalidates the signature. The Web UI's **Generate HMAC** examples automatically use an active profile from the webhook policy; if none is active, they omit the profile header.
 
 ### Payload Handling
 
@@ -155,6 +228,15 @@ curl -X POST http://localhost:8080/api/v1/dags/my-dag/webhook/toggle \
   -d '{"enabled":false}'
 ```
 
+Replace the profiles callers may select (admin only):
+
+```bash
+curl -X PUT http://localhost:8080/api/v1/dags/my-dag/webhook/profile-selection \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"allowedProfiles":["staging"]}'
+```
+
 Delete the webhook:
 
 ```bash
@@ -165,8 +247,9 @@ curl -X DELETE http://localhost:8080/api/v1/dags/my-dag/webhook \
 ## Common Trigger Responses
 
 - `200 OK`: DAG run was enqueued
-- `401 Unauthorized`: missing or invalid authorization header, or invalid webhook token
-- `403 Forbidden`: webhook is disabled
-- `404 Not Found`: no webhook is configured for the DAG, the DAG was not found, or webhook triggering is not configured on the server
+- `400 Bad Request`: invalid `X-Dagu-Profile` header, invalid request body, or the selected profile is disabled
+- `401 Unauthorized`: missing or invalid webhook token, or missing or invalid HMAC signature when strict HMAC enforcement is active
+- `403 Forbidden`: webhook is disabled, or the selected profile is not in the webhook allowlist
+- `404 Not Found`: no webhook is configured for the DAG, the DAG or selected profile was not found, or webhook triggering is not configured on the server
 - `409 Conflict`: the supplied `dagRunId` already exists
 - `413 Payload Too Large`: request body exceeded `webhooks.max_payload_size`
