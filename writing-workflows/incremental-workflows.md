@@ -54,7 +54,7 @@ On later runs, Dagu reuses the step only when all of these still match:
 
 Changing an input, command, parameter, environment value, tool configuration, working directory, or output file causes the step to execute again. If the final output is missing or modified, Dagu recomputes it; incremental workflows do not restore a separate cached copy.
 
-A reused step is reported as succeeded. It is not skipped, and `${steps.<id>.outputs.<name>}` still publishes the final output path to dependent steps.
+A reused step is reported as succeeded. It is not skipped, and `${steps.<id>.outputs.<name>}` still publishes the final output path to dependent steps. Reuse does not create new stdout, stderr, exit-code, or legacy `output`/`outputs` values, so a potentially reusable producer cannot be referenced through `${step_id.stdout}`, `${step_id.stderr}`, `${step_id.exit_code}`, `${step_id.output}`, or `${step_id.outputs}`. Use the declared path reference instead.
 
 ## Path References
 
@@ -108,6 +108,8 @@ Dagu holds shared locks for declared inputs and an exclusive lock for the output
 
 Each retry gets a fresh staging path. If an attempt fails, times out, or is aborted, Dagu removes its staging file and leaves the previous final output and manifest unchanged. Before commit, Dagu also verifies that the declared inputs did not change during execution.
 
+Path-output steps cannot use `continue_on.mark_success`. Treating a failed attempt as successful would let dependent steps observe an old or missing final output without a new commit.
+
 ## Preview or Disable Reuse
 
 Use `dagu dry` to preview incremental decisions without executing commands or creating locks, staging files, manifests, or run history:
@@ -126,7 +128,7 @@ dagu enqueue --no-reuse report-pipeline.yaml
 dagu dry --no-reuse report-pipeline.yaml
 ```
 
-The Web UI exposes the same behavior as **Disable reuse for this run** in the start dialog. API clients can send `noReuse: true`, and embedded applications can pass `dagu.WithNoReuse(true)`.
+The Web UI exposes the same behavior as **Disable reuse for this run** in the start and enqueue dialogs. REST and MCP `dagu_execute` clients can send `noReuse: true`, and embedded applications can pass `dagu.WithNoReuse(true)`.
 
 ## Inspect Decisions
 
