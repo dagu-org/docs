@@ -102,6 +102,8 @@ Incremental execution is currently local-only. A distributed execution request i
 
 Dagu holds shared locks for declared inputs and an exclusive lock for the output while it evaluates and executes a path-backed step. Incremental runs using the same local Dagu data store therefore cannot publish conflicting materializations. Dagu also verifies input contents again before commit, so an external change fails the attempt instead of publishing an inconsistent output.
 
+`stdout`, `stderr`, `stdout.artifact`, and `stderr.artifact` destinations cannot resolve to a declared incremental input or output. This keeps stream capture from modifying an input or final materialization before verification and commit.
+
 Each retry gets a fresh staging path. If an attempt fails, times out, or is aborted, Dagu removes its staging file and leaves the previous final output and manifest unchanged. Before commit, Dagu also verifies that the declared inputs did not change during execution.
 
 ## Preview or Disable Reuse
