@@ -218,6 +218,11 @@ Configure SMTP and email alerts for all DAGs:
 
 ```yaml
 # base.yaml
+env:
+  - SMTP_TENANT_ID: ${SMTP_TENANT_ID}
+  - SMTP_CLIENT_ID: ${SMTP_CLIENT_ID}
+  - SMTP_CLIENT_SECRET: ${SMTP_CLIENT_SECRET}
+
 smtp:
   host: smtp.sendgrid.net
   port: 587
@@ -248,6 +253,26 @@ wait_mail:
     - approvers@mycompany.com
   prefix: "[APPROVAL REQUIRED]"
 ```
+
+You can configure SMTP OAuth in the base file instead of a password. OAuth
+providers have a fixed STARTTLS endpoint, so omit `host` and `port`:
+
+```yaml
+# base.yaml
+smtp:
+  username: alerts@contoso.com
+  oauth:
+    provider: microsoft
+    tenant_id: "${env.SMTP_TENANT_ID}"
+    client_id: "${env.SMTP_CLIENT_ID}"
+    client_secret: "${env.SMTP_CLIENT_SECRET}"
+```
+
+Treat an OAuth-enabled `smtp` block as an atomic credential configuration. A
+DAG that overrides it must provide a complete replacement; individual SMTP
+fields are not merged across OAuth and password identities. See
+[Email Notifications](/writing-workflows/email-notifications#smtp-providers)
+for all providers and their authorization prerequisites.
 
 ### Execution Defaults
 

@@ -59,7 +59,10 @@ Open **Notifications > Channels** to create destinations before adding rules.
 
 For Google Chat or another service without a dedicated channel type, use a generic webhook and customize its JSON body to match the receiver's payload format.
 
-Channel secrets such as webhook URLs, HMAC secrets, SMTP passwords, and bot tokens are stored encrypted. The UI shows redacted previews after save.
+Dagu encrypts channel secrets at rest, including webhook URLs, HMAC secrets,
+SMTP passwords, OAuth client secrets, refresh tokens, service-account JSON, and
+bot tokens. The API never returns SMTP secret values; the UI shows whether each
+secret is configured after save.
 
 ### Microsoft Teams
 
@@ -90,10 +93,39 @@ After saving the channel, use the **Test** action to confirm that the bot can po
 
 Email has two layers:
 
-- **Email Delivery** configures the SMTP transport: host, port, username, password, and default sender.
+- **Email Delivery** configures the SMTP transport, authentication, and default sender.
 - **Email channels** configure recipients, subject/body templates, and whether to attach logs.
 
 Configure SMTP once on the Channels page, then reuse email channels from Global, workspace, or DAG rules.
+
+Email Delivery supports two authentication modes:
+
+| Authentication | Configuration |
+| --- | --- |
+| **Password** | SMTP host, port, username, password, and default sender |
+| **OAuth 2.0** | Provider, sender mailbox, provider credentials, and default sender |
+
+OAuth 2.0 supports these providers:
+
+| Provider | Required credentials |
+| --- | --- |
+| **Microsoft 365** | Tenant ID, client ID, and client secret |
+| **Google Workspace service account** | Service-account JSON with domain-wide delegation |
+| **Google refresh token** | OAuth client ID, client secret, and refresh token |
+
+For OAuth, Dagu selects the provider endpoint automatically and disables the
+host and port fields. Microsoft uses `smtp.office365.com:587`; Google uses
+`smtp.gmail.com:587`. OAuth delivery requires STARTTLS and XOAUTH2.
+
+Leaving a secret field blank preserves the stored value only while the OAuth
+identity is unchanged. Changing the provider, sender mailbox, Microsoft tenant
+ID, or OAuth client ID invalidates the stored credential state; enter the
+required secret for the new identity before saving. Switching to Password and
+saving removes the OAuth configuration.
+
+Finish the provider setup before testing delivery. See
+[Email Notifications](/writing-workflows/email-notifications#smtp-providers)
+for Microsoft and Google setup instructions.
 
 ## Rules
 

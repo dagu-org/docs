@@ -24,7 +24,9 @@ steps:
 
 Configure SMTP at DAG-level for all mail steps. For global configuration, see [Email Notifications](/writing-workflows/email-notifications#smtp-configuration).
 
-### Common Providers
+### Password Authentication
+
+Use password authentication only when the SMTP provider still accepts it.
 
 ```yaml
 # Gmail
@@ -34,13 +36,6 @@ smtp:
   username: "your-email@gmail.com"
   password: "app-specific-password"  # Not regular password
 
-# Office 365
-smtp:
-  host: "smtp.office365.com"
-  port: "587"
-  username: "${env.SMTP_USER}"
-  password: "${env.SMTP_PASS}"
-
 # AWS SES
 smtp:
   host: "email-smtp.us-east-1.amazonaws.com"
@@ -48,6 +43,33 @@ smtp:
   username: "${env.AWS_SES_SMTP_USER}"
   password: "${env.AWS_SES_SMTP_PASSWORD}"
 ```
+
+### OAuth 2.0
+
+OAuth uses the same DAG-level `smtp` block and therefore works for every
+`mail.send` step and mail notification in the DAG. Omit `host`, `port`, and
+`password`; Dagu selects the provider's STARTTLS endpoint and authenticates with
+XOAUTH2.
+
+```yaml
+env:
+  - SMTP_TENANT_ID: ${SMTP_TENANT_ID}
+  - SMTP_CLIENT_ID: ${SMTP_CLIENT_ID}
+  - SMTP_CLIENT_SECRET: ${SMTP_CLIENT_SECRET}
+
+smtp:
+  username: alerts@contoso.com
+  oauth:
+    provider: microsoft
+    tenant_id: "${env.SMTP_TENANT_ID}"
+    client_id: "${env.SMTP_CLIENT_ID}"
+    client_secret: "${env.SMTP_CLIENT_SECRET}"
+```
+
+Supported provider values are `microsoft`, `google_service_account`, and
+`google_refresh`. See [Email Notifications](/writing-workflows/email-notifications#smtp-providers)
+for the required fields, Google examples, provider authorization steps, and
+SMTP inheritance behavior.
 
 ### Variable Expansion
 

@@ -12,6 +12,15 @@ The YAML fields on this page are useful when you want email behavior to travel w
 
 ## SMTP Configuration
 
+Dagu supports password authentication and OAuth 2.0. Both modes use the same
+`smtp` block. Dagu uses the selected transport for workflow notifications and
+`mail.send` steps.
+
+`password` and `oauth` are mutually exclusive. When `oauth` is configured,
+Dagu connects to the provider's SMTP submission endpoint on port `587`, requires
+STARTTLS, and authenticates only when the server advertises XOAUTH2. OAuth does
+not fall back to password authentication.
+
 ### Base Configuration
 
 Set up SMTP defaults in the base configuration inherited by DAGs:
@@ -51,6 +60,33 @@ smtp:
 
 For Web UI-managed notification rules, configure email delivery from [Notifications](/web-ui/notifications) instead of DAG YAML.
 
+### OAuth 2.0
+
+Every OAuth configuration requires `smtp.username`. This is the mailbox Dagu
+authenticates as and, for Google Workspace service accounts, the user delegated
+to the service account.
+
+| Provider | `provider` value | Required OAuth fields |
+| --- | --- | --- |
+| Microsoft 365 application | `microsoft` | `tenant_id`, `client_id`, `client_secret` |
+| Google Workspace service account | `google_service_account` | `service_account_json` |
+| Google user refresh token | `google_refresh` | `client_id`, `client_secret`, `refresh_token` |
+
+OAuth provider endpoints are fixed:
+
+| Provider | SMTP endpoint |
+| --- | --- |
+| Microsoft 365 | `smtp.office365.com:587` |
+| Google | `smtp.gmail.com:587` |
+
+Omit `host` and `port` in OAuth configurations. If either field is present, it
+must match the endpoint above.
+
+OAuth fields support the same DAG-scoped environment and secret references as
+password SMTP fields. Keep client secrets, refresh tokens, and service-account
+JSON out of the DAG file; import them through `env:` or a
+[secret provider](/writing-workflows/secrets).
+
 ## DAG-Level Configuration
 
 Override global settings per DAG:
@@ -83,6 +119,16 @@ wait_mail:
   prefix: "[WAITING]"
   attach_logs: false
 ```
+
+### OAuth Inheritance
+
+An OAuth-enabled `smtp` block is inherited as one credential boundary. If a
+base configuration uses OAuth and a child DAG defines any `smtp` fields, the
+child block replaces the complete inherited SMTP configuration. The same rule
+applies when a child switches a password-based base configuration to OAuth.
+
+Repeat the complete SMTP identity and credentials in an override. Dagu does not
+merge a username from one configuration with OAuth credentials from another.
 
 ## Email Triggers
 
@@ -212,7 +258,88 @@ handler_on:
 
 ## SMTP Providers
 
-### Gmail
+### Microsoft 365 Application
+
+This mode uses the OAuth client-credentials grant for unattended delivery.
+
+```yaml
+env:
+  - SMTP_TENANT_ID: ${SMTP_TENANT_ID}
+  - SMTP_CLIENT_ID: ${SMTP_CLIENT_ID}
+  - SMTP_CLIENT_SECRET: ${SMTP_CLIENT_SECRET}
+
+smtp:
+  username: alerts@contoso.com
+  oauth:
+    provider: microsoft
+    tenant_id: "${env.SMTP_TENANT_ID}"
+    client_id: "${env.SMTP_CLIENT_ID}"
+    client_secret: "${env.SMTP_CLIENT_SECRET}"
+```
+
+Before using this configuration:
+
+1. Register an application in Microsoft Entra ID.
+2. Grant the Office 365 Exchange Online `SMTP.SendAsApp` application permission
+   and admin consent.
+3. Register the application's service principal in Exchange Online and grant
+   it access to the sender mailbox.
+4. Ensure SMTP AUTH is enabled for the organization and mailbox.
+
+See Microsoft's
+[SMTP OAuth application-authentication guide](https://learn.microsoft.com/en-us/exchange/client-developer/legacy-protocols/how-to-authenticate-an-imap-pop-smtp-application-by-using-oauth#authenticate-connection-requests)
+and [SMTP AUTH settings](https://learn.microsoft.com/en-us/exchange/clients-and-mobile-in-exchange-online/authenticated-client-smtp-submission).
+
+### Google Workspace Service Account
+
+This mode impersonates the mailbox in `smtp.username` through domain-wide
+delegation. It is for Google Workspace domains, not consumer Gmail accounts.
+
+```yaml
+env:
+  - GMAIL_SERVICE_ACCOUNT_JSON: ${GMAIL_SERVICE_ACCOUNT_JSON}
+
+smtp:
+  username: alerts@example.com
+  oauth:
+    provider: google_service_account
+    service_account_json: "${env.GMAIL_SERVICE_ACCOUNT_JSON}"
+```
+
+Enable domain-wide delegation for the service account, then authorize its
+numeric client ID in the Google Admin console with the
+`https://mail.google.com/` scope. The delegated user must be a mailbox in the
+Workspace domain.
+
+See Google's [service-account delegation guide](https://developers.google.com/identity/protocols/oauth2/service-account#delegatingauthority)
+and [Gmail XOAUTH2 guide](https://developers.google.com/workspace/gmail/imap/xoauth2-protocol).
+
+### Google Refresh Token
+
+Use this mode when an OAuth client already has a refresh token for the mailbox.
+Dagu refreshes access tokens but does not run the interactive authorization
+flow that creates the refresh token.
+
+```yaml
+env:
+  - GMAIL_CLIENT_ID: ${GMAIL_CLIENT_ID}
+  - GMAIL_CLIENT_SECRET: ${GMAIL_CLIENT_SECRET}
+  - GMAIL_REFRESH_TOKEN: ${GMAIL_REFRESH_TOKEN}
+
+smtp:
+  username: alerts@gmail.com
+  oauth:
+    provider: google_refresh
+    client_id: "${env.GMAIL_CLIENT_ID}"
+    client_secret: "${env.GMAIL_CLIENT_SECRET}"
+    refresh_token: "${env.GMAIL_REFRESH_TOKEN}"
+```
+
+The refresh token must be issued to the same OAuth client with offline access
+and the `https://mail.google.com/` scope. See Google's
+[offline-access guide](https://developers.google.com/identity/protocols/oauth2/web-server#offline).
+
+### Gmail App Password
 
 ```yaml
 smtp:
@@ -220,16 +347,6 @@ smtp:
   port: "587"
   username: your-email@gmail.com
   password: app-specific-password  # Use app password, not regular password
-```
-
-### Office 365
-
-```yaml
-smtp:
-  host: smtp.office365.com
-  port: "587"
-  username: your-email@company.com
-  password: your-password
 ```
 
 ### SendGrid

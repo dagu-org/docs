@@ -679,6 +679,17 @@ Step-level `with` overrides DAG-level `kubernetes` using Kubernetes merge rules:
 | `info_mail` | object | Mail settings for success notifications. |
 | `wait_mail` | object | Mail settings for wait/approval notifications. |
 | `smtp` | object | SMTP connection settings. |
+| `smtp.host` | string | SMTP host. Optional for OAuth; an explicit value must match the provider endpoint. |
+| `smtp.port` | string or integer | SMTP port. Optional for OAuth; an explicit value must be `587`. |
+| `smtp.username` | string | SMTP username. Required with OAuth and when password authentication is used. |
+| `smtp.password` | string | SMTP password. Mutually exclusive with `smtp.oauth`. |
+| `smtp.oauth` | object | Provider-specific OAuth credentials. Mutually exclusive with `smtp.password`. |
+| `smtp.oauth.provider` | string | `microsoft`, `google_service_account`, or `google_refresh`. |
+| `smtp.oauth.tenant_id` | string | Microsoft Entra tenant ID. |
+| `smtp.oauth.client_id` | string | Microsoft or Google OAuth client ID. |
+| `smtp.oauth.client_secret` | string | Microsoft or Google OAuth client secret. |
+| `smtp.oauth.service_account_json` | string | Google service-account credential JSON. |
+| `smtp.oauth.refresh_token` | string | Google OAuth refresh token. |
 
 ```yaml
 mail_on:
@@ -699,6 +710,30 @@ smtp:
   username: notifications@example.com
   password: ${env.SMTP_PASSWORD}
 ```
+
+OAuth field requirements depend on the provider:
+
+| Provider | Required fields in `smtp.oauth` | SMTP endpoint |
+| --- | --- | --- |
+| `microsoft` | `tenant_id`, `client_id`, `client_secret` | `smtp.office365.com:587` |
+| `google_service_account` | `service_account_json` | `smtp.gmail.com:587` |
+| `google_refresh` | `client_id`, `client_secret`, `refresh_token` | `smtp.gmail.com:587` |
+
+```yaml
+smtp:
+  username: notifications@contoso.com
+  oauth:
+    provider: microsoft
+    tenant_id: "${env.SMTP_TENANT_ID}"
+    client_id: "${env.SMTP_CLIENT_ID}"
+    client_secret: "${env.SMTP_CLIENT_SECRET}"
+```
+
+OAuth SMTP requires STARTTLS and a server that advertises XOAUTH2. When an
+inherited or overriding SMTP configuration uses OAuth, the complete `smtp`
+block is replaced instead of merging individual credential fields. See
+[Email Notifications](/writing-workflows/email-notifications#smtp-providers) for
+provider setup and complete examples.
 
 `mail.send` step inputs use `message`, not `body`.
 
