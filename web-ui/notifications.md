@@ -113,6 +113,23 @@ OAuth 2.0 supports these providers:
 | **Google Workspace service account** | Service-account JSON with domain-wide delegation |
 | **Google refresh token** | OAuth client ID, client secret, and refresh token |
 
+OAuth is optional for Gmail. Choose the authentication method based on how the
+sender mailbox is managed:
+
+| Gmail setup | Authentication to choose |
+| --- | --- |
+| Personal Gmail or one manually managed mailbox | **Password**, using a Google app password |
+| Centrally managed Google Workspace automation | **OAuth 2.0 → Google Workspace service account** |
+| Existing Google OAuth client and refresh token, or a policy that prohibits app passwords | **OAuth 2.0 → Google refresh token** |
+
+For the simplest personal Gmail setup, enable 2-Step Verification, create a
+[Google app password](https://myaccount.google.com/apppasswords), then select
+**Password** in Email Delivery. Enter `smtp.gmail.com`, port `587`, the Gmail
+address as the username, and the 16-character app password as the password. Do
+not enter the account's normal password. App passwords may be unavailable for
+some work or school accounts and accounts protected by certain advanced
+security settings; see [Google's app-password documentation](https://support.google.com/accounts/answer/185833).
+
 For OAuth, Dagu selects the provider endpoint automatically and disables the
 host and port fields. Microsoft uses `smtp.office365.com:587`; Google uses
 `smtp.gmail.com:587`. OAuth delivery requires STARTTLS and XOAUTH2.

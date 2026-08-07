@@ -290,6 +290,41 @@ See Microsoft's
 [SMTP OAuth application-authentication guide](https://learn.microsoft.com/en-us/exchange/client-developer/legacy-protocols/how-to-authenticate-an-imap-pop-smtp-application-by-using-oauth#authenticate-connection-requests)
 and [SMTP AUTH settings](https://learn.microsoft.com/en-us/exchange/clients-and-mobile-in-exchange-online/authenticated-client-smtp-submission).
 
+### Choosing Gmail Authentication
+
+OAuth is optional for Gmail. Dagu's password authentication accepts a Google
+app password, which is the simplest setup for personal Gmail and a single
+manually managed mailbox. The Google OAuth modes are intended for centrally
+managed Workspace automation or an existing OAuth integration.
+
+| Gmail setup | Authentication to choose |
+| --- | --- |
+| Personal Gmail or one manually managed mailbox | Gmail app password |
+| Centrally managed Google Workspace automation | Google Workspace service account |
+| Existing OAuth client and refresh token, or a policy that prohibits app passwords | Google refresh token |
+
+### Gmail App Password
+
+Enable 2-Step Verification for the Google account, then create a
+[Google app password](https://myaccount.google.com/apppasswords). Store the
+16-character app password in an environment variable or secret provider. Do
+not use the account's normal password.
+
+```yaml
+env:
+  - GMAIL_APP_PASSWORD: ${GMAIL_APP_PASSWORD}
+
+smtp:
+  host: smtp.gmail.com
+  port: "587"
+  username: your-email@gmail.com
+  password: "${env.GMAIL_APP_PASSWORD}"
+```
+
+App passwords may be unavailable for some work or school accounts, accounts
+whose 2-Step Verification uses only security keys, and accounts enrolled in
+Advanced Protection. See [Google's app-password documentation](https://support.google.com/accounts/answer/185833).
+
 ### Google Workspace Service Account
 
 This mode impersonates the mailbox in `smtp.username` through domain-wide
@@ -338,16 +373,6 @@ smtp:
 The refresh token must be issued to the same OAuth client with offline access
 and the `https://mail.google.com/` scope. See Google's
 [offline-access guide](https://developers.google.com/identity/protocols/oauth2/web-server#offline).
-
-### Gmail App Password
-
-```yaml
-smtp:
-  host: smtp.gmail.com
-  port: "587"
-  username: your-email@gmail.com
-  password: app-specific-password  # Use app password, not regular password
-```
 
 ### SendGrid
 
