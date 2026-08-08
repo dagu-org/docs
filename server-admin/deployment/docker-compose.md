@@ -75,12 +75,11 @@ This setup bypasses `/entrypoint.sh` so Dagu can run as root for Docker socket a
 
 The `./dags` mount is writable so Dagu can seed first-run examples and save DAG edits. Add `:ro` only when using immutable DAG sources.
 
-This development example enables `DAGU_DEBUG=true`. Debug mode includes HTTP request headers in access logs and can produce large log entries. Remove that environment variable or set it to `false` when the extra diagnostic detail is not needed. To disable HTTP access logs while retaining application warnings and errors, add:
+This development example enables `DAGU_DEBUG=true`. When HTTP access logging is enabled, debug mode includes request headers and can produce large log entries. Remove that environment variable or set it to `false` when the extra diagnostic detail is not needed. HTTP access logs are disabled by default. To enable them, add:
 
 ```yaml
 environment:
-  - DAGU_DEBUG=false
-  - DAGU_ACCESS_LOG_MODE=none
+  - DAGU_ACCESS_LOG_MODE=all
 ```
 
 See [Operations - Logging](/server-admin/operations#logging) for all access log modes and their behavior.

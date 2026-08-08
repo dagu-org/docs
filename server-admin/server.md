@@ -34,7 +34,7 @@ api_base_path: "/api/v1"    # API endpoint base path
 tz: "Asia/Tokyo"          # Server timezone
 debug: false              # Include DEBUG logs and HTTP request headers when true
 log_format: "text"         # Log format: "text" or "json"
-access_log_mode: "all"     # Access log mode: "all" (default), "non-public", or "none"
+access_log_mode: "none"    # Access log mode: "all", "non-public", or "none" (default)
 headless: false           # Run without Web UI
 check_updates: true       # Automatic web UI update checks (default: true)
 metrics: "private"        # Metrics endpoint access: "private" (default) or "public"
@@ -179,7 +179,7 @@ All options support `DAGU_` prefix:
 - `DAGU_TZ` - Timezone
 - `DAGU_DEBUG` - Include DEBUG logs and HTTP request headers
 - `DAGU_LOG_FORMAT` - Log format (`text`/`json`)
-- `DAGU_ACCESS_LOG_MODE` - Access log mode: `all` (default), `non-public`, or `none`; see [Operations - Logging](/server-admin/operations#http-access-logs)
+- `DAGU_ACCESS_LOG_MODE` - Access log mode: `all`, `non-public`, or `none` (default); see [Operations - Logging](/server-admin/operations#http-access-logs)
 - `DAGU_CHECK_UPDATES` - Enable automatic web UI update checks (default: `true`)
 - `DAGU_SERVER_METRICS` - Metrics endpoint access: `private` (default) or `public`
 - `DAGU_CORS_ALLOWED_ORIGINS` - Comma-separated list of allowed CORS origins (e.g. `https://app.example.com,https://other.example.com`). An empty value disables cross-origin browser access. An explicit `*` allows any origin without credentials and emits a security warning.

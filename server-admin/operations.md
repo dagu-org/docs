@@ -279,9 +279,9 @@ JSON log example:
 
 | Mode | Behavior |
 |------|----------|
-| `all` | Logs every request. This is the default. |
+| `all` | Logs every request. |
 | `non-public` | Skips the health, login, and initial setup endpoints. It also skips the metrics endpoint when metrics are public. Normal Web UI and API requests are still logged. |
-| `none` | Disables HTTP access logs. Application logs, including warnings and errors, are unaffected. |
+| `none` | Disables HTTP access logs. This is the default. Application logs, including warnings and errors, are unaffected. |
 
 To keep access logs while omitting request headers:
 
