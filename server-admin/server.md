@@ -32,7 +32,7 @@ public_url: ""            # External Web UI URL for generated links (e.g., "http
 base_path: ""              # Base path for reverse proxy (e.g., "/dagu")
 api_base_path: "/api/v1"    # API endpoint base path
 tz: "Asia/Tokyo"          # Server timezone
-debug: false              # Debug mode
+debug: false              # Include DEBUG logs and HTTP request headers when true
 log_format: "text"         # Log format: "text" or "json"
 access_log_mode: "all"     # Access log mode: "all" (default), "non-public", or "none"
 headless: false           # Run without Web UI
@@ -162,6 +162,12 @@ remote_nodes:
     skip_tls_verify: false
 ```
 
+## Logging
+
+`debug` controls application log verbosity and whether HTTP request headers are included in access logs. `access_log_mode` independently controls which HTTP requests are logged. Setting it to `none` disables access logs without disabling application warnings or errors.
+
+See [Operations - Logging](/server-admin/operations#logging) for mode behavior, configuration examples, and current filtering limitations.
+
 ## Environment Variables
 
 All options support `DAGU_` prefix:
@@ -171,9 +177,9 @@ All options support `DAGU_` prefix:
 - `DAGU_PORT` - Port (default: `8080`)
 - `DAGU_PUBLIC_URL` - External Web UI URL used in generated links, including notification DAG-run links
 - `DAGU_TZ` - Timezone
-- `DAGU_DEBUG` - Debug mode
+- `DAGU_DEBUG` - Include DEBUG logs and HTTP request headers
 - `DAGU_LOG_FORMAT` - Log format (`text`/`json`)
-- `DAGU_ACCESS_LOG_MODE` - Access log mode: `all` (default), `non-public`, or `none`
+- `DAGU_ACCESS_LOG_MODE` - Access log mode: `all` (default), `non-public`, or `none`; see [Operations - Logging](/server-admin/operations#http-access-logs)
 - `DAGU_CHECK_UPDATES` - Enable automatic web UI update checks (default: `true`)
 - `DAGU_SERVER_METRICS` - Metrics endpoint access: `private` (default) or `public`
 - `DAGU_CORS_ALLOWED_ORIGINS` - Comma-separated list of allowed CORS origins (e.g. `https://app.example.com,https://other.example.com`). An empty value disables cross-origin browser access. An explicit `*` allows any origin without credentials and emits a security warning.

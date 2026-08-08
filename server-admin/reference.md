@@ -16,7 +16,7 @@ public_url: ""            # External Web UI URL for generated links
 base_path: ""              # For reverse proxy (e.g., "/dagu")
 api_base_path: "/api/v1"    # API endpoint base path
 tz: "America/New_York"
-debug: false
+debug: false              # Include DEBUG logs and HTTP request headers when true
 log_format: "text"         # "text" or "json"
 access_log_mode: "all"     # Access log mode: "all", "non-public", or "none"
 headless: false
@@ -285,9 +285,9 @@ All options support `DAGU_` prefix.
 - `DAGU_TZ` - Server timezone
 - `DAGU_ENV_PASSTHROUGH` - Comma-separated exact env var names to forward to step execution
 - `DAGU_ENV_PASSTHROUGH_PREFIXES` - Comma-separated env var prefixes to forward to step execution
-- `DAGU_DEBUG` - Enable debug mode
+- `DAGU_DEBUG` - Include DEBUG logs and HTTP request headers
 - `DAGU_LOG_FORMAT` - Log format (`text`/`json`)
-- `DAGU_ACCESS_LOG_MODE` - Access log mode (`all`, `non-public`, or `none`; default: `all`)
+- `DAGU_ACCESS_LOG_MODE` - Access log mode (`all`, `non-public`, or `none`; default: `all`); see [Operations - Logging](/server-admin/operations#http-access-logs)
 - `DAGU_HEADLESS` - Run without UI
 - `DAGU_CHECK_UPDATES` - Enable automatic web UI update checks (default: `true`)
 - `DAGU_LATEST_STATUS_TODAY` - Show only today's status

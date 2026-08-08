@@ -227,10 +227,30 @@ Metrics available at `/api/v1/metrics`:
 
 ### Logging
 
+Dagu emits two kinds of server logs:
+
+- **Application logs** report server, scheduler, worker, and DAG execution activity.
+- **HTTP access logs** report requests handled by the web server.
+
+The application log verbosity and HTTP access logging are configured separately.
+
+#### Application Log Verbosity
+
+`debug` controls application log verbosity. The default value is `false`.
+
+| `debug` | Application logs | HTTP access log details |
+|---------|------------------|-------------------------|
+| `false` | `INFO`, `WARN`, and `ERROR` | Request and response metadata without request headers |
+| `true` | Includes `DEBUG` messages and source locations | Also includes request headers |
+
+Request headers can make each HTTP access log entry much larger. Keep `debug` disabled unless diagnostic details are needed.
+
+Arbitrary log thresholds such as `WARN` or `ERROR` are not currently configurable.
+
 ```yaml
 # config.yaml
-log_format: json    # text or json
-debug: true       # Debug mode
+log_format: json  # text or json
+debug: false      # Set to true only while diagnosing a problem
 paths:
   log_dir: /var/log/dagu
 ```
@@ -238,7 +258,7 @@ paths:
 ```bash
 # Or via environment
 export DAGU_LOG_FORMAT=json
-export DAGU_DEBUG=true
+export DAGU_DEBUG=false
 export DAGU_LOG_DIR=/var/log/dagu
 ```
 
@@ -252,6 +272,39 @@ JSON log example:
   "run_id": "20240315_120000_abc123"
 }
 ```
+
+#### HTTP Access Logs
+
+`access_log_mode` controls which HTTP requests are logged:
+
+| Mode | Behavior |
+|------|----------|
+| `all` | Logs every request. This is the default. |
+| `non-public` | Skips the health, login, and initial setup endpoints. It also skips the metrics endpoint when metrics are public. Normal Web UI and API requests are still logged. |
+| `none` | Disables HTTP access logs. Application logs, including warnings and errors, are unaffected. |
+
+To keep access logs while omitting request headers:
+
+```yaml
+debug: false
+access_log_mode: all
+```
+
+To suppress HTTP access logs entirely while retaining application logs:
+
+```yaml
+debug: false
+access_log_mode: none
+```
+
+The equivalent environment variables are:
+
+```bash
+export DAGU_DEBUG=false
+export DAGU_ACCESS_LOG_MODE=none
+```
+
+Restart the server after changing these settings. Filtering access logs by status code, latency, or arbitrary path is not currently supported. When a reverse proxy already records HTTP requests, `access_log_mode: none` avoids duplicate access logs.
 
 #### Log Cleanup
 
