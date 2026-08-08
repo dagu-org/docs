@@ -5,7 +5,7 @@ The Windows installer ships as both a PowerShell script and a CMD launcher. The 
 ## PowerShell
 
 ```powershell
-irm https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/installer.ps1 | iex
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/installer.ps1)))
 ```
 
 ### Install a specific version or location
