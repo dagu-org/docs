@@ -101,7 +101,7 @@ Unknown top-level fields are rejected. The accepted top-level fields are listed 
 
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
-| `type` | string | Step scheduling mode. Accepted values are `graph`, `chain`, `controller`, and `incremental`. | `graph` |
+| `type` | string | Step scheduling mode. Accepted values are `graph`, `chain`, `controller`, and `build`. | `graph` |
 | `tasks` | array | Goals a `controller` workflow must satisfy. Required with `type: controller`, invalid otherwise. | `[]` |
 
 `graph` schedules steps from their `depends` relationships.
@@ -160,12 +160,10 @@ steps:
     run: echo "design drafted"
 ```
 
-`incremental` schedules a graph from explicit dependencies and matching file paths. Eligible steps reuse a prior materialization when their recipe, declared inputs, and existing output still match. See [Incremental Workflows](/writing-workflows/incremental-workflows).
-
-<!-- dagu-example: no-validate; requires incremental workflow support from dagu#2515 -->
+`build` schedules a graph from explicit dependencies and matching file paths. Eligible steps reuse a prior materialization when their recipe, declared inputs, and existing output still match. See [Build Workflows](/writing-workflows/incremental-workflows).
 
 ```yaml
-type: incremental
+type: build
 working_dir: /srv/build
 
 steps:
@@ -816,8 +814,8 @@ Step `id` must be 40 characters or fewer, match `^[a-zA-Z][a-zA-Z0-9_]*$`, and c
 | `stderr` | string or object | Redirect stderr to a file or artifact. |
 | `log_output` | string | Step-level log output mode. |
 | `output` | string or object | Captured step output variable or structured output mapping. |
-| `outputs` | array | Declared value outputs, or a path-backed output for incremental execution. |
-| `inputs` | array | Named regular-file inputs for incremental execution. |
+| `outputs` | array | Declared value outputs, or a path-backed output for build execution. |
+| `inputs` | array | Named regular-file inputs for build execution. |
 | `output_schema` | object | Inline JSON Schema for stdout JSON validation. |
 | `timeout_sec` | integer | Step timeout in seconds. |
 | `container` | string or object | Step-level container override. |
@@ -1056,12 +1054,10 @@ steps:
 
 `output_schema` must be an inline JSON Schema object. It is not a path. When present, Dagu captures stdout, decodes it as JSON, validates it, and fails the step on invalid JSON or schema mismatch.
 
-In an incremental workflow, an input declaration requires `name` and `path`. An output declaration can use `path` instead of `type`:
-
-<!-- dagu-example: no-validate; requires incremental workflow support from dagu#2515 -->
+In a build workflow, an input declaration requires `name` and `path`. An output declaration can use `path` instead of `type`:
 
 ```yaml
-type: incremental
+type: build
 working_dir: /srv/build
 
 steps:
@@ -1075,7 +1071,7 @@ steps:
     run: compiler "${inputs.source}" -o "${outputs.artifact}"
 ```
 
-Input and output names must match `^[A-Za-z][A-Za-z0-9_]*$` and be unique within their respective list. `type` and `path` cannot appear on the same output declaration, and a step can declare at most one path output. Incremental paths are valid only on host command or shell steps without DAG-level or step-level containers. See [Incremental Workflows](/writing-workflows/incremental-workflows) for path and reuse rules.
+Input and output names must match `^[A-Za-z][A-Za-z0-9_]*$` and be unique within their respective list. `type` and `path` cannot appear on the same output declaration, and a step can declare at most one path output. Build paths are valid only on host command or shell steps without DAG-level or step-level containers. See [Build Workflows](/writing-workflows/incremental-workflows) for path and reuse rules.
 
 Use `stdout.artifact` or `stderr.artifact` to write command output into the run artifact directory:
 

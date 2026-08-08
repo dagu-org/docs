@@ -10,7 +10,7 @@ ${steps.<step_id>.outputs.<output_name>}
 
 For value outputs from command steps, the producer must have an `id`, declare each output name in `outputs`, and write the value to `DAGU_OUTPUT_FILE`. Built-in actions can provide their own output contract. For example, a [human task](/writing-workflows/human-tasks) derives outputs from its form properties and publishes the validated operator input without an authored `outputs` field or `DAGU_OUTPUT_FILE`.
 
-An [incremental workflow](/writing-workflows/incremental-workflows) can instead declare `path` on an output. The command writes the file to `${outputs.<name>}`, and dependent steps receive its final absolute path through `${steps.<id>.outputs.<name>}`. Path outputs are not written to `DAGU_OUTPUT_FILE`.
+A [build workflow](/writing-workflows/incremental-workflows) can instead declare `path` on an output. The command writes the file to `${outputs.<name>}`, and dependent steps receive its final absolute path through `${steps.<id>.outputs.<name>}`. Path outputs are not written to `DAGU_OUTPUT_FILE`.
 
 ## Basic Example
 
@@ -131,12 +131,10 @@ Use names such as `version`, `image_tag`, `artifact_url`, or `record_count`.
 
 ## Path Outputs
 
-Path-backed outputs are available only in `type: incremental` workflows:
-
-<!-- dagu-example: no-validate; requires incremental workflow support from dagu#2515 -->
+Path-backed outputs are available only in `type: build` workflows:
 
 ```yaml
-type: incremental
+type: build
 working_dir: /srv/build
 
 steps:
@@ -150,7 +148,7 @@ steps:
     run: compiler "${inputs.source}" -o "${outputs.artifact}"
 ```
 
-`path` and `type` are mutually exclusive on one output declaration. An eligible reusable step declares exactly one output and that output is path-backed. See [Incremental Workflows](/writing-workflows/incremental-workflows) for dependency inference, staging, reuse, and eligibility rules.
+`path` and `type` are mutually exclusive on one output declaration. An eligible reusable step declares exactly one output and that output is path-backed. See [Build Workflows](/writing-workflows/incremental-workflows) for dependency inference, staging, reuse, and eligibility rules.
 
 ## Large Results
 

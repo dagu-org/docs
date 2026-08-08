@@ -2,25 +2,23 @@
 description: Reuse unchanged file-producing steps while preserving safe, atomic publication of their outputs.
 ---
 
-# Incremental Workflows
+# Build Workflows
 
-Incremental workflows avoid repeating file transformations whose recipe, declared inputs, and existing output have not changed. They are useful for builds, reports, media pipelines, and other local workflows where each stage produces a regular file at a stable path.
+Build workflows avoid repeating file transformations whose recipe, declared inputs, and existing output have not changed. They are useful for builds, reports, media pipelines, and other local workflows where each stage produces a regular file at a stable path.
 
 ## Try It
 
 Create a directory and an input file:
 
 ```bash
-mkdir -p incremental-demo
-printf 'alpha\n' > incremental-demo/source.txt
+mkdir -p build-demo
+printf 'alpha\n' > build-demo/source.txt
 ```
 
-Save this workflow as `incremental-demo/workflow.yaml`:
-
-<!-- dagu-example: no-validate; requires incremental workflow support from dagu#2515 -->
+Save this workflow as `build-demo/workflow.yaml`:
 
 ```yaml
-type: incremental
+type: build
 working_dir: .
 
 steps:
@@ -50,25 +48,25 @@ steps:
 Validate and run it twice:
 
 ```bash
-dagu validate incremental-demo/workflow.yaml
-dagu start incremental-demo/workflow.yaml
-dagu start incremental-demo/workflow.yaml
+dagu validate build-demo/workflow.yaml
+dagu start build-demo/workflow.yaml
+dagu start build-demo/workflow.yaml
 ```
 
 The first run executes both steps. The second run reports `reuse (matched)` for both because their recipes, inputs, and outputs are unchanged. Preview the same decisions without executing anything:
 
 ```bash
-dagu dry incremental-demo/workflow.yaml
+dagu dry build-demo/workflow.yaml
 ```
 
 Change the source and run the workflow again:
 
 ```bash
-printf 'beta\n' > incremental-demo/source.txt
-dagu start incremental-demo/workflow.yaml
+printf 'beta\n' > build-demo/source.txt
+dagu start build-demo/workflow.yaml
 ```
 
-Both steps execute again because their input contents changed. `working_dir: .` resolves from the workflow file's directory, so this example reads and writes inside `incremental-demo`. The working directory and the parent directories of declared outputs must already exist.
+Both steps execute again because their input contents changed. `working_dir: .` resolves from the workflow file's directory, so this example reads and writes inside `build-demo`. The working directory and the parent directories of declared outputs must already exist.
 
 `count` does not need `depends: uppercase`. Its `uppercase.txt` input matches `uppercase`'s output, so Dagu infers that dependency.
 
@@ -82,13 +80,13 @@ On later runs, Dagu reuses the step only when all of these still match:
 - the names, paths, and SHA-256 content hashes of every declared input
 - the declared output path and the content of the file currently at that path
 
-Changing an input, command, parameter, environment value, tool configuration, working directory, or output file causes the step to execute again. If the final output is missing or modified, Dagu recomputes it; incremental workflows do not restore a separate cached copy.
+Changing an input, command, parameter, environment value, tool configuration, working directory, or output file causes the step to execute again. If the final output is missing or modified, Dagu recomputes it; build workflows do not restore a separate cached copy.
 
 A reused step is reported as succeeded. It is not skipped, and `${steps.<id>.outputs.<name>}` still publishes the final output path to dependent steps. Reuse does not create new stdout, stderr, exit-code, or legacy `output`/`outputs` values, so a potentially reusable producer cannot be referenced through `${step_id.stdout}`, `${step_id.stderr}`, `${step_id.exit_code}`, `${step_id.output}`, or `${step_id.outputs}`. Use the declared path reference instead.
 
 ## Path References
 
-Incremental paths have three reference forms:
+Build paths have three reference forms:
 
 | Reference | Value | Availability |
 |---|---|---|
@@ -102,7 +100,7 @@ Do not use `${outputs.<name>}` in `working_dir`, preconditions, retry settings, 
 
 ## Paths and Inferred Dependencies
 
-Paths may be absolute or relative. Relative paths use the workflow's stable working directory or the source DAG file's directory. An inline workflow with relative incremental paths must be given a stable default working directory, such as `dagu.WithDefaultWorkingDir` in the [embedded Go API](/embedding/go-api).
+Paths may be absolute or relative. Relative paths use the workflow's stable working directory or the source DAG file's directory. An inline workflow with relative build paths must be given a stable default working directory, such as `dagu.WithDefaultWorkingDir` in the [embedded Go API](/embedding/go-api).
 
 Path expressions must resolve before step execution. They may use stable values such as parameters and environment values, but cannot use step-output references or command substitution.
 
@@ -128,15 +126,15 @@ A step is eligible for reuse when it:
 - does not publish dynamic or scalar outputs
 - does not use secrets, repeat, human tasks, approvals, `parallel`, `foreach`, or a child DAG lifecycle
 
-Other valid steps in an incremental workflow execute normally and show an `always` decision. Path declarations themselves are supported only on host command and shell steps; built-in actions and containerized steps cannot declare incremental paths.
+Other valid steps in a build workflow execute normally and show an `always` decision. Path declarations themselves are supported only on host command and shell steps; built-in actions and containerized steps cannot declare build paths.
 
-Incremental execution is currently local-only. A distributed execution request is rejected because workers do not yet share the required file fencing. If the server's default execution mode is distributed, set `worker_selector: local` on the workflow.
+Build execution is currently local-only. A distributed execution request is rejected because workers do not yet share the required file fencing. If the server's default execution mode is distributed, set `worker_selector: local` on the workflow.
 
 ## Publication, Retries, and Concurrent Runs
 
-Dagu holds shared locks for declared inputs and an exclusive lock for the output while it evaluates and executes a path-backed step. Incremental runs using the same local Dagu data store therefore cannot publish conflicting materializations. Dagu also verifies input contents again before commit, so an external change fails the attempt instead of publishing an inconsistent output.
+Dagu holds shared locks for declared inputs and an exclusive lock for the output while it evaluates and executes a path-backed step. Build runs using the same local Dagu data store therefore cannot publish conflicting materializations. Dagu also verifies input contents again before commit, so an external change fails the attempt instead of publishing an inconsistent output.
 
-`stdout`, `stderr`, `stdout.artifact`, and `stderr.artifact` destinations cannot resolve to a declared incremental input or output. This keeps stream capture from modifying an input or final materialization before verification and commit.
+`stdout`, `stderr`, `stdout.artifact`, and `stderr.artifact` destinations cannot resolve to a declared build input or output. This keeps stream capture from modifying an input or final materialization before verification and commit.
 
 Each retry gets a fresh staging path. If an attempt fails, times out, or is aborted, Dagu removes its staging file and leaves the previous final output and manifest unchanged. Before commit, Dagu also verifies that the declared inputs did not change during execution.
 
@@ -144,7 +142,7 @@ Path-output steps cannot use `continue_on.mark_success`. Treating a failed attem
 
 ## Preview or Disable Reuse
 
-Use `dagu dry` to preview incremental decisions without executing commands or creating locks, staging files, manifests, or run history:
+Use `dagu dry` to preview build decisions without executing commands or creating locks, staging files, manifests, or run history:
 
 ```bash
 dagu dry report-pipeline.yaml
@@ -178,11 +176,11 @@ Common decisions include:
 | `execute (output_changed)` | The final output no longer matches the committed materialization. |
 | `execute (control_dependency_ran)` | An explicit dependency executed during this run. |
 | `execute (reuse_disabled)` | The run used `--no-reuse` or the equivalent API option. |
-| `always (ineligible)` | The step is valid in an incremental workflow but does not meet the reuse requirements. |
+| `always (ineligible)` | The step is valid in a build workflow but does not meet the reuse requirements. |
 | `deferred (upstream_would_execute)` | A dry run cannot decide until an upstream producer creates its output. |
 | `none (precondition_not_met)` | A precondition prevented the step from reaching a reuse or execute decision. |
 
-The REST DAG-run response exposes the same data under each node's `incremental` field. See [REST API](/web-ui/api#incremental-execution-data) for the response shape.
+The REST DAG-run response exposes the same data under each node's `build` field. See [REST API](/web-ui/api#build-execution-data) for the response shape.
 
 ## Troubleshooting
 
@@ -193,7 +191,7 @@ The REST DAG-run response exposes the same data under each node's `incremental` 
 | `relative materialization path ... has no stable working directory` | An inline workflow used a relative path. Supply an absolute path or a stable default working directory. |
 | `multiple producers` | Two output declarations resolve to the same canonical path. Give each produced file one owner. |
 | Unexpected `always (ineligible)` | Check the eligibility list above, especially extra outputs, secrets, containers, repeat, and nested execution. |
-| Incremental workflows require local execution | Add `worker_selector: local` when the server defaults to distributed execution. |
+| Build workflows require local execution | Add `worker_selector: local` when the server defaults to distributed execution. |
 | A step executes even though its file inputs did not change | Check whether an explicit dependency executed. Remove redundant `depends` entries when the matching input/output path already expresses the dependency. |
 
 ## Related Pages

@@ -174,7 +174,7 @@ steps:
     run: uv run --python 3.13.9 python process.py < /tmp/data.json
 ```
 
-When files live at stable paths and unchanged transformations should be reused across runs, use an [incremental workflow](/writing-workflows/incremental-workflows). Incremental file declarations infer dependencies and publish an output only after its producer succeeds.
+When files live at stable paths and unchanged transformations should be reused across runs, use a [build workflow](/writing-workflows/incremental-workflows). Build file declarations infer dependencies and publish an output only after its producer succeeds.
 
 For run-scoped files that users should preview or download, prefer artifacts.
 
@@ -225,7 +225,7 @@ steps:
 ## Related Pages
 
 - [Outputs](/writing-workflows/outputs)
-- [Incremental Workflows](/writing-workflows/incremental-workflows)
+- [Build Workflows](/writing-workflows/incremental-workflows)
 - [Environment Variables](/writing-workflows/environment-variables)
 - [Parameters](/writing-workflows/parameters)
 - [Artifacts](/writing-workflows/artifacts)
