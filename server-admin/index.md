@@ -42,7 +42,7 @@ auth:
 
 paths:
   dags_dir: /opt/dagu/workflows
-  docs_dir: /opt/dagu/workflows/docs
+  wiki_dir: /opt/dagu/workflows/wiki
   log_dir: /var/log/dagu
 ```
 
@@ -61,7 +61,7 @@ docker run -d \
 **[Configuration](/server-admin/configuration)**
 - Config file, environment variables, and precedence
 - `DAGU_HOME` and path defaults
-- Documents and runbook storage
+- Wiki and runbook storage
 - Persistent state directory configuration
 
 **[Server Configuration](/server-admin/server)**
@@ -152,7 +152,7 @@ export DAGU_PORT=8080
 
 # Paths
 export DAGU_DAGS_DIR=/opt/workflows
-export DAGU_DOCS_DIR=/opt/workflows/docs
+export DAGU_WIKI_DIR=/opt/workflows/wiki
 export DAGU_LOG_DIR=/var/log/dagu
 
 # Auth
@@ -167,7 +167,7 @@ dagu start-all
 - [Set up authentication](/server-admin/server#authentication) for production
 - [Understand configuration precedence](/server-admin/configuration) before mixing flags, environment variables, and `config.yaml`
 - [Configure base defaults](/server-admin/base-config) for shared DAG settings
-- [Configure Documents](/web-ui/documents) for Markdown runbooks and Git Sync
+- [Configure Wiki](/web-ui/wiki) for Markdown runbooks and Git Sync
 - [Configure monitoring](/server-admin/operations#monitoring) for visibility
 - [Set up distributed execution](/server-admin/distributed/) for scaling
 - [Review all options](/server-admin/reference) for fine-tuning

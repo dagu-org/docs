@@ -1,16 +1,16 @@
 # Git Sync
 
-Git Sync keeps Dagu workflows, Markdown documents, and workflow-authoring skill files aligned with a Git repository.
+Git Sync keeps Dagu workflows, Markdown Wiki pages, and workflow-authoring skill files aligned with a Git repository.
 
 ## What It Syncs
 
 Git Sync can track:
 
 - DAG files
-- Markdown documents
+- Markdown Wiki pages
 - skills
 
-DAG files live at the configured repository root, documents live under `docs/`, and skills live under `skills/`. Pulling a repository routes each kind to its configured local storage directory.
+DAG files live at the configured repository root, Wiki pages live under `wiki/`, and skills live under `skills/`. An existing repository that contains `docs/` but not `wiki/` continues using `docs/` in place. Git Sync rejects repositories containing both directories rather than merging them implicitly.
 
 ## Tracked Items And IDs
 
@@ -20,7 +20,7 @@ Git Sync refers to each tracked file by an `itemId`. You will see that term in t
 |---|---|---|
 | `my-dag.yaml` | `my-dag` | `dag` |
 | `subdir/report.yml` | `subdir/report` | `dag` |
-| `docs/operations/runbook.md` | `docs/operations/runbook` | `doc` |
+| `wiki/operations/runbook.md` | `wiki/operations/runbook` | `doc` |
 | `skills/review/SKILL.md` | `skills/review/SKILL` | `skill` |
 
 ## Basic Configuration
@@ -179,7 +179,7 @@ Write operations are blocked when Git Sync is configured as read-only (`push_ena
 ## Operational Notes
 
 - Manage Git Sync through the UI, CLI, or API rather than editing its internal state directly.
-- Documents edited in the Web UI appear as `doc` items in Git Sync status, diff, publish, discard, delete, and move operations.
+- Wiki pages edited in the Web UI appear as `doc` items in Git Sync status, diff, publish, discard, delete, and move operations. The `doc` kind remains the stable wire value.
 - Pull before publishing when multiple people or systems may change the same repository.
 - Use clear commit messages because Git Sync publishes normal Git commits.
 - For staging and production, prefer read-only Git Sync configurations and promote reviewed workflow versions between environment branches. See [Multi-Environment Deployments](/server-admin/deployment/multi-environment).
@@ -187,5 +187,5 @@ Write operations are blocked when Git Sync is configured as read-only (`push_ena
 ## Related Pages
 
 - [Server Administration](/server-admin/)
-- [Documents](/web-ui/documents)
+- [Wiki](/web-ui/wiki)
 - [Multi-Environment Deployments](/server-admin/deployment/multi-environment)

@@ -3431,35 +3431,40 @@ Retrieves information about connected workers in the distributed execution syste
 }
 ```
 
-## Documents Endpoints
+## Wiki Endpoints
 
-Documents endpoints accept optional `workspace` and `remoteNode` query parameters. Document paths are relative to the selected workspace and omit the `.md` extension. All authenticated users can list, read, and search documents they can access. Mutations require `permissions.write_dags` and a write-capable workspace role.
+Wiki endpoints accept optional `workspace` and `remoteNode` query parameters. Page paths are relative to the selected workspace and omit the `.md` extension. All authenticated users can list, read, and search pages they can access. Mutations require `permissions.write_dags` and a write-capable workspace role.
 
 | Method | Endpoint | Description |
 | --- | --- | --- |
-| `GET` | `/api/v1/docs` | List the document tree, or use `flat=true` for a flat list. |
-| `POST` | `/api/v1/docs` | Create a Markdown document. |
-| `GET` | `/api/v1/docs/search?q=...` | Search document content. |
-| `GET` | `/api/v1/docs/doc?path=...` | Read one document. |
-| `PATCH` | `/api/v1/docs/doc?path=...` | Replace one document's content. |
-| `DELETE` | `/api/v1/docs/doc?path=...` | Delete one document. |
-| `POST` | `/api/v1/docs/doc/rename?path=...` | Rename or move a document or directory. |
-| `POST` | `/api/v1/docs/delete-batch` | Delete several documents or directories. |
+| `GET` | `/api/v1/wiki` | List the page tree, or use `flat=true` for a flat list. |
+| `POST` | `/api/v1/wiki` | Create a Markdown page. |
+| `GET` | `/api/v1/wiki/search?q=...` | Search page content. |
+| `GET` | `/api/v1/wiki/backlinks?path=...` | List pages that link to a page. |
+| `GET` | `/api/v1/wiki/page?path=...` | Read one page. |
+| `PATCH` | `/api/v1/wiki/page?path=...` | Replace one page's content. |
+| `DELETE` | `/api/v1/wiki/page?path=...` | Delete one page. |
+| `POST` | `/api/v1/wiki/page/rename?path=...` | Rename or move a page or directory. |
+| `GET` | `/api/v1/wiki/page/revisions?path=...` | List saved revisions for one page. |
+| `GET` | `/api/v1/wiki/page/revision?path=...` | Read one saved revision. |
+| `POST` | `/api/v1/wiki/page/attachment?path=...` | Upload an attachment for a page. |
+| `GET` | `/api/v1/wiki/page/attachment?path=...` | Download a page attachment. |
+| `POST` | `/api/v1/wiki/delete-batch` | Delete several pages or directories. |
 
-Create a document in the `operations` directory of the default workspace:
+Create a page in the `operations` directory of the default workspace:
 
 ```bash
-curl -X POST "http://localhost:8080/api/v1/docs?workspace=default" \
+curl -X POST "http://localhost:8080/api/v1/wiki?workspace=default" \
   -H "Content-Type: application/json" \
   -d '{"id":"operations/runbook","content":"# Operations runbook\n"}'
 ```
 
-Read or update the same document:
+Read or update the same page:
 
 ```bash
-curl "http://localhost:8080/api/v1/docs/doc?workspace=default&path=operations%2Frunbook"
+curl "http://localhost:8080/api/v1/wiki/page?workspace=default&path=operations%2Frunbook"
 
-curl -X PATCH "http://localhost:8080/api/v1/docs/doc?workspace=default&path=operations%2Frunbook" \
+curl -X PATCH "http://localhost:8080/api/v1/wiki/page?workspace=default&path=operations%2Frunbook" \
   -H "Content-Type: application/json" \
   -d '{"content":"# Updated operations runbook\n"}'
 ```
@@ -3474,7 +3479,9 @@ Rename and batch-delete requests use `newPath` and `paths` respectively:
 {"paths":["operations/deploy","legacy"]}
 ```
 
-See [Documents](/web-ui/documents) for Web UI behavior, workspace ownership, storage, and Git Sync.
+The old `/api/v1/docs` endpoints are not part of the current API. Upgrade direct clients to `/api/v1/wiki`; Dagu's remote-node proxy falls back to the legacy paths when it connects to an older Dagu node.
+
+See [Wiki](/web-ui/wiki) for Web UI behavior, workspace ownership, storage, and Git Sync.
 
 ## Git Sync Endpoints
 

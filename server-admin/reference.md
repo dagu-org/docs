@@ -56,7 +56,7 @@ sse:
 # Directories (must be under "paths" key)
 paths:
   dags_dir: "~/.config/dagu/dags"
-  docs_dir: ""                # Auto: {dags_dir}/docs
+  wiki_dir: ""                # Auto: {dags_dir}/wiki
   alt_dags_dir: ""          # Additional read-only DAG directories
   log_dir: "~/.local/share/dagu/logs"
   data_dir: "~/.local/share/dagu/data"
@@ -321,7 +321,8 @@ All options support `DAGU_` prefix.
 - `DAGU_HOME` - Set all directories to this path (can be overridden by `--dagu-home` flag)
 - `DAGU_DAGS_DIR` - DAG definitions
 - `DAGU_DAGS` - Alternative to `DAGU_DAGS_DIR`
-- `DAGU_DOCS_DIR` - Markdown documents and runbooks (default: `{dags_dir}/docs`)
+- `DAGU_WIKI_DIR` - Markdown Wiki pages and runbooks (default: `{dags_dir}/wiki`)
+- `DAGU_DOCS_DIR` - Deprecated alias for `DAGU_WIKI_DIR`
 - `DAGU_ALT_DAGS_DIR` - Additional read-only DAG directories
 - `DAGU_LOG_DIR` - Log files
 - `DAGU_DATA_DIR` - Application data
@@ -773,7 +774,8 @@ peer:
 
 ### Auto-generated Paths
 When not specified, these paths are automatically derived:
-- `paths.docs_dir`: `{paths.dags_dir}/docs` - Stores Markdown documents and runbooks
+- `paths.wiki_dir`: `{paths.dags_dir}/wiki` - Stores Markdown Wiki pages and runbooks
+- `paths.docs_dir`: Deprecated compatibility alias for `paths.wiki_dir`
 - `paths.artifact_dir`: `{paths.data_dir}/artifacts` - Stores DAG run artifacts
 - `paths.tools_dir`: `{paths.data_dir}/tools` - Stores managed DAG tool cache, locks, manifests, and shims
 - `paths.dag_state_dir`: `{paths.data_dir}/dag-state` - Stores persistent DAG state values

@@ -122,7 +122,7 @@ const fullSidebar = [
         collapsed: true,
         items: [
           { text: "Cockpit", link: "/web-ui/cockpit" },
-          { text: "Documents", link: "/web-ui/documents" },
+          { text: "Wiki", link: "/web-ui/wiki" },
           { text: "Workspaces", link: "/web-ui/workspaces" },
           { text: "Profiles", link: "/web-ui/profiles" },
           { text: "DAG Secret Refs", link: "/web-ui/secrets" },

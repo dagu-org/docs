@@ -4,8 +4,8 @@ Dagu intentionally exposes three MCP tools.
 
 | Tool | Purpose |
 |------|---------|
-| `dagu_read` | Read DAGs, Markdown documents, DAG runs, logs, list views, and Dagu MCP reference resources. |
-| `dagu_change` | Preview or apply DAG YAML and workspace-aware document changes. |
+| `dagu_read` | Read DAGs, Markdown Wiki pages, DAG runs, logs, list views, and Dagu MCP reference resources. |
+| `dagu_change` | Preview or apply DAG YAML and workspace-aware Wiki page changes. |
 | `dagu_execute` | Start, enqueue, retry, or stop DAG runs. |
 
 ## `dagu_read`
@@ -14,17 +14,17 @@ Use `dagu_read` for current Dagu state.
 
 | Input | Values |
 |-------|--------|
-| `target` | `dags`, `dag`, `dag_spec`, `docs`, `doc`, `doc_search`, `runs`, `run`, `run_logs`, `step_log`, or `reference` |
+| `target` | `dags`, `dag`, `dag_spec`, `wiki`, `wiki_page`, `wiki_search`, `runs`, `run`, `run_logs`, `step_log`, or `reference` |
 | `name` | DAG name for DAG and run targets |
 | `dagRunId` | DAG-run ID for run and log targets |
 | `stepName` | Step name for the `step_log` target |
 | `query` | URL query string for list and log targets, such as `page=1&perPage=100` or `tail=100` |
-| `workspace` | `all`, `default`, or a workspace name for document targets. Required for `doc`; optional for `docs` and `doc_search`. |
-| `path` | Document path without `.md`; required for `doc` |
-| `search` | Search text; required for `doc_search` |
-| `prefix` | Document path prefix without `.md`; optional for `docs` and `doc_search` |
-| `cursor` | Opaque cursor from the preceding `doc_search` result page |
-| `limit` | Maximum `doc_search` results from 1 to 50; defaults to 20 |
+| `workspace` | `all`, `default`, or a workspace name for Wiki page targets. Required for `wiki_page`; optional for `wiki` and `wiki_search`. |
+| `path` | Wiki page path without `.md`; required for `wiki_page` |
+| `search` | Search text; required for `wiki_search` |
+| `prefix` | Wiki page path prefix without `.md`; optional for `wiki` and `wiki_search` |
+| `cursor` | Opaque cursor from the preceding `wiki_search` result page |
+| `limit` | Maximum `wiki_search` results from 1 to 50; defaults to 20 |
 | `uri` | Direct resource URI, such as `dagu://reference/authoring` |
 
 Examples:
@@ -37,28 +37,28 @@ Examples:
 { "target": "dag_spec", "name": "nightly-report" }
 ```
 
-List documents in one workspace:
+List Wiki pages in one workspace:
 
 ```json
 {
-  "target": "docs",
+  "target": "wiki",
   "workspace": "operations",
   "prefix": "runbooks",
   "query": "flat=true&perPage=100&sort=mtime&order=desc"
 }
 ```
 
-In tree mode, `page` and `perPage` select direct children of the workspace or `prefix`, and each returned directory includes its descendants. In flat mode, they select individual documents. Document lists accept up to 200 entries per page.
+In tree mode, `page` and `perPage` select direct children of the workspace or `prefix`, and each returned directory includes its descendants. In flat mode, they select individual Wiki pages. Wiki page lists accept up to 200 entries per page.
 
-Read or search Markdown documents:
+Read or search Markdown Wiki pages:
 
 ```json
-{ "target": "doc", "workspace": "operations", "path": "runbooks/restart" }
+{ "target": "wiki_page", "workspace": "operations", "path": "runbooks/restart" }
 ```
 
 ```json
 {
-  "target": "doc_search",
+  "target": "wiki_search",
   "workspace": "operations",
   "prefix": "runbooks",
   "search": "database failover",
@@ -67,6 +67,8 @@ Read or search Markdown documents:
 ```
 
 Search results include matching snippets and `modifiedAt`. If `hasMore` is true, pass `nextCursor` as `cursor` in the next call and keep `search`, `workspace`, and `prefix` unchanged.
+
+The legacy `docs`, `doc`, and `doc_search` targets remain available as deprecated exact aliases. New clients should use the Wiki target names.
 
 ```json
 { "uri": "dagu://runs/nightly-report/latest/logs?tail=100" }
@@ -85,18 +87,20 @@ Read stdout and stderr for one step:
 
 ## `dagu_change`
 
-Use `dagu_change` for DAG YAML and Markdown document changes. Preview does not write; apply uses the same workspace authorization, path validation, Git Sync write policy, mutation notifications, and audit path as the REST API.
+Use `dagu_change` for DAG YAML and Markdown Wiki page changes. Preview does not write; apply uses the same workspace authorization, path validation, Git Sync write policy, mutation notifications, and audit path as the REST API.
 
 | Input | Values |
 |-------|--------|
 | `mode` | `preview` or `apply`; defaults to `preview` |
-| `type` | `upsert_dag`, `upsert_doc`, `rename_doc`, or `delete_doc`; defaults to `upsert_dag` |
+| `type` | `upsert_dag`, `upsert_wiki_page`, `rename_wiki_page`, or `delete_wiki_page`; defaults to `upsert_dag` |
 | `name` | DAG name for `upsert_dag` |
 | `spec` | Full DAG YAML specification for `upsert_dag` |
-| `workspace` | `default` or a named workspace for document changes; `all` is not allowed |
-| `path` | Document or directory path without `.md` for document changes |
-| `content` | Full Markdown content for `upsert_doc`; empty content is allowed |
-| `newPath` | Destination document or directory path for `rename_doc` |
+| `workspace` | `default` or a named workspace for Wiki page changes; `all` is not allowed |
+| `path` | Wiki page or directory path without `.md` for Wiki page changes |
+| `content` | Full Markdown content for `upsert_wiki_page`; empty content is allowed |
+| `newPath` | Destination Wiki page or directory path for `rename_wiki_page` |
+
+The legacy `upsert_doc`, `rename_doc`, and `delete_doc` types remain available as deprecated exact aliases.
 
 Preview validates the spec without writing it:
 
@@ -120,36 +124,36 @@ Apply writes only after validation succeeds:
 }
 ```
 
-Preview a document create or update:
+Preview a Wiki page create or update:
 
 ```json
 {
   "mode": "preview",
-  "type": "upsert_doc",
+  "type": "upsert_wiki_page",
   "workspace": "operations",
   "path": "runbooks/restart",
   "content": "# Restart procedure\n\n..."
 }
 ```
 
-Rename or move a document or directory:
+Rename or move a Wiki page or directory:
 
 ```json
 {
   "mode": "apply",
-  "type": "rename_doc",
+  "type": "rename_wiki_page",
   "workspace": "operations",
   "path": "runbooks",
   "newPath": "procedures"
 }
 ```
 
-Delete a document or directory:
+Delete a Wiki page or directory:
 
 ```json
 {
   "mode": "preview",
-  "type": "delete_doc",
+  "type": "delete_wiki_page",
   "workspace": "operations",
   "path": "procedures/obsolete"
 }
