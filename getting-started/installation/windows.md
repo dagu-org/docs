@@ -5,17 +5,21 @@ The Windows installer ships as both a PowerShell script and a CMD launcher. The 
 ## PowerShell
 
 ```powershell
-& ([scriptblock]::Create((irm https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/installer.ps1)))
+irm https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/installer.ps1 | iex
 ```
 
 ### Install a specific version or location
 
 ```powershell
+$daguInstaller = [scriptblock]::Create(
+  (irm https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/installer.ps1)
+)
+
 # Specific version
-& ([scriptblock]::Create((irm https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/installer.ps1))) -Version vX.Y.Z
+& $daguInstaller -Version vX.Y.Z
 
 # Custom directory
-& ([scriptblock]::Create((irm https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/installer.ps1))) `
+& $daguInstaller `
   -Version latest `
   -InstallDir "C:\tools\dagu"
 ```
@@ -25,7 +29,10 @@ The Windows installer ships as both a PowerShell script and a CMD launcher. The 
 The installer will prompt to elevate automatically. For non-interactive setups, start PowerShell as Administrator and run:
 
 ```powershell
-& ([scriptblock]::Create((irm https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/installer.ps1))) `
+$daguInstaller = [scriptblock]::Create(
+  (irm https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/installer.ps1)
+)
+& $daguInstaller `
   -Version latest `
   -Service yes `
   -InstallDir "C:\Program Files\Dagu" `

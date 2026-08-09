@@ -15,7 +15,7 @@ curl -fsSL https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/install
 ```
 
 ```powershell [Windows]
-& ([scriptblock]::Create((irm https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/installer.ps1)))
+irm https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/installer.ps1 | iex
 ```
 
 ```bash [Docker]

@@ -42,13 +42,15 @@ curl -fsSL https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/install
 ## Windows
 
 ```powershell
+$daguInstaller = [scriptblock]::Create(
+  (irm https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/installer.ps1)
+)
+
 # Binary + Windows service + PATH entry
-& ([scriptblock]::Create((irm https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/installer.ps1))) `
-  -Uninstall
+& $daguInstaller -Uninstall
 
 # Also delete the data directory
-& ([scriptblock]::Create((irm https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/installer.ps1))) `
-  -Uninstall -PurgeData
+& $daguInstaller -Uninstall -PurgeData
 ```
 
 CMD launcher:
