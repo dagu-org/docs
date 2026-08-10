@@ -80,6 +80,14 @@ See [Workspaces](/web-ui/workspaces) for access rules and lifecycle behavior.
 
 The Wiki sidebar filters the current tree by file name and page content. Dagu's global **Search** page also returns matching pages and the lines containing the query, subject to workspace access.
 
+## Maintain Wiki With AI Agents
+
+Any AI agent or coding assistant that supports MCP can maintain Wiki pages through Dagu's built-in MCP server. The integration is not tied to a specific AI provider or client. Connect the agent to the Dagu `/mcp` endpoint, then ask it to search and read pages or create, update, rename, move, and delete them.
+
+Wiki operations use the same authentication, workspace permissions, Git Sync write policy, and audit trail as the Web UI and REST API. Give the agent the narrowest access it needs, specify the target workspace and page path in the request, and preview changes before applying them when appropriate.
+
+See the [MCP Quickstart](/mcp/quickstart) to connect an agent, [MCP Clients](/mcp/clients/) for client-specific examples, and [MCP Tools](/mcp/tools) for Wiki operations.
+
 ## Storage Configuration
 
 The page root is configured with `paths.wiki_dir`:
