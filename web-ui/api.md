@@ -1,5 +1,7 @@
 # REST API Reference
 
+Browse the complete OpenAPI specification in [Swagger UI](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/dagucloud/dagu/main/api/v1/api.yaml).
+
 ## Base Configuration
 
 - **Base URL**: `http://localhost:8080/api/v1`
