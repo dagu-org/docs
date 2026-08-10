@@ -59,6 +59,7 @@ paths:
 # DAG definition discovery
 dag_discovery:
   recursive: false      # Discover DAGs below paths.dags_dir
+  symlinks: false       # Include DAG file symlinks and allow external targets
 
 # Permissions
 permissions:
@@ -188,13 +189,14 @@ All options support `DAGU_` prefix:
 - `DAGU_HOME` - Set all paths
 - `DAGU_DAGS_DIR` - DAGs directory
 - `DAGU_DAG_DISCOVERY_RECURSIVE` - Discover DAG definitions recursively below `paths.dags_dir` (default: `false`)
+- `DAGU_DAG_DISCOVERY_SYMLINKS` - Include DAG file symlinks in recursive discovery and allow external targets (default: `false`)
 - `DAGU_LOG_DIR` - Logs
 - `DAGU_DATA_DIR` - Data
 - `DAGU_TOOLS_DIR` - Managed DAG tool cache
 - `DAGU_EVENT_STORE_DIR` - Centralized event log directory
 - `DAGU_CONTEXTS_DIR` - CLI contexts directory
 
-For directory traversal, duplicate handling, and Web UI behavior, see
+For directory traversal, file-symlink behavior, duplicate handling, and Web UI behavior, see
 [Recursive DAG Discovery](/server-admin/configuration#recursive-dag-discovery).
 
 **Auth:**

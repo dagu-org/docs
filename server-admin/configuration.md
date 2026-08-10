@@ -72,6 +72,7 @@ export DAGU_PORT=8080
 export DAGU_DAGS_DIR=/opt/dagu/dags
 export DAGU_WIKI_DIR=/opt/dagu/dags/wiki
 export DAGU_DAG_DISCOVERY_RECURSIVE=true
+export DAGU_DAG_DISCOVERY_SYMLINKS=true
 export DAGU_DATA_DIR=/var/lib/dagu/data
 export DAGU_DAG_STATE_DIR=/var/lib/dagu/data/dag-state
 
@@ -88,6 +89,7 @@ Common examples:
 | `DAGU_DAGS_DIR` | `paths.dags_dir` | DAG definition directory |
 | `DAGU_WIKI_DIR` | `paths.wiki_dir` | Markdown Wiki page directory |
 | `DAGU_DAG_DISCOVERY_RECURSIVE` | `dag_discovery.recursive` | Discover DAG definitions in subdirectories |
+| `DAGU_DAG_DISCOVERY_SYMLINKS` | `dag_discovery.symlinks` | Include DAG file symlinks and allow external targets |
 | `DAGU_DATA_DIR` | `paths.data_dir` | Data directory used by derived stores |
 | `DAGU_LOG_DIR` | `paths.log_dir` | Log directory |
 | `DAGU_ARTIFACT_DIR` | `paths.artifact_dir` | DAG-run artifact directory |
@@ -215,8 +217,8 @@ export DAGU_DAG_DISCOVERY_RECURSIVE=true
 ```
 
 Recursive discovery skips dot-directories, the root `workspaces/` directory,
-and symlinks. `paths.alt_dags_dir` remains a lookup path and is not included in
-the recursive catalog.
+and symlinked directories. `paths.alt_dags_dir` remains a lookup path and is not
+included in the recursive catalog.
 
 File names without their `.yaml` or `.yml` extension must be unique across the
 discovered tree. Effective DAG `name` values must also be unique. Comparison is
@@ -224,6 +226,32 @@ case-sensitive. If either value is duplicated, Dagu excludes every DAG in that
 conflict from the Definitions page and scheduler. The Definitions page shows an
 error with the conflicting paths. After the files are renamed or removed, the
 remaining DAG is discovered again automatically.
+
+### DAG File Symlinks
+
+Enable file-symlink discovery when DAG definitions are linked into
+`paths.dags_dir`:
+
+```yaml
+dag_discovery:
+  symlinks: true
+```
+
+The equivalent environment variable is:
+
+```bash
+export DAGU_DAG_DISCOVERY_SYMLINKS=true
+```
+
+This opt-in includes YAML file symlinks in recursive discovery and permits
+targets outside `paths.dags_dir`. External targets can be viewed, scheduled,
+and run, but cannot be updated, deleted, or renamed through Dagu. Symlinked
+directories are never traversed. A symlink configured as `paths.dags_dir`
+itself is supported.
+
+Without the opt-in, top-level YAML file symlinks whose targets remain inside
+`paths.dags_dir` continue to work in the default non-recursive mode. File
+symlinks encountered during recursive discovery are skipped.
 
 ### Persistent State Directory
 
