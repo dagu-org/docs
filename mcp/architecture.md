@@ -30,7 +30,7 @@ The route honors the server base path. With `base_path: /dagu`, the route is `/d
 Dagu exposes a small tool surface by design:
 
 - `dagu_read` reads state, Markdown Wiki pages, and reference resources.
-- `dagu_change` validates and optionally writes DAG YAML or workspace-aware Wiki page changes.
+- `dagu_change` previews or applies DAG definition upserts, renames, and deletions, plus workspace-aware Wiki page changes.
 - `dagu_execute` starts, enqueues, retries, or stops DAG runs.
 
 This keeps client instructions stable and avoids exposing every REST endpoint as a separate MCP tool.

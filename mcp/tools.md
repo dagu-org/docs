@@ -87,14 +87,15 @@ Read stdout and stderr for one step:
 
 ## `dagu_change`
 
-Use `dagu_change` for DAG YAML and Markdown Wiki page changes. Preview does not write; apply uses the same workspace authorization, path validation, Git Sync write policy, mutation notifications, and audit path as the REST API.
+Use `dagu_change` to create, update, rename, or delete DAG definitions and to maintain Markdown Wiki pages. Preview does not write; apply uses the same authorization, Git Sync write policy, mutation notifications, and audit path as the REST API.
 
 | Input | Values |
 |-------|--------|
 | `mode` | `preview` or `apply`; defaults to `preview` |
-| `type` | `upsert_dag`, `upsert_wiki_page`, `rename_wiki_page`, or `delete_wiki_page`; defaults to `upsert_dag` |
-| `name` | DAG name for `upsert_dag` |
+| `type` | `upsert_dag`, `rename_dag`, `delete_dag`, `upsert_wiki_page`, `rename_wiki_page`, or `delete_wiki_page`; defaults to `upsert_dag` |
+| `name` | Target DAG name for DAG changes |
 | `spec` | Full DAG YAML specification for `upsert_dag` |
+| `newName` | Destination DAG name for `rename_dag` |
 | `workspace` | `default` or a named workspace for Wiki page changes; `all` is not allowed |
 | `path` | Wiki page or directory path without `.md` for Wiki page changes |
 | `content` | Full Markdown content for `upsert_wiki_page`; empty content is allowed |
@@ -123,6 +124,31 @@ Apply writes only after validation succeeds:
   "spec": "steps:\n  - name: hello\n    command: echo hello\n"
 }
 ```
+
+Preview a DAG rename:
+
+```json
+{
+  "mode": "preview",
+  "type": "rename_dag",
+  "name": "nightly-report",
+  "newName": "daily-report"
+}
+```
+
+Preview verifies that the source exists and the destination is available. Repeat the call with `mode=apply` to rename the stored DAG. Rename changes the stored identifier without rewriting the YAML `name` field or historical runs. A successful apply links to the destination DAG and omits the obsolete source `dagUri`.
+
+Preview a DAG deletion:
+
+```json
+{
+  "mode": "preview",
+  "type": "delete_dag",
+  "name": "daily-report"
+}
+```
+
+Repeat the call with `mode=apply` to delete the DAG definition. A successful deletion omits `dagUri` because the resource no longer exists.
 
 Preview a Wiki page create or update:
 
