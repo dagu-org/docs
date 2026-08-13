@@ -13,6 +13,7 @@ Define workflows in declarative YAML over your existing commands and tools. One 
     <a href="https://dagu-demo-f5e33d0e.dagu.sh/" class="VPButton alt">Try the Live Demo</a>
     <a href="/writing-workflows/examples" class="VPButton alt">View Examples</a>
   </div>
+  <p>Live demo login: username <code>demouser</code>, password <code>demouser</code>.</p>
 </div>
 
 ## Why Dagu exists
