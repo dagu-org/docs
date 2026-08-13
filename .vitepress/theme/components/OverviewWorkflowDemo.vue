@@ -151,6 +151,21 @@ const yamlDocuments = computed(() => yamlSources[selectedId.value])
 const selectedYaml = computed(() => yamlDocuments.value[yamlIndex.value])
 const yamlLines = computed(() => selectedYaml.value.source.split('\n'))
 
+function captureOverviewEvent(event, properties = {}) {
+  window.posthog?.capture?.(event, {
+    surface: 'docs',
+    page: 'overview',
+    component: 'workflow_demo',
+    scenario: selectedId.value,
+    ...properties,
+  })
+}
+
+function yamlDocumentRole(index = yamlIndex.value) {
+  if (yamlDocuments.value.length === 1) return 'workflow'
+  return index === 0 ? 'parent' : 'child'
+}
+
 function stopTimers() {
   clearTimeout(phaseTimer)
   clearInterval(clockTimer)
@@ -165,29 +180,45 @@ function resetRun() {
 }
 
 function selectDemo(id) {
+  const previousScenario = selectedId.value
   resetRun()
   yamlIndex.value = 0
   copyLabel.value = 'Copy YAML'
   selectedId.value = id
+  captureOverviewEvent('overview_demo_scenario_selected', {
+    previous_scenario: previousScenario,
+  })
 }
 
 function openYaml() {
   yamlIndex.value = 0
   copyLabel.value = 'Copy YAML'
   yamlDialog.value.showModal()
+  captureOverviewEvent('overview_demo_yaml_opened', {
+    document_count: yamlDocuments.value.length,
+  })
 }
 
 function selectYaml(index) {
   yamlIndex.value = index
   copyLabel.value = 'Copy YAML'
+  captureOverviewEvent('overview_demo_yaml_document_selected', {
+    document_role: yamlDocumentRole(index),
+  })
 }
 
 async function copyYaml() {
   try {
     await navigator.clipboard.writeText(selectedYaml.value.source)
     copyLabel.value = 'Copied!'
+    captureOverviewEvent('overview_demo_yaml_copied', {
+      document_role: yamlDocumentRole(),
+    })
   } catch {
     copyLabel.value = 'Copy failed'
+    captureOverviewEvent('overview_demo_yaml_copy_failed', {
+      document_role: yamlDocumentRole(),
+    })
   }
   clearTimeout(copyTimer)
   copyTimer = setTimeout(() => { copyLabel.value = 'Copy YAML' }, 1800)
@@ -206,6 +237,9 @@ function showPhase(index) {
   if (next.complete) {
     elapsed.value = (Date.now() - startedAt) / 1000
     clearInterval(clockTimer)
+    captureOverviewEvent('overview_demo_run_completed', {
+      elapsed_seconds: Number(elapsed.value.toFixed(1)),
+    })
     return
   }
   if (!next.waiting?.length) {
@@ -215,12 +249,20 @@ function showPhase(index) {
 
 function runDemo() {
   if (phaseIndex.value < 0 || isComplete.value) {
+    captureOverviewEvent('overview_demo_run_started', {
+      mode: isComplete.value ? 'replay' : 'initial',
+    })
     resetRun()
     startClock()
     showPhase(0)
     return
   }
-  if (isWaiting.value) showPhase(phaseIndex.value + 1)
+  if (isWaiting.value) {
+    captureOverviewEvent('overview_demo_human_task_approved', {
+      step: phase.value.waiting[0],
+    })
+    showPhase(phaseIndex.value + 1)
+  }
 }
 
 function nodeStatus(id) {
@@ -258,8 +300,8 @@ onBeforeUnmount(stopTimers)
         <h1>{{ demo.headline[0] }}<br>{{ demo.headline[1] }}</h1>
         <p class="overview-landing-lead">{{ demo.lead }}</p>
         <div class="overview-actions">
-          <a href="#run-your-first-workflow" class="overview-button overview-button-primary">Start in 5 minutes</a>
-          <a href="https://dagu-demo-f5e33d0e.dagu.sh/" class="overview-button overview-button-secondary">Try the Live Demo</a>
+          <a href="#run-your-first-workflow" class="overview-button overview-button-primary" @click="captureOverviewEvent('overview_demo_cta_clicked', { cta: 'quickstart' })">Start in 5 minutes</a>
+          <a href="https://dagu-demo-f5e33d0e.dagu.sh/" class="overview-button overview-button-secondary" @click="captureOverviewEvent('overview_demo_cta_clicked', { cta: 'live_demo' })">Try the Live Demo</a>
         </div>
         <p class="overview-demo-login"><span>Demo login</span><code>demouser / demouser</code></p>
       </section>
@@ -325,7 +367,7 @@ onBeforeUnmount(stopTimers)
             <strong>Let AI build it</strong>
             <p>Connect an AI agent or chat app to Dagu through MCP, then ask it to create or edit this workflow.</p>
           </div>
-          <a href="/mcp/quickstart">Set up MCP <span aria-hidden="true">→</span></a>
+          <a href="/mcp/quickstart" @click="captureOverviewEvent('overview_demo_mcp_clicked', { source: 'yaml_viewer' })">Set up MCP <span aria-hidden="true">→</span></a>
         </aside>
 
         <footer class="yaml-dialog-footer">

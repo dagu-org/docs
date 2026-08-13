@@ -29,6 +29,23 @@ function starCtaLocation(anchor, route) {
   return 'content'
 }
 
+function capture(event, properties) {
+  window.posthog?.capture?.(event, {
+    surface: 'docs',
+    ...properties,
+  })
+}
+
+function selectedCodeGroupTab(group) {
+  const selected = group.querySelector('.tabs input:checked')
+  if (!selected) return undefined
+
+  return [...group.querySelectorAll('.tabs label')]
+    .find(label => label.htmlFor === selected.id)
+    ?.textContent
+    ?.trim()
+}
+
 export default {
   extends: DefaultTheme,
   enhanceApp({ app }) {
@@ -42,19 +59,44 @@ export default {
       const anchor = event.target.closest('a')
       if (!anchor || !anchor.textContent?.includes('Star Dagu')) return
 
-      window.posthog?.capture?.('github_star_cta_clicked', {
-        surface: 'docs',
+      capture('github_star_cta_clicked', {
         location: starCtaLocation(anchor, route),
+      })
+    }
+
+    const trackOverviewInstallClick = (event) => {
+      if (!event.isTrusted || route.path !== '/' || !(event.target instanceof Element)) return
+
+      const tab = event.target.closest('.vp-code-group .tabs label')
+      const platform = tab?.textContent?.trim()
+      if (platform === 'Windows' || platform === 'macOS/Linux') {
+        capture('overview_install_platform_selected', {
+          page: 'overview',
+          platform,
+        })
+        return
+      }
+
+      const copyButton = event.target.closest('.vp-code-group button.copy')
+      const group = copyButton?.closest('.vp-code-group')
+      const selectedPlatform = group && selectedCodeGroupTab(group)
+      if (selectedPlatform !== 'Windows' && selectedPlatform !== 'macOS/Linux') return
+
+      capture('overview_install_command_copied', {
+        page: 'overview',
+        platform: selectedPlatform,
       })
     }
 
     onMounted(() => {
       selectOSTab()
       document.addEventListener('click', trackGitHubStarClick)
+      document.addEventListener('click', trackOverviewInstallClick)
     })
 
     onUnmounted(() => {
       document.removeEventListener('click', trackGitHubStarClick)
+      document.removeEventListener('click', trackOverviewInstallClick)
     })
 
     // Re-run when navigating to a new page
