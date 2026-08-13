@@ -88,15 +88,39 @@ export default {
       })
     }
 
+    const trackBasicExampleClick = (event) => {
+      if (!event.isTrusted || route.path !== '/writing-workflows/examples/basic' || !(event.target instanceof Element)) return
+
+      const recipe = event.target.closest('[data-basic-recipe]')
+      if (!recipe) return
+
+      if (event.target.closest('button.copy')) {
+        capture('basic_example_yaml_copied', {
+          page: 'basic_examples',
+          recipe: recipe.dataset.basicRecipe,
+        })
+        return
+      }
+
+      if (event.target.closest('[data-basic-learn-more]')) {
+        capture('basic_example_learn_more_clicked', {
+          page: 'basic_examples',
+          recipe: recipe.dataset.basicRecipe,
+        })
+      }
+    }
+
     onMounted(() => {
       selectOSTab()
       document.addEventListener('click', trackGitHubStarClick)
       document.addEventListener('click', trackOverviewInstallClick)
+      document.addEventListener('click', trackBasicExampleClick)
     })
 
     onUnmounted(() => {
       document.removeEventListener('click', trackGitHubStarClick)
       document.removeEventListener('click', trackOverviewInstallClick)
+      document.removeEventListener('click', trackBasicExampleClick)
     })
 
     // Re-run when navigating to a new page

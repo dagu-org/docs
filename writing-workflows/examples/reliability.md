@@ -105,7 +105,7 @@ steps:
 
 ### Repeat with Backoff
 
-> Looking for iteration over a list? See [Parallel Execution](/writing-workflows/examples/basic#parallel-execution-iterator).
+> Looking for iteration over a list? See [Parallel Execution](/writing-workflows/execution-control#parallel-execution).
 
 ```yaml
 steps:

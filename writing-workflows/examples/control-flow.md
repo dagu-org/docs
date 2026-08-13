@@ -77,7 +77,7 @@ The first command exits after the run reaches `Waiting`. Completing the task enq
 
 ### Repeat Until Condition
 
-> Looking for iteration over a list? See [Parallel Execution](/writing-workflows/examples/basic#parallel-execution-iterator).
+> Looking for iteration over a list? See [Parallel Execution](/writing-workflows/execution-control#parallel-execution).
 
 ```yaml
 steps:

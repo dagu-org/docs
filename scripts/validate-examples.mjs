@@ -22,6 +22,7 @@ const excludedDirectories = new Set([
 ]);
 const markdownFiles = [];
 const standaloneWorkflowFiles = [
+  ".vitepress/theme/components/basic-workflows/release-readiness.yaml",
   ".vitepress/theme/components/overview-workflows/ai.yaml",
   ".vitepress/theme/components/overview-workflows/scheduled.yaml",
   ".vitepress/theme/components/overview-workflows/servers.yaml",

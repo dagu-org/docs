@@ -214,7 +214,7 @@ const fullSidebar = [
         collapsed: false,
         items: [
           { text: "Overview", link: "/writing-workflows/examples/" },
-          { text: "Basic Examples", link: "/writing-workflows/examples/basic" },
+          { text: "Powerful Basics", link: "/writing-workflows/examples/basic" },
           { text: "Control Flow", link: "/writing-workflows/examples/control-flow" },
           { text: "Reliability", link: "/writing-workflows/examples/reliability" },
           { text: "Data & Variables", link: "/writing-workflows/examples/data-variables" },

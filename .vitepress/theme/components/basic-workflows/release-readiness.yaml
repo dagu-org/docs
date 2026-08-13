@@ -1,0 +1,162 @@
+description: Scheduled AI-assisted release review with a human handoff
+type: graph
+working_dir: .
+
+schedule: "CRON_TZ=America/New_York 0 9 * * 1-5"
+catchup_window: 4h
+
+params:
+  - name: RELEASE
+    type: string
+    description: Release version under review
+    required: true
+    default: v1.4.0
+  - name: BASE_BRANCH
+    type: string
+    description: Branch used as the review baseline
+    required: true
+    default: main
+
+consts:
+  - owner: release-engineering
+
+env:
+  - REPORT_TITLE: "Release readiness · ${params.RELEASE}"
+
+tools:
+  - anomalyco/opencode@v1.18.11
+
+secrets:
+  - name: OPENROUTER_API_KEY
+    provider: env
+    key: OPENROUTER_API_KEY
+
+llm:
+  provider: openrouter
+  model: deepseek/deepseek-v4-flash
+
+defaults:
+  retry_policy:
+    limit: 2
+    interval_sec: 10
+
+steps:
+  - id: collect_context
+    run: >-
+      git log -1 --format='{"commit":"%h","subject":"%s"}'
+    output:
+      commit:
+        from: stdout
+        decode: json
+        select: .commit
+      subject:
+        from: stdout
+        decode: json
+        select: .subject
+
+  - id: agent_review
+    depends: [collect_context]
+    action: harness.run
+    with:
+      provider: opencode
+      model: openrouter/deepseek/deepseek-v4-flash
+      prompt: |
+        Review release ${params.RELEASE} against ${params.BASE_BRANCH}.
+        Inspect the current diff and tests without modifying files.
+        Return only JSON: {"summary":"...","risk":"low|medium|high","verdict":"ready|hold"}.
+    output_schema:
+      type: object
+      additionalProperties: false
+      required: [summary, risk, verdict]
+      properties:
+        summary:
+          type: string
+        risk:
+          type: string
+          enum: [low, medium, high]
+        verdict:
+          type: string
+          enum: [ready, hold]
+
+  - id: container_check
+    depends: [collect_context]
+    action: docker.run
+    with:
+      image: alpine:3.21
+      pull: missing
+      auto_remove: true
+      command: >-
+        printf '{"status":"passed","checks":148}'
+    output:
+      status:
+        from: stdout
+        decode: json
+        select: .status
+      checks:
+        from: stdout
+        decode: json
+        select: .checks
+
+  - id: ai_summary
+    depends: [agent_review, container_check]
+    action: chat.completion
+    with:
+      prompt: |
+        Write a concise release brief for ${params.RELEASE} at commit ${collect_context.output.commit}.
+        Agent verdict: ${agent_review.output.verdict}; risk: ${agent_review.output.risk}.
+        Agent summary: ${agent_review.output.summary}
+        Container checks: ${container_check.output.checks} ${container_check.output.status}.
+    output:
+      brief:
+        from: stdout
+
+  - id: release_handoff
+    depends: [ai_summary]
+    action: human.task
+    with:
+      prompt: Complete the release handoff for ${params.RELEASE}
+      form:
+        type: object
+        title: Release handoff
+        additionalProperties: false
+        properties:
+          environment:
+            type: string
+            enum: [staging, production]
+          change_ticket:
+            type: string
+            pattern: '^CHG-[0-9]+$'
+          release_window:
+            type: string
+          notify_team:
+            type: boolean
+            default: true
+        required: [environment, change_ticket, release_window]
+
+  - id: release_report
+    depends: [release_handoff]
+    action: template.render
+    with:
+      template: |
+        # {{ .title }}
+
+        - **Commit:** `{{ .commit }}`
+        - **Environment:** {{ .environment }}
+        - **Change ticket:** {{ .ticket }}
+        - **Release window:** {{ .window }}
+
+        ## AI release brief
+
+        {{ .brief }}
+
+        Prepared for {{ .owner }}.
+      data:
+        title: ${env.REPORT_TITLE}
+        commit: ${collect_context.output.commit}
+        environment: ${steps.release_handoff.outputs.environment}
+        ticket: ${steps.release_handoff.outputs.change_ticket}
+        window: ${steps.release_handoff.outputs.release_window}
+        brief: ${ai_summary.output.brief}
+        owner: ${consts.owner}
+    stdout:
+      artifact: release-readiness.md
