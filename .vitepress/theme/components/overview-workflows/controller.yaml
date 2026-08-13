@@ -1,0 +1,69 @@
+type: controller
+
+params:
+  - repo: .
+
+secrets:
+  - name: OPENROUTER_API_KEY
+    provider: env
+    key: OPENROUTER_API_KEY
+
+working_dir: ${params.repo}
+
+llm:
+  provider: openrouter
+  model: anthropic/claude-sonnet-4.5
+  system: |
+    Get the current code past both reviews.
+    After any revision, run both reviews again because the code changed.
+
+steps:
+  - name: review_correctness
+    description: Review the current code for correctness. Returns PASS or one finding.
+    action: harness.run
+    with:
+      provider: opencode
+      prompt: |
+        Review the current code for correctness only.
+        Print PASS, or FAIL followed by one concrete finding.
+
+  - name: review_simplicity
+    description: Review the current code for simplicity. Returns PASS or one finding.
+    action: harness.run
+    with:
+      provider: opencode
+      prompt: |
+        Review the current code for unnecessary complexity only.
+        Print PASS, or FAIL followed by one concrete finding.
+
+  - name: revise
+    description: Fix one finding from the latest review.
+    action: dag.run
+    with:
+      dag: revise-code
+      params:
+        repo: ${params.repo}
+
+tasks:
+  - name: correctness_passed
+    description: Finished when the latest correctness review returned PASS on the current code.
+  - name: simplicity_passed
+    description: Finished when the latest simplicity review returned PASS on the current code.
+---
+name: revise-code
+
+params:
+  - repo: .
+  - finding: ""
+
+working_dir: ${params.repo}
+
+steps:
+  - id: edit
+    action: harness.run
+    with:
+      provider: opencode
+      prompt: |
+        Fix exactly this review finding and change nothing else:
+
+        ${params.finding}

@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import aiYaml from './overview-workflows/ai.yaml?raw'
+import controllerYaml from './overview-workflows/controller.yaml?raw'
 import scheduledYaml from './overview-workflows/scheduled.yaml?raw'
 import serversYaml from './overview-workflows/servers.yaml?raw'
 
@@ -18,7 +19,27 @@ const yamlSources = {
     { label: 'Parent · api-recovery', source: yamlDocument(serversYaml) },
     { label: 'Child · remote-recovery', source: yamlDocument(serversYaml, 1) },
   ],
+  controller: [
+    { label: 'Controller · code-review', source: yamlDocument(controllerYaml) },
+    { label: 'Child · revise-code', source: yamlDocument(controllerYaml, 1) },
+  ],
 }
+
+const controllerActions = [
+  { id: 'review_correctness', icon: '⌕', label: 'Review correctness', meta: 'OpenCode' },
+  { id: 'review_simplicity', icon: '≡', label: 'Review simplicity', meta: 'OpenCode' },
+  { id: 'revise', icon: '✎', label: 'Revise', meta: 'Child workflow' },
+]
+
+const controllerTurns = [
+  { action: 'review_correctness', result: 'FAIL · off-by-one error', status: 'failed' },
+  { action: 'revise', result: 'Patch applied · child run #8297', status: 'succeeded' },
+  { action: 'review_correctness', result: 'PASS · correctness verified', status: 'succeeded' },
+  { action: 'review_simplicity', result: 'FAIL · unnecessary complexity', status: 'failed' },
+  { action: 'revise', result: 'Patch applied · child run #8298', status: 'succeeded' },
+  { action: 'review_correctness', result: 'PASS · current revision verified', status: 'succeeded' },
+  { action: 'review_simplicity', result: 'PASS · simplicity verified', status: 'succeeded' },
+]
 
 const demos = [
   {
@@ -48,8 +69,8 @@ const demos = [
   },
   {
     id: 'ai',
-    tab: 'AI + Human',
-    kicker: 'AI workflows',
+    tab: 'Harness',
+    kicker: 'Agent Harness',
     headline: ['AI takes action.', 'You stay in control.'],
     lead: 'Let OpenCode inspect logs, search the repository, and propose a fix. Dagu pauses before execution until a person approves it.',
     runId: 'incident-fix · #8293',
@@ -91,7 +112,29 @@ const demos = [
       { active: [], done: ['inspect', 'review', 'recovery', 'restart', 'verify', 'email'], event: 'Remote recovery completed', complete: true },
     ],
   },
+  {
+    id: 'controller',
+    tab: 'AI Controller',
+    kicker: 'Adaptive workflows',
+    headline: ['Set the goal.', 'Let Dagu adapt.'],
+    lead: 'Give the controller reviewed actions and completion goals. It chooses one action per turn, observes the result, and keeps going until every task is settled.',
+    runId: 'code-review · #8296',
+    nodes: [],
+    phases: [
+      ...controllerTurns.map((turn, controllerTurn) => ({
+        duration: 1050,
+        active: [],
+        done: [],
+        controllerTurn,
+        event: `${controllerActions.find((action) => action.id === turn.action).label} · ${turn.result}`,
+      })),
+      { active: [], done: [], event: 'Both review goals completed · controller stopped', complete: true },
+    ],
+  },
 ]
+
+const orderedDemos = ['scheduled', 'servers', 'ai', 'controller']
+  .map((id) => demos.find((item) => item.id === id))
 
 const childNodes = [
   { id: 'extract', icon: '↧', label: 'Extract', meta: 'Python command' },
@@ -124,6 +167,7 @@ let copyTimer
 
 const demo = computed(() => demos.find((item) => item.id === selectedId.value))
 const phase = computed(() => demo.value.phases[phaseIndex.value])
+const isController = computed(() => selectedId.value === 'controller')
 const isWaiting = computed(() => Boolean(phase.value?.waiting?.length))
 const isComplete = computed(() => Boolean(phase.value?.complete))
 const isRunning = computed(() => phaseIndex.value >= 0 && !isWaiting.value && !isComplete.value)
@@ -133,7 +177,9 @@ const runStatus = computed(() => {
   if (isComplete.value) return 'SUCCEEDED'
   return 'RUNNING'
 })
-const eventText = computed(() => phase.value?.event ?? 'Click Run to watch the graph execute')
+const eventText = computed(() => phase.value?.event ?? (isController.value
+  ? 'Click Run to watch the controller choose approved actions'
+  : 'Click Run to watch the graph execute'))
 const actionLabel = computed(() => {
   if (phaseIndex.value < 0) return 'Run animated demo'
   if (isWaiting.value) return phase.value.approval
@@ -147,6 +193,21 @@ const agentVisible = computed(() => selectedId.value === 'ai' && nodeStatus('ope
 const remoteVisible = computed(() => selectedId.value === 'servers' && isWaiting.value)
 const recoveryVisible = computed(() => selectedId.value === 'servers' && nodeStatus('recovery') !== 'queued')
 const recoveryStatus = computed(() => nodeStatus('recovery'))
+const controllerTurn = computed(() => phase.value?.controllerTurn === undefined
+  ? undefined
+  : controllerTurns[phase.value.controllerTurn])
+const selectedControllerAction = computed(() => controllerActions.find((action) => action.id === controllerTurn.value?.action))
+const controllerHistory = computed(() => {
+  const turns = isComplete.value
+    ? controllerTurns.slice(-3)
+    : phase.value?.controllerTurn === undefined
+      ? []
+      : controllerTurns.slice(Math.max(0, phase.value.controllerTurn - 2), phase.value.controllerTurn + 1)
+  return turns.map((turn) => ({
+    ...turn,
+    definition: controllerActions.find((action) => action.id === turn.action),
+  }))
+})
 const yamlDocuments = computed(() => yamlSources[selectedId.value])
 const selectedYaml = computed(() => yamlDocuments.value[yamlIndex.value])
 const yamlLines = computed(() => selectedYaml.value.source.split('\n'))
@@ -310,7 +371,7 @@ onBeforeUnmount(stopTimers)
     <section class="workflow-demo" aria-label="Animated Dagu workflow run">
       <div class="workflow-tabs" role="group" aria-label="Choose a workflow scenario">
         <button
-          v-for="item in demos"
+          v-for="item in orderedDemos"
           :key="item.id"
           type="button"
           :aria-pressed="selectedId === item.id"
@@ -322,7 +383,7 @@ onBeforeUnmount(stopTimers)
 
       <div class="run-toolbar">
         <div>
-          <span class="run-label">DAG RUN</span>
+          <span class="run-label">{{ isController ? 'CONTROLLER RUN' : 'DAG RUN' }}</span>
           <strong>{{ demo.runId }}</strong>
         </div>
         <div class="run-toolbar-tools">
@@ -376,7 +437,80 @@ onBeforeUnmount(stopTimers)
         </footer>
       </dialog>
 
-      <div class="graph-canvas" :class="`graph-${demo.id}`">
+      <div class="run-canvas" :class="`canvas-${demo.id}`" :aria-label="isController ? 'Live AI controller loop' : 'Live workflow graph'">
+        <template v-if="isController">
+          <div class="controller-topline">
+            <section class="controller-tasks" aria-label="Controller tasks">
+              <header><span>TASKS</span><b>Completion goals</b></header>
+              <div>
+                <article :class="{ 'is-complete': isComplete }">
+                  <i aria-hidden="true">{{ isComplete ? '✓' : '○' }}</i>
+                  <strong>Correctness passed</strong>
+                  <em>{{ isComplete ? 'COMPLETE' : 'OPEN' }}</em>
+                </article>
+                <article :class="{ 'is-complete': isComplete }">
+                  <i aria-hidden="true">{{ isComplete ? '✓' : '○' }}</i>
+                  <strong>Simplicity passed</strong>
+                  <em>{{ isComplete ? 'COMPLETE' : 'OPEN' }}</em>
+                </article>
+              </div>
+            </section>
+
+            <section class="controller-catalog" aria-label="Approved action catalog">
+              <header><span>APPROVED ACTIONS</span><b>3 available</b></header>
+              <div>
+                <article
+                  v-for="action in controllerActions"
+                  :key="action.id"
+                  :class="{ 'is-selected': controllerTurn?.action === action.id && !isComplete }"
+                >
+                  <i aria-hidden="true">{{ action.icon }}</i>
+                  <span><strong>{{ action.label }}</strong><small>{{ action.meta }}</small></span>
+                  <em v-if="controllerTurn?.action === action.id && !isComplete">SELECTED</em>
+                </article>
+              </div>
+            </section>
+          </div>
+
+          <section class="controller-loop" :class="{ 'is-active': isRunning, 'is-complete': isComplete }" aria-label="Choose, run, observe, and update loop">
+            <span class="controller-loop-track" aria-hidden="true"></span>
+            <div class="controller-stage stage-choose"><i aria-hidden="true">◆</i><span><b>CHOOSE</b><small>Pick one action</small></span></div>
+            <div class="controller-stage stage-run"><i aria-hidden="true">▶</i><span><b>RUN</b><small>Execute safely</small></span></div>
+            <div class="controller-stage stage-observe"><i aria-hidden="true">◉</i><span><b>OBSERVE</b><small>Read the result</small></span></div>
+            <div class="controller-stage stage-update"><i aria-hidden="true">↻</i><span><b>UPDATE</b><small>Check the goals</small></span></div>
+
+            <div class="controller-core">
+              <span>CONTROLLER</span>
+              <strong>{{ isComplete ? 'DONE' : phase?.controllerTurn === undefined ? 'READY' : `TURN ${phase.controllerTurn + 1}` }}</strong>
+            </div>
+
+            <Transition name="controller-card" mode="out-in">
+              <article v-if="selectedControllerAction && !isComplete" :key="`${phase.controllerTurn}-${selectedControllerAction.id}`" class="controller-selected-action">
+                <i aria-hidden="true">{{ selectedControllerAction.icon }}</i>
+                <span><strong>{{ selectedControllerAction.label }}</strong><small>{{ selectedControllerAction.meta }}</small></span>
+              </article>
+            </Transition>
+
+            <Transition name="controller-result" mode="out-in">
+              <p v-if="controllerTurn && !isComplete" :key="`${phase.controllerTurn}-${controllerTurn.result}`" class="controller-observation" :class="`is-${controllerTurn.status}`">
+                <span>OBSERVATION</span><strong>{{ controllerTurn.result }}</strong>
+              </p>
+            </Transition>
+          </section>
+
+          <section class="controller-history" aria-label="Recent controller turns">
+            <header>RECENT TURNS</header>
+            <div v-if="controllerHistory.length">
+              <article v-for="turn in controllerHistory" :key="`${turn.action}-${turn.result}`" :class="`is-${turn.status}`">
+                <i aria-hidden="true">{{ turn.definition.icon }}</i>
+                <span><strong>{{ turn.definition.label }}</strong><small>{{ turn.result }}</small></span>
+              </article>
+            </div>
+            <p v-else>Run the demo to watch decisions appear here.</p>
+          </section>
+        </template>
+
+        <template v-else>
         <div class="dag-flow">
           <template v-for="(node, index) in demo.nodes" :key="node.id">
             <article class="dag-node" :class="`is-${nodeStatus(node.id)}`">
@@ -479,6 +613,7 @@ onBeforeUnmount(stopTimers)
             </div>
           </section>
         </Transition>
+        </template>
       </div>
 
       <div class="run-footer">
@@ -509,7 +644,7 @@ onBeforeUnmount(stopTimers)
 
 .workflow-tabs {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0;
   padding: 0 12px;
   border-bottom: 1px solid #252a37;
@@ -863,7 +998,7 @@ onBeforeUnmount(stopTimers)
   background: #7c6ef4;
 }
 
-.graph-canvas {
+.run-canvas {
   position: relative;
   min-height: 325px;
   padding: 1.35rem 1.15rem 1.15rem;
@@ -881,8 +1016,8 @@ onBeforeUnmount(stopTimers)
   min-width: 610px;
 }
 
-.graph-ai .dag-flow,
-.graph-servers .dag-flow {
+.canvas-ai .dag-flow,
+.canvas-servers .dag-flow {
   min-width: 520px;
 }
 
@@ -1306,6 +1441,430 @@ onBeforeUnmount(stopTimers)
   color: #f07773;
 }
 
+.canvas-controller {
+  min-height: 610px;
+  padding: 1rem;
+  overflow: hidden;
+}
+
+.controller-topline {
+  display: grid;
+  grid-template-columns: minmax(190px, 0.8fr) minmax(330px, 1.4fr);
+  gap: 0.8rem;
+  min-width: 560px;
+}
+
+.controller-tasks,
+.controller-catalog,
+.controller-history {
+  min-width: 0;
+}
+
+.controller-tasks > header,
+.controller-catalog > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.45rem;
+  color: #7f8796;
+  font: 700 0.55rem/1 var(--vp-font-family-mono);
+  letter-spacing: 0.06em;
+}
+
+.controller-tasks > header b,
+.controller-catalog > header b {
+  color: #5f6878;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.controller-tasks > div,
+.controller-catalog > div {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.controller-catalog > div {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.controller-tasks article,
+.controller-catalog article {
+  min-width: 0;
+  border: 1px solid #323847;
+  border-radius: 9px;
+  background: rgba(18, 22, 32, 0.94);
+}
+
+.controller-tasks article {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 48px;
+  padding: 0.55rem 0.65rem;
+}
+
+.controller-tasks article > i {
+  color: #7d8797;
+  font: normal 700 0.9rem/1 var(--vp-font-family-mono);
+}
+
+.controller-tasks article > strong {
+  overflow: hidden;
+  color: #d9dce4;
+  font-size: 0.66rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.controller-tasks article > em {
+  color: #697180;
+  font: normal 700 0.49rem/1 var(--vp-font-family-mono);
+}
+
+.controller-tasks article.is-complete {
+  border-color: #268f52;
+  background: rgba(27, 89, 53, 0.22);
+}
+
+.controller-tasks article.is-complete > i,
+.controller-tasks article.is-complete > em {
+  color: #65dc94;
+}
+
+.controller-catalog article {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 76px;
+  padding: 0.55rem;
+  transition: border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
+}
+
+.controller-catalog article > i,
+.controller-history article > i,
+.controller-selected-action > i {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border-radius: 7px;
+  background: rgba(109, 92, 232, 0.2);
+  color: #b3aaff;
+  font: normal 700 0.82rem/1 var(--vp-font-family-mono);
+}
+
+.controller-catalog article strong,
+.controller-catalog article small,
+.controller-selected-action strong,
+.controller-selected-action small,
+.controller-history article strong,
+.controller-history article small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.controller-catalog article strong,
+.controller-selected-action strong,
+.controller-history article strong {
+  color: #e5e7ed;
+  font-size: 0.62rem;
+}
+
+.controller-catalog article small,
+.controller-selected-action small,
+.controller-history article small {
+  margin-top: 0.16rem;
+  color: #737c8c;
+  font: 0.53rem/1.2 var(--vp-font-family-mono);
+}
+
+.controller-catalog article > em {
+  position: absolute;
+  right: 0.45rem;
+  bottom: 0.35rem;
+  color: #67def8;
+  font: normal 700 0.43rem/1 var(--vp-font-family-mono);
+}
+
+.controller-catalog article.is-selected {
+  border-color: #23c7e7;
+  background: rgba(20, 116, 139, 0.18);
+  box-shadow: 0 0 22px rgba(35, 199, 231, 0.16);
+}
+
+.controller-catalog article.is-selected > i {
+  background: #139fc1;
+  color: #e6fbff;
+}
+
+.controller-loop {
+  position: relative;
+  min-width: 560px;
+  height: 285px;
+  margin-top: 0.85rem;
+  overflow: hidden;
+  border: 1px solid #2d3442;
+  border-radius: 14px;
+  background: radial-gradient(circle at 50% 50%, rgba(22, 153, 184, 0.12), transparent 28%), rgba(10, 14, 22, 0.82);
+}
+
+.controller-loop-track {
+  position: absolute;
+  inset: 38px 74px;
+  border: 2px solid #245b70;
+  border-radius: 82px;
+  box-shadow: inset 0 0 18px rgba(35, 199, 231, 0.08), 0 0 18px rgba(35, 199, 231, 0.08);
+}
+
+.controller-loop-track::after {
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #b8f5ff;
+  box-shadow: 0 0 14px #21d4f4;
+  content: '';
+  opacity: 0;
+  offset-path: inset(0 round 82px);
+  offset-distance: 0%;
+}
+
+.controller-loop.is-active .controller-loop-track::after {
+  opacity: 1;
+  animation: controller-orbit 2.2s linear infinite;
+}
+
+.controller-stage {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  width: 128px;
+  min-height: 54px;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.48rem;
+  border: 1px solid #354050;
+  border-radius: 9px;
+  background: #151b25;
+}
+
+.controller-stage > i {
+  display: grid;
+  width: 25px;
+  height: 25px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 6px;
+  background: rgba(109, 92, 232, 0.18);
+  color: #a99fff;
+  font: normal 700 0.66rem/1 var(--vp-font-family-mono);
+}
+
+.controller-stage b,
+.controller-stage small {
+  display: block;
+}
+
+.controller-stage b {
+  color: #5eddf4;
+  font: 700 0.54rem/1 var(--vp-font-family-mono);
+  letter-spacing: 0.04em;
+}
+
+.controller-stage small {
+  margin-top: 0.18rem;
+  color: #8a93a2;
+  font-size: 0.5rem;
+}
+
+.stage-choose { top: 15px; left: 20px; }
+.stage-run { top: 15px; right: 20px; }
+.stage-observe { right: 20px; bottom: 15px; }
+.stage-update { bottom: 15px; left: 20px; }
+
+.controller-core {
+  position: absolute;
+  z-index: 3;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  width: 96px;
+  height: 96px;
+  place-content: center;
+  border: 2px solid #23c7e7;
+  border-radius: 50%;
+  background: #0c1b26;
+  box-shadow: 0 0 0 7px rgba(35, 199, 231, 0.08), 0 0 30px rgba(35, 199, 231, 0.2);
+  text-align: center;
+  transform: translate(-50%, -50%);
+}
+
+.controller-core span {
+  color: #62def5;
+  font: 700 0.48rem/1 var(--vp-font-family-mono);
+  letter-spacing: 0.06em;
+}
+
+.controller-core strong {
+  margin-top: 0.32rem;
+  color: #e7fbff;
+  font: 700 0.9rem/1 var(--vp-font-family-mono);
+}
+
+.controller-loop.is-complete .controller-core {
+  border-color: #33ce74;
+  box-shadow: 0 0 0 7px rgba(51, 206, 116, 0.08), 0 0 30px rgba(51, 206, 116, 0.18);
+}
+
+.controller-loop.is-complete .controller-core span,
+.controller-loop.is-complete .controller-core strong {
+  color: #76e4a3;
+}
+
+.controller-selected-action {
+  position: absolute;
+  z-index: 4;
+  top: 50%;
+  right: 8%;
+  display: grid;
+  width: 142px;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem;
+  border: 1px solid #23c7e7;
+  border-radius: 9px;
+  background: #0e2834;
+  box-shadow: 0 0 24px rgba(35, 199, 231, 0.2);
+  transform: translateY(-50%);
+}
+
+.controller-selected-action > i {
+  background: #139fc1;
+  color: #e6fbff;
+}
+
+.controller-observation {
+  position: absolute;
+  z-index: 4;
+  top: 50%;
+  left: 7%;
+  display: grid;
+  width: 158px;
+  gap: 0.22rem;
+  margin: 0;
+  padding: 0.6rem;
+  border: 1px solid #3b8e60;
+  border-radius: 9px;
+  background: #10231a;
+  transform: translateY(-50%);
+}
+
+.controller-observation.is-failed {
+  border-color: #b64f4b;
+  background: #281516;
+}
+
+.controller-observation > span {
+  color: #6cd997;
+  font: 700 0.46rem/1 var(--vp-font-family-mono);
+  letter-spacing: 0.05em;
+}
+
+.controller-observation.is-failed > span {
+  color: #f07773;
+}
+
+.controller-observation > strong {
+  color: #dce3e7;
+  font: 600 0.56rem/1.35 var(--vp-font-family-mono);
+}
+
+.controller-history {
+  min-width: 560px;
+  margin-top: 0.75rem;
+}
+
+.controller-history > header {
+  margin-bottom: 0.4rem;
+  color: #727b8b;
+  font: 700 0.53rem/1 var(--vp-font-family-mono);
+  letter-spacing: 0.06em;
+}
+
+.controller-history > div {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
+.controller-history article {
+  display: grid;
+  min-width: 0;
+  min-height: 55px;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.5rem;
+  border: 1px solid #313846;
+  border-radius: 8px;
+  background: #121720;
+}
+
+.controller-history article.is-succeeded {
+  border-color: rgba(51, 206, 116, 0.5);
+}
+
+.controller-history article.is-failed {
+  border-color: rgba(237, 96, 92, 0.54);
+}
+
+.controller-history article.is-succeeded small { color: #65dc94; }
+.controller-history article.is-failed small { color: #f07773; }
+
+.controller-history > p {
+  margin: 0;
+  padding: 0.8rem;
+  border: 1px dashed #303746;
+  border-radius: 8px;
+  color: #687181;
+  font: 0.58rem/1.3 var(--vp-font-family-mono);
+  text-align: center;
+}
+
+.controller-card-enter-active,
+.controller-result-enter-active {
+  transition: opacity 260ms ease, transform 360ms ease;
+}
+
+.controller-card-enter-from {
+  opacity: 0;
+  transform: translate(55px, -50%);
+}
+
+.controller-result-enter-from {
+  opacity: 0;
+  transform: translate(-45px, -50%);
+}
+
+.controller-card-leave-active,
+.controller-result-leave-active {
+  transition: opacity 100ms ease;
+}
+
+.controller-card-leave-to,
+.controller-result-leave-to {
+  opacity: 0;
+}
+
 .run-footer {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -1432,6 +1991,10 @@ a:focus-visible {
   50% { box-shadow: 0 0 24px rgba(109, 92, 232, 0.3); }
 }
 
+@keyframes controller-orbit {
+  to { offset-distance: 100%; }
+}
+
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
@@ -1445,15 +2008,85 @@ a:focus-visible {
     min-height: 56px;
   }
 
-  .graph-canvas {
+  .run-canvas {
     min-height: 275px;
+  }
+
+  .canvas-controller {
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .controller-topline {
+    min-width: 0;
+    grid-template-columns: 1fr;
+  }
+
+  .controller-catalog > div {
+    grid-template-columns: 1fr;
+  }
+
+  .controller-catalog article {
+    min-height: 60px;
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .controller-catalog article > em {
+    display: none;
+  }
+
+  .controller-loop {
+    min-width: 0;
+    height: 455px;
+  }
+
+  .controller-loop-track {
+    inset: 40px 26px;
+    border-radius: 105px;
+  }
+
+  .controller-stage {
+    width: 108px;
+  }
+
+  .stage-choose { top: 16px; left: 12px; }
+  .stage-run { top: 16px; right: 12px; }
+  .stage-observe { right: 12px; bottom: 16px; }
+  .stage-update { bottom: 16px; left: 12px; }
+
+  .controller-core {
+    top: 40%;
+    width: 88px;
+    height: 88px;
+  }
+
+  .controller-selected-action {
+    top: 59%;
+    right: auto;
+    left: 50%;
+    margin-left: -71px;
+  }
+
+  .controller-observation {
+    top: 73%;
+    left: 50%;
+    margin-left: -79px;
+  }
+
+  .controller-history {
+    min-width: 0;
+  }
+
+  .controller-history > div {
+    grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 480px) {
   .workflow-tabs button {
+    min-height: 56px;
     padding: 0.45rem 0.25rem;
-    font-size: 0.63rem;
+    font-size: 0.58rem;
   }
 
   .run-label {
