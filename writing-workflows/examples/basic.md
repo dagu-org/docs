@@ -5,6 +5,7 @@ aside: false
 
 <script setup>
 import BasicWorkflowDemo from '/.vitepress/theme/components/BasicWorkflowDemo.vue'
+import BasicRecipeVisual from '/.vitepress/theme/components/BasicRecipeVisual.vue'
 </script>
 
 # Powerful workflow basics
@@ -41,9 +42,7 @@ Every example below is a complete, copyable workflow. The flagship demo is just 
 
 <p class="recipe-outcome">Start with existing scripts. Independent steps run together; a dependent step waits for both.</p>
 
-<div class="recipe-flow" aria-label="Checkout fans out to tests and build, then converges at package">
-  <span>checkout</span><i>→</i><span class="is-parallel">test<br>build</span><i>→</i><span>package</span>
-</div>
+<BasicRecipeVisual kind="graph" />
 
 ```yaml
 type: graph
@@ -74,7 +73,7 @@ steps:
 
 <p class="recipe-outcome">Validate parameters at the boundary and publish structured values for downstream steps.</p>
 
-<div class="recipe-chips"><span>params</span><span>consts</span><span>env</span><span>structured output</span></div>
+<BasicRecipeVisual kind="data" />
 
 ```yaml
 params:
@@ -111,7 +110,7 @@ steps:
 
 <p class="recipe-outcome">Turn a command into an operated job with one cron expression and shared reliability defaults.</p>
 
-<div class="recipe-chips"><span>09:00 New York</span><span>catch up for 4h</span><span>2 retries</span><span>15m timeout</span></div>
+<BasicRecipeVisual kind="schedule" />
 
 ```yaml
 schedule: "CRON_TZ=America/New_York 0 9 * * 1-5"
@@ -141,9 +140,7 @@ steps:
 
 <p class="recipe-outcome">Give one step its exact runtime without containerizing the Dagu server or the rest of the workflow.</p>
 
-<div class="recipe-flow is-short" aria-label="Host checkout passes source to a containerized test step">
-  <span>host command</span><i>→</i><span class="is-container">python:3.13</span><i>→</i><span>result</span>
-</div>
+<BasicRecipeVisual kind="container" />
 
 ```yaml
 steps:
@@ -173,7 +170,7 @@ Set `DAGU_CONTAINER_RUNTIME=podman` to use a Docker-compatible Podman socket.
 
 <p class="recipe-outcome">Use a model as an ordinary step, capture its answer, and pass it into the rest of the graph.</p>
 
-<div class="recipe-chips"><span>masked secret</span><span>streaming response</span><span>captured output</span></div>
+<BasicRecipeVisual kind="llm" />
 
 ```yaml
 secrets:
@@ -215,9 +212,7 @@ steps:
 
 <p class="recipe-outcome">Run OpenCode, Codex, Claude Code, Copilot, or Pi as a durable workflow step with retries, logs, and artifacts.</p>
 
-<div class="recipe-flow is-short" aria-label="Pinned OpenCode reviews a repository and creates an artifact">
-  <span>repository</span><i>→</i><span class="is-ai">OpenCode</span><i>→</i><span>review.md</span>
-</div>
+<BasicRecipeVisual kind="agent" />
 
 ```yaml
 working_dir: .
@@ -258,9 +253,7 @@ The pinned tool is installed for the run, so the worker does not need OpenCode p
 
 <p class="recipe-outcome">Dagu generates a typed form, persists the answer, resumes the same run, and renders a result visible in the Web UI.</p>
 
-<div class="recipe-flow is-short" aria-label="Human input flows into a rendered release artifact">
-  <span class="is-human">typed form</span><i>→</i><span>template.render</span><i>→</i><span>artifact</span>
-</div>
+<BasicRecipeVisual kind="human" />
 
 ```yaml
 params:
@@ -312,9 +305,7 @@ steps:
 
 <p class="recipe-outcome">A child DAG is a real nested run with its own graph, logs, and status. Inputs cross the boundary explicitly.</p>
 
-<div class="recipe-flow is-short" aria-label="Parent workflow calls a nested reusable test suite">
-  <span>parent run</span><i>→</i><span class="is-child">test-suite ↳</span><i>→</i><span>publish</span>
-</div>
+<BasicRecipeVisual kind="nested" />
 
 ```yaml
 type: graph
