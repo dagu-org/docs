@@ -554,7 +554,7 @@ h1.title {
 }
 
 .overview-page .VPDoc:not(.has-sidebar) .container {
-  width: min(100%, 1320px);
+  width: min(100%, 1480px);
 }
 
 .overview-page .vp-doc > div {
@@ -641,7 +641,7 @@ h1.title {
 
 @media (min-width: 1100px) {
   .overview-landing {
-    grid-template-columns: minmax(0, 0.88fr) minmax(520px, 1.12fr);
+    grid-template-columns: minmax(390px, 0.72fr) minmax(660px, 1.28fr);
   }
 }
 

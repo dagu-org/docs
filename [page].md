@@ -10,69 +10,63 @@ pageClass: overview-page
 import OverviewWorkflowDemo from '/.vitepress/theme/components/OverviewWorkflowDemo.vue'
 </script>
 
-<div class="overview-landing">
-  <section class="overview-landing-copy">
-    <p class="overview-kicker">Local-first workflow orchestration</p>
-    <h1>Your commands.<br>OpenCode.<br>Human decisions.<br>One workflow.</h1>
-    <p class="overview-landing-lead">Keep the tools that already work. Dagu adds schedules, dependencies, retries, human checkpoints, and a Web UI from one declarative YAML file.</p>
-    <p class="overview-landing-prompt">Pick a use case, then click through a real Dagu workflow.</p>
-    <div class="overview-actions">
-      <a href="#run-your-first-workflow" class="overview-button overview-button-primary">Start in 5 minutes</a>
-      <a href="https://dagu-demo-f5e33d0e.dagu.sh/" class="overview-button overview-button-secondary">Try the Live Demo</a>
-    </div>
-    <p class="overview-demo-login"><span>Demo login</span><code>demouser / demouser</code></p>
-  </section>
-
-  <OverviewWorkflowDemo />
-</div>
+<OverviewWorkflowDemo />
 
 <p class="overview-demo-guides">Explore the building blocks: <a href="/writing-workflows/scheduling">Scheduling</a> · <a href="/step-types/docker">Docker</a> · <a href="/writing-workflows/sub-dags">Nested workflows</a> · <a href="/step-types/harness/opencode">OpenCode</a> · <a href="/writing-workflows/human-tasks">Human tasks</a> · <a href="/step-types/ssh">SSH</a> · <a href="/step-types/mail">Email</a></p>
 
 ## Run your first workflow
 
-Install Dagu on macOS or Linux:
+Install Dagu on Windows, macOS, or Linux:
 
-```bash
+::: code-group
+
+```powershell [Windows]
+irm https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/installer.ps1 | iex
+```
+
+```bash [macOS/Linux]
 curl -fsSL https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/installer.sh | bash
 ```
 
-The installer can add Dagu to your `PATH`, set up a background service, and create the first admin account. See [Installation](/getting-started/installation/) for Windows, Docker, Homebrew, npm, and manual options.
+:::
+
+The installers can add Dagu to your `PATH`, set up a background service, and create the first admin account. See [Installation](/getting-started/installation/) for Docker, Homebrew, npm, and manual options.
 
 Save this as `health.yaml`. Two checks run in parallel, then Dagu turns their output into a Markdown artifact:
 
 ```yaml
 steps:
-  - id: system
-    run: uname -a
-    output: SYSTEM
+  - id: version
+    run: dagu version
+    output: VERSION
 
-  - id: disk
-    run: df -h .
-    output: DISK
+  - id: ready
+    run: echo Dagu is ready
+    output: READY
 
   - id: report
     action: template.render
     with:
       template: |
-        # System health
+        # Dagu health
 
-        ## System
+        ## Version
 
         ~~~text
-        {{ .system }}
+        {{ .version }}
         ~~~
 
-        ## Disk usage
+        ## Check
 
         ~~~text
-        {{ .disk }}
+        {{ .ready }}
         ~~~
       data:
-        system: ${SYSTEM}
-        disk: ${DISK}
+        version: ${VERSION}
+        ready: ${READY}
     stdout:
       artifact: health-report.md
-    depends: [system, disk]
+    depends: [version, ready]
 ```
 
 Start the scheduler and Web UI in the same directory:
@@ -81,7 +75,7 @@ Start the scheduler and Web UI in the same directory:
 dagu start-all --dags .
 ```
 
-Open <http://localhost:8080> and start `health` from the UI. The `system` and `disk` steps run in parallel, and `report` waits for both. Open the run's **Artifacts** tab to preview or download `health-report.md`. The dependency graph, per-step logs, and full run history are all there. The [full quickstart](/getting-started/quickstart) covers command-line runs, Docker, parameters, retries, and other fundamentals.
+Open <http://localhost:8080> and start `health` from the UI. The `version` and `ready` steps run in parallel, and `report` waits for both. Open the run's **Artifacts** tab to preview or download `health-report.md`. The dependency graph, per-step logs, and full run history are all there. The [full quickstart](/getting-started/quickstart) covers command-line runs, Docker, parameters, retries, and other fundamentals.
 
 ## See the Web UI
 
