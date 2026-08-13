@@ -19,10 +19,7 @@ const yamlSources = {
     { label: 'Parent · api-recovery', source: yamlDocument(serversYaml) },
     { label: 'Child · remote-recovery', source: yamlDocument(serversYaml, 1) },
   ],
-  controller: [
-    { label: 'Controller · code-review', source: yamlDocument(controllerYaml) },
-    { label: 'Child · revise-code', source: yamlDocument(controllerYaml, 1) },
-  ],
+  controller: [{ label: 'Agent Loop · code-review', source: `${controllerYaml.trim()}\n` }],
 }
 
 const controllerActions = [
@@ -114,10 +111,10 @@ const demos = [
   },
   {
     id: 'controller',
-    tab: 'AI Controller',
+    tab: 'Agent Loop',
     kicker: 'Adaptive workflows',
     headline: ['Set the goal.', 'Let Dagu adapt.'],
-    lead: 'Give the controller reviewed actions and completion goals. It chooses one action per turn, observes the result, and keeps going until every task is settled.',
+    lead: 'Give Dagu reviewed actions and completion goals. It chooses one action per turn, observes the result, and keeps going until every task is settled.',
     runId: 'code-review · #8296',
     nodes: [],
     phases: [
@@ -128,7 +125,7 @@ const demos = [
         controllerTurn,
         event: `${controllerActions.find((action) => action.id === turn.action).label} · ${turn.result}`,
       })),
-      { active: [], done: [], event: 'Both review goals completed · controller stopped', complete: true },
+      { active: [], done: [], event: 'Both review goals completed · agent loop stopped', complete: true },
     ],
   },
 ]
@@ -178,7 +175,7 @@ const runStatus = computed(() => {
   return 'RUNNING'
 })
 const eventText = computed(() => phase.value?.event ?? (isController.value
-  ? 'Click Run to watch the controller choose approved actions'
+  ? 'Click Run to watch the agent loop choose approved actions'
   : 'Click Run to watch the graph execute'))
 const actionLabel = computed(() => {
   if (phaseIndex.value < 0) return 'Run animated demo'
@@ -383,7 +380,7 @@ onBeforeUnmount(stopTimers)
 
       <div class="run-toolbar">
         <div>
-          <span class="run-label">{{ isController ? 'CONTROLLER RUN' : 'DAG RUN' }}</span>
+          <span class="run-label">{{ isController ? 'AGENT LOOP RUN' : 'DAG RUN' }}</span>
           <strong>{{ demo.runId }}</strong>
         </div>
         <div class="run-toolbar-tools">
@@ -437,10 +434,10 @@ onBeforeUnmount(stopTimers)
         </footer>
       </dialog>
 
-      <div class="run-canvas" :class="`canvas-${demo.id}`" :aria-label="isController ? 'Live AI controller loop' : 'Live workflow graph'">
+      <div class="run-canvas" :class="`canvas-${demo.id}`" :aria-label="isController ? 'Live agent loop' : 'Live workflow graph'">
         <template v-if="isController">
           <div class="controller-topline">
-            <section class="controller-tasks" aria-label="Controller tasks">
+            <section class="controller-tasks" aria-label="Agent loop tasks">
               <header><span>TASKS</span><b>Completion goals</b></header>
               <div>
                 <article :class="{ 'is-complete': isComplete }">
@@ -480,7 +477,7 @@ onBeforeUnmount(stopTimers)
             <div class="controller-stage stage-update"><i aria-hidden="true">↻</i><span><b>UPDATE</b><small>Check the goals</small></span></div>
 
             <div class="controller-core">
-              <span>CONTROLLER</span>
+              <span>AGENT LOOP</span>
               <strong>{{ isComplete ? 'DONE' : phase?.controllerTurn === undefined ? 'READY' : `TURN ${phase.controllerTurn + 1}` }}</strong>
             </div>
 
@@ -498,7 +495,7 @@ onBeforeUnmount(stopTimers)
             </Transition>
           </section>
 
-          <section class="controller-history" aria-label="Recent controller turns">
+          <section class="controller-history" aria-label="Recent agent loop turns">
             <header>RECENT TURNS</header>
             <div v-if="controllerHistory.length">
               <article v-for="turn in controllerHistory" :key="`${turn.action}-${turn.result}`" :class="`is-${turn.status}`">
