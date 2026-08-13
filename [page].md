@@ -1,64 +1,32 @@
 ---
 title: Local-first orchestration that just works
 description: Local-first workflow orchestration in declarative YAML. One open-source binary with schedules, retries, approvals, logs, and a Web UI. No external database, no framework.
+sidebar: false
+aside: false
+pageClass: overview-page
 ---
 
-# Local-first orchestration that just works
+<script setup>
+import OverviewWorkflowDemo from '/.vitepress/theme/components/OverviewWorkflowDemo.vue'
+</script>
 
-Define workflows in declarative YAML over your existing commands and tools. One open-source binary adds schedules, retries, approvals, logs, and a Web UI, with state in local files. No database, no decorators, no framework. The same engine runs AI: coding agents as steps, LLM calls, and human approval gates.
+<div class="overview-landing">
+  <section class="overview-landing-copy">
+    <p class="overview-kicker">Local-first workflow orchestration</p>
+    <h1>Your commands.<br>OpenCode.<br>Human decisions.<br>One workflow.</h1>
+    <p class="overview-landing-lead">Keep the tools that already work. Dagu adds schedules, dependencies, retries, human checkpoints, and a Web UI from one declarative YAML file.</p>
+    <p class="overview-landing-prompt">Pick a use case, then click through a real Dagu workflow.</p>
+    <div class="overview-actions">
+      <a href="#run-your-first-workflow" class="overview-button overview-button-primary">Start in 5 minutes</a>
+      <a href="https://dagu-demo-f5e33d0e.dagu.sh/" class="overview-button overview-button-secondary">Try the Live Demo</a>
+    </div>
+    <p class="overview-demo-login"><span>Demo login</span><code>demouser / demouser</code></p>
+  </section>
 
-<div class="hero-section">
-  <div class="hero-actions">
-    <a href="#run-your-first-workflow" class="VPButton brand">Get started</a>
-    <a href="https://dagu-demo-f5e33d0e.dagu.sh/" class="VPButton alt">Try the Live Demo</a>
-    <a href="/writing-workflows/examples" class="VPButton alt">View Examples</a>
-  </div>
-  <p>Live demo login: username <code>demouser</code>, password <code>demouser</code>.</p>
+  <OverviewWorkflowDemo />
 </div>
 
-## Why Dagu exists
-
-Most teams that land here are not looking for a workflow platform. Their scripts and containers already work. The scheduler around them is the problem: it takes more time to operate than it saves.
-
-The same complaints come up in every conversation:
-
-**Orchestration is not your main work.** A big platform brings its own database, its own worker fleet, its own upgrades and alerts. You wanted to schedule some jobs. Now you operate a second system.
-
-**A workflow is configuration, not a program.** Order, retries, schedules, approvals: you declare them; there is no logic to write. Written in Python, the workflow definition itself starts having bugs and dependency conflicts.
-
-**Decorators lock the engine into your code.** Once `@dag` and `@task` are on every function, the orchestrator lives inside your business logic. Removing it means a rewrite.
-
-**A script should not know its schedule.** The script that moves data does not need to know when it runs or who approved it.
-
-Dagu's answer: the workflow is one YAML file. It holds the structure: order, schedule, retries, approvals. Your scripts and containers do the work, unchanged, in whatever language they are written in. The engine is one binary writing state to local files.
-
-## The idea in one file
-
-Your repository already has the logic:
-
-```text
-scripts/extract.py
-scripts/build-report.sh
-```
-
-Add one file that holds only the structure:
-
-```yaml
-schedule: "0 2 * * *"
-
-steps:
-  - id: extract
-    run: python scripts/extract.py
-    retry_policy:
-      limit: 3
-      interval_sec: 30
-
-  - id: report
-    run: ./scripts/build-report.sh
-    depends: extract
-```
-
-That is the entire integration. No imports, no decorators, nothing rewritten. Delete the YAML and your scripts still run. Keep it, and every run gets a dependency graph, retries, per-step logs, history, and a Web UI.
+<p class="overview-demo-guides">Explore the building blocks: <a href="/writing-workflows/scheduling">Scheduling</a> · <a href="/step-types/docker">Docker</a> · <a href="/writing-workflows/sub-dags">Nested workflows</a> · <a href="/step-types/harness/opencode">OpenCode</a> · <a href="/writing-workflows/human-tasks">Human tasks</a> · <a href="/step-types/ssh">SSH</a> · <a href="/step-types/mail">Email</a></p>
 
 ## Run your first workflow
 
@@ -121,6 +89,18 @@ Open <http://localhost:8080> and start `health` from the UI. The `system` and `d
 
 Want to explore without installing anything? Open the [live demo](https://dagu-demo-f5e33d0e.dagu.sh/) and sign in with `demouser` / `demouser`.
 
+## Why Dagu exists
+
+Most teams that land here are not looking for a workflow platform. Their scripts and containers already work. The scheduler around them is the problem: it takes more time to operate than it saves.
+
+**Orchestration is not your main work.** A big platform brings its own database, worker fleet, upgrades, and alerts. You wanted to schedule some jobs. Now you operate a second system.
+
+**A workflow is configuration, not a program.** Order, retries, schedules, and approvals are declared; there is no framework logic to write or dependency environment to maintain.
+
+**A script should not know its schedule.** The script that moves data does not need to know when it runs, where it runs, or who approved it.
+
+Dagu keeps workflow structure in one YAML file next to the tools that do the work. Delete the YAML and the scripts still run. Keep it, and every run gets a dependency graph, retries, per-step logs, history, and a Web UI.
+
 ## What Dagu adds
 
 <div class="overview-card-grid overview-strengths-grid">
@@ -129,12 +109,12 @@ Want to explore without installing anything? Open the [live demo](https://dagu-d
     <p>Run shell commands, scripts, containers, SSH commands, SQL, HTTP requests, and other tools without rewriting them into a framework.</p>
   </div>
   <div class="overview-card">
-    <h3><a href="/overview/web-ui">See every run</a></h3>
-    <p>Use the Web UI to inspect live status, read step logs, review history, retry failures, and edit workflow YAML.</p>
+    <h3><a href="/writing-workflows/sub-dags">Compose reusable workflows</a></h3>
+    <p>Call a child DAG from a parent, pass parameters, wait for its result, and inspect every nested run independently.</p>
   </div>
   <div class="overview-card">
-    <h3><a href="/web-ui/wiki">Keep runbooks with workflows</a></h3>
-    <p>Write Markdown, preview Mermaid diagrams, organize nested Wiki pages, search their contents, and synchronize them through Git.</p>
+    <h3><a href="/overview/web-ui">See every run</a></h3>
+    <p>Use the Web UI to inspect live status, read step logs, review history, retry failures, and edit workflow YAML.</p>
   </div>
   <div class="overview-card">
     <h3><a href="/writing-workflows/error-handling">Make jobs reliable</a></h3>
@@ -161,19 +141,11 @@ Want to explore without installing anything? Open the [live demo](https://dagu-d
   </div>
   <div class="step-card">
     <h3><a href="/getting-started/quickstart-ai">AI workflows</a></h3>
-    <p>Run coding agents as steps, call LLMs, or let a controller pick the path. Five minutes to your first AI workflow.</p>
+    <p>Run coding agents as steps, call LLMs, or let a controller pick the path.</p>
   </div>
   <div class="step-card">
     <h3><a href="/writing-workflows/examples">Workflow examples</a></h3>
     <p>Start from practical YAML for scripts, data jobs, containers, and operations.</p>
-  </div>
-  <div class="step-card">
-    <h3><a href="/web-ui/wiki">Wiki and runbooks</a></h3>
-    <p>Keep operational Markdown, diagrams, and troubleshooting guides next to the workflows they explain.</p>
-  </div>
-  <div class="step-card">
-    <h3><a href="/getting-started/concepts">Core concepts</a></h3>
-    <p>Learn how steps, dependencies, parameters, runs, and schedules fit together.</p>
   </div>
   <div class="step-card">
     <h3><a href="/overview/deployment-models">Deployment models</a></h3>
@@ -182,10 +154,6 @@ Want to explore without installing anything? Open the [live demo](https://dagu-d
   <div class="step-card">
     <h3><a href="/server-admin/">Server administration</a></h3>
     <p>Configure authentication, queues, storage, Git sync, and production operation.</p>
-  </div>
-  <div class="step-card">
-    <h3><a href="/overview/self-host-license">Teams and licensing</a></h3>
-    <p>Compare Community and licensed self-host. Review enterprise features, support, and <a href="https://dagu.sh/pricing#self-host">pricing</a>.</p>
   </div>
   <div class="step-card">
     <h3><a href="/mcp/">MCP server</a></h3>

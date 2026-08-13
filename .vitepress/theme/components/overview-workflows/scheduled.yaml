@@ -1,0 +1,54 @@
+type: graph
+schedule: "0 2 * * *"
+
+steps:
+  - id: prepare
+    action: docker.run
+    with:
+      image: python:3.13-slim
+      auto_remove: true
+      volumes: [.:/work:ro]
+      working_dir: /work
+      command: python jobs/prepare.py
+    retry_policy:
+      limit: 3
+      interval_sec: 30
+
+  - id: process
+    action: dag.run
+    with:
+      dag: data-pipeline
+    depends: prepare
+
+  - id: publish
+    run: ./scripts/publish-report.sh
+    depends: process
+
+  - id: notify
+    action: mail.send
+    depends: publish
+    with:
+      to: ops@example.com
+      from: dagu@example.com
+      subject: Nightly report completed
+      message: The scheduled workload completed successfully.
+---
+name: data-pipeline
+type: graph
+
+steps:
+  - id: extract
+    run: python jobs/extract.py
+
+  - id: transform
+    action: docker.run
+    depends: extract
+    with:
+      image: python:3.13-slim
+      volumes: [.:/work:ro]
+      working_dir: /work
+      command: python jobs/transform.py
+
+  - id: validate
+    run: ./scripts/validate-output.sh
+    depends: transform
