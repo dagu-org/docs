@@ -68,6 +68,7 @@ paths:
   event_store_dir: ""        # Auto: {admin_logs_dir}/events
   base_config: "~/.config/dagu/base.yaml"
   dag_runs_dir: ""            # Auto: {data_dir}/dag-runs
+  dag_run_work_dir: ""        # Auto: {data_dir}/dag-run-work
   queue_dir: ""              # Auto: {data_dir}/queue
   proc_dir: ""               # Auto: {data_dir}/proc
   service_registry_dir: ""    # Auto: {data_dir}/service-registry
@@ -335,6 +336,7 @@ All options support `DAGU_` prefix.
 - `DAGU_EVENT_STORE_DIR` - Centralized event log directory (default: `{admin_logs_dir}/events`)
 - `DAGU_BASE_CONFIG` - Base configuration
 - `DAGU_DAG_RUNS_DIR` - DAG run data directory
+- `DAGU_DAG_RUN_WORK_DIR` - Per-run working directory root (default: `{data_dir}/dag-run-work`)
 - `DAGU_QUEUE_DIR` - Queue data directory
 - `DAGU_PROC_DIR` - Process data directory
 - `DAGU_SERVICE_REGISTRY_DIR` - Service registry data directory
@@ -783,6 +785,7 @@ When not specified, these paths are automatically derived:
 - `paths.tools_dir`: `{paths.data_dir}/tools` - Stores managed DAG tool cache, locks, manifests, and shims
 - `paths.dag_state_dir`: `{paths.data_dir}/dag-state` - Stores persistent DAG state values
 - `paths.dag_runs_dir`: `{paths.data_dir}/dag-runs` - Stores DAG run history
+- `paths.dag_run_work_dir`: `{paths.data_dir}/dag-run-work` - Stores per-run working directories
 - `paths.queue_dir`: `{paths.data_dir}/queue` - Stores queue data
 - `paths.proc_dir`: `{paths.data_dir}/proc` - Stores process data
 - `paths.contexts_dir`: `{paths.data_dir}/contexts` - Stores CLI remote contexts

@@ -65,8 +65,8 @@ Values are refreshed for each step, so `DAG_RUN_STEP_NAME`, `DAG_RUN_STEP_STDOUT
 | `DAGU_OUTPUT_FILE` | Current step attempt when declared outputs can be written | File path used to publish declared step outputs. | `/var/log/dagu/daily-backup/upload-artifacts.output` |
 | `DAG_RUN_STATUS` | Lifecycle handlers only | Canonical status: `running` (init handler), `succeeded`, `partially_succeeded`, `failed`, `rejected`, `aborted`, or `waiting` (wait handler). | `failed` |
 | `DAG_WAITING_STEPS` | Wait handler only | Comma-separated list of step names currently waiting for human-task completion or approval. | `release_review,security_review` |
-| `PWD` | Current step only | Working directory for the step. Defaults to DAG's `working_dir` or the DAG file's directory. | `/home/user/project` |
-| `DAG_RUN_WORK_DIR` | All steps & handlers | Absolute path to the per-DAG-run working directory. Each run gets its own isolated directory. In local mode, this is `<dag-run-dir>/work/`. In shared-nothing (distributed) mode, this is a temporary directory under the system temp dir. Not set during dry runs. | `/data/dagu/dag-runs/daily-backup/dag-run_20241012_040000Z_c1f4b2/work` |
+| `PWD` | Current step only | Working directory for the step. Uses an explicit step or DAG `working_dir`; otherwise, it defaults to `DAG_RUN_WORK_DIR`. | `/data/dagu/dag-run-work/daily-backup/mtbry4u4rcyn6/root` |
+| `DAG_RUN_WORK_DIR` | All steps & handlers | Absolute path to the per-DAG-run working directory. Each run gets its own isolated directory. In local mode, it is stored below `paths.dag_run_work_dir`. In shared-nothing distributed mode, it is temporary worker-local storage. Not set during dry runs. | `/data/dagu/dag-run-work/daily-backup/mtbry4u4rcyn6/root` |
 | `DAG_WIKI_DIR` | All steps & handlers | Absolute path to the current DAG's Wiki page directory. Named-workspace DAGs include the workspace directory. | `/opt/dagu/dags/wiki/platform/daily-backup` |
 | `DAG_RUN_ARTIFACTS_DIR` | All steps & handlers when artifact storage is active | Absolute path to the per-DAG-run artifact directory, or a worker-local staging directory in shared-nothing mode. Artifact storage is active when enabled explicitly or auto-enabled by `${context.paths.artifacts_dir}` references, artifact actions, or artifact stream outputs. | `/data/dagu/artifacts/daily-backup/dag-run_20241012_040000Z_c1f4b2` |
 | `DAG_PARAMS_JSON` | All steps & handlers | JSON string containing the resolved parameter map. Resolved DAG params are serialized as strings; if the run was started with raw JSON parameters, the original payload is preserved. Not set when the DAG has no resolved parameters. | `{"ENVIRONMENT":"prod","batchSize":"1000"}` |
@@ -80,7 +80,17 @@ Values are refreshed for each step, so `DAG_RUN_STEP_NAME`, `DAG_RUN_STEP_STDOUT
 
 Each DAG run gets an isolated work directory. The path is set in `DAG_RUN_WORK_DIR` and is available to all steps and handlers during the run.
 
-**Local mode:** The directory is `<dag-run-dir>/work/`. It lives at the dag-run level (not the attempt level), so it persists across retries of the same run. It is cleaned up automatically when the dag-run is removed (e.g., by history retention).
+**Local mode:** New runs are stored separately from history under `paths.dag_run_work_dir`, which defaults to `{paths.data_dir}/dag-run-work`. The file-backed layout is:
+
+```text
+<dag_run_work_dir>/<dag>/<root-run-id-hash>/
+├── root/
+└── <child-run-id-hash>/
+```
+
+The `<dag>` component is the same filesystem-safe DAG name used under `paths.dag_runs_dir`. The root run uses `root/`; each child run uses its hashed sibling directory. Run hashes are lowercase, unpadded Base32 encodings of the first eight SHA-256 bytes of the run ID. Attempts are not represented, so retries reuse the same directory. Deleting a DAG run, including through history retention, removes its complete root-run work tree.
+
+After an upgrade, an existing run continues using its previous nested work directory when that directory is already present. New runs use the separate root; Dagu does not copy or move legacy work files.
 
 **Shared-nothing (distributed) mode:** The directory is a temporary directory under the system temp dir (`/tmp/dagu_<dag-name>_<run-id>`). It is cleaned up when the worker process exits.
 
@@ -88,7 +98,7 @@ Each DAG run gets an isolated work directory. The path is set in `DAG_RUN_WORK_D
 
 **Sub-DAGs:** Each sub-DAG is a separate dag-run with its own `DAG_RUN_WORK_DIR`.
 
-The directory is created lazily — the env var is always set, but the directory itself is only created on disk when a step accesses it (e.g., via `mkdir -p`).
+The directory is created when the run agent prepares execution.
 
 ### Default process working directory
 
@@ -101,7 +111,7 @@ When `working_dir` **is** explicitly set (in the DAG YAML, base config, or via `
 steps:
   - id: write_scratch_file
     run: |
-      # PWD is DAG_RUN_WORK_DIR (e.g., /data/dagu/dag-runs/my-dag/dag-run_.../work)
+      # PWD is DAG_RUN_WORK_DIR (e.g., /data/dagu/dag-run-work/my-dag/mtbry4u4rcyn6/root)
       echo "intermediate data" > scratch.txt
 
   - id: read_scratch_file

@@ -51,6 +51,7 @@ paths:
   event_store_dir: ""                                 # Auto: {admin_logs_dir}/events
   base_config: "~/.config/dagu/base.yaml"            # Base configuration
   dag_runs_dir: ""                                    # Auto: {data_dir}/dag-runs
+  dag_run_work_dir: ""                                # Auto: {data_dir}/dag-run-work
   queue_dir: ""                                      # Auto: {data_dir}/queue
   proc_dir: ""                                       # Auto: {data_dir}/proc
   contexts_dir: ""                                   # Auto: {data_dir}/contexts

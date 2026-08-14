@@ -158,6 +158,7 @@ Most persistent runtime data is stored under `paths.data_dir` by default.
 | `paths.artifact_dir` | `{data_dir}/artifacts` | DAG-run artifacts |
 | `paths.dag_state_dir` | `{data_dir}/dag-state` | Persistent state for `state.*` actions |
 | `paths.dag_runs_dir` | `{data_dir}/dag-runs` | DAG-run status and history |
+| `paths.dag_run_work_dir` | `{data_dir}/dag-run-work` | Per-run working directories |
 | `paths.queue_dir` | `{data_dir}/queue` | Queue data |
 | `paths.proc_dir` | `{data_dir}/proc` | Local process heartbeat data |
 | `paths.service_registry_dir` | `{data_dir}/service-registry` | File-backed service registry data |

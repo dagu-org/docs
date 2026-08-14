@@ -103,6 +103,7 @@ Shared storage must be mounted at the same path on all nodes, or configured via 
 Required shared directories:
 - `{data}/service-registry/` — worker registration and discovery
 - `{data}/dag-runs/` — execution status
+- `{data}/dag-run-work/` — per-run working directories, unless `paths.dag_run_work_dir` points elsewhere
 - `{data}/dag-state/` — persistent state for `state.*` actions, unless `paths.dag_state_dir` points elsewhere
 - `{logs}/` — execution logs (required for Web UI log display)
 
