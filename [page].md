@@ -63,41 +63,48 @@ curl -fsSL https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/install
 
 The installers can add Dagu to your `PATH`, set up a background service, and create the first admin account. See [Installation](/getting-started/installation/) for Docker, Homebrew, npm, and manual options.
 
-Save this as `health.yaml`. Two checks run in parallel, then Dagu turns their output into a Markdown artifact:
+Save this as `service-monitor.yaml`. The parent workflow fans out one child run per endpoint, with a concurrency limit and retries:
 
 ```yaml
+schedule: "CRON_TZ=UTC 0 9 * * *" # Daily at 09:00 UTC
+
 steps:
-  - id: version
-    run: dagu version
-    output: VERSION
-
-  - id: ready
-    run: echo Dagu is ready
-    output: READY
-
-  - id: report
-    action: template.render
+  - id: check_services
+    action: dag.run
     with:
-      template: |
-        # Dagu health
+      dag: check-endpoint
+      params:
+        url: ${ITEM}
+    parallel:
+      items:
+        - https://dagu.sh
+        - https://docs.dagu.sh
+        - https://github.com/dagucloud/dagu
+      max_concurrent: 3
+    output: CHECKS
 
-        ## Version
+  - id: summarize
+    depends: check_services
+    run: echo "${CHECKS.summary.succeeded}/${CHECKS.summary.total} services healthy"
 
-        ~~~text
-        {{ .version }}
-        ~~~
+---
+name: check-endpoint
 
-        ## Check
+params:
+  - name: url
+    type: string
 
-        ~~~text
-        {{ .ready }}
-        ~~~
-      data:
-        version: ${VERSION}
-        ready: ${READY}
-    stdout:
-      artifact: health-report.md
-    depends: [version, ready]
+steps:
+  - id: request
+    action: http.request
+    with:
+      method: GET
+      url: ${params.url}
+      timeout: 10
+      silent: true
+    retry_policy:
+      limit: 3
+      interval_sec: 2
 ```
 
 Start the scheduler and Web UI in the same directory:
@@ -106,7 +113,7 @@ Start the scheduler and Web UI in the same directory:
 dagu start-all --dags .
 ```
 
-Open <http://localhost:8080> and start `health` from the UI. The `version` and `ready` steps run in parallel, and `report` waits for both. Open the run's **Artifacts** tab to preview or download `health-report.md`. The dependency graph, per-step logs, and full run history are all there. The [full quickstart](/getting-started/quickstart) covers command-line runs, Docker, parameters, retries, and other fundamentals.
+Open <http://localhost:8080> and start `service-monitor` from the UI. The `check_services` step starts three `check-endpoint` child runs in parallel, each with its own status, logs, and retry history. The `summarize` step waits for all three and reports the result. The dependency graph, per-step logs, and full run history are all there. The [full quickstart](/getting-started/quickstart) covers command-line runs, Docker, parameters, retries, and other fundamentals.
 
 ## See the Web UI
 
