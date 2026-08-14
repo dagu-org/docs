@@ -75,6 +75,8 @@ steps:
 
 Note: Password authentication is supported at both DAG and step level, but key-based authentication is strongly recommended.
 
+The SSH `timeout` field limits connection establishment. DAG-level and step-level `timeout_sec` cover the complete operation, including TCP dialing, SSH handshake, bastion setup, and remote command execution. When execution is canceled or reaches either deadline, Dagu closes the SSH transport so the step can finish promptly.
+
 ### Shell Configuration
 
 When `shell` is specified, commands are wrapped and executed through the shell on the remote server:

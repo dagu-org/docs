@@ -55,6 +55,8 @@ steps:
 | `destination` | Yes | - | Destination path (remote for upload, local for download) |
 | `bastion` | No | - | Bastion host configuration (same as SSH) |
 
+The SSH `timeout` field limits connection establishment. DAG-level and step-level `timeout_sec` cover connection setup and the complete transfer. When execution is canceled or reaches either deadline, Dagu closes the SSH transport so blocked uploads and downloads can finish promptly.
+
 ## Directory Transfer
 
 Directories are transferred recursively:

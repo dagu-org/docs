@@ -196,15 +196,15 @@ In practice, a very old DAG run can fall out of the retry window even if its lat
 
 ## Auto-Created `base.yaml`
 
-When Dagu auto-creates `base.yaml` for a first-time installation, the generated file currently enables root DAG retry by default:
+When Dagu auto-creates `base.yaml` for a first-time installation, root DAG retries are disabled unless configured. The generated file contains a commented example:
 
 ```yaml
-retry_policy:
-  limit: 3
-  interval_sec: 5
+# retry_policy:
+#   limit: 3
+#   interval_sec: 5
 ```
 
-If you keep that generated `base.yaml`, every DAG inherits one scheduler-issued DAG retry.
+Existing `base.yaml` files are not rewritten, so an already active retry policy remains in effect.
 
 ## Combined Example
 

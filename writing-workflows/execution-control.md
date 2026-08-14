@@ -163,15 +163,18 @@ Tips:
 
 ### Cleanup Timeout
 
-By default DAGs wait 5 seconds for cleanup before forcefully terminating steps. Increase `max_clean_up_time_sec` if your handlers need longer.
+By default Dagu gives running step processes 5 seconds to stop cleanly before forcefully terminating them.
 
 ```yaml
-max_clean_up_time_sec: 300  # allow 5 minutes for cleanup (default timeout: 5s)
+max_clean_up_time_sec: 300  # allow running processes 5 minutes to stop
 
 handler_on:
   exit:
-    run: echo "Cleaning up"  # Must finish within 5 minutes
+    run: echo "Cleaning up"
+    timeout_sec: 300          # handler execution limit
 ```
+
+`max_clean_up_time_sec` controls process termination during a stop; it does not limit lifecycle handlers. Set `timeout_sec` on each handler that needs an execution limit. After Dagu's DAG-level timeout expires, terminal handlers run with their own timeout budgets. Cancellation or deadlines supplied by the caller are still inherited by handlers.
 
 ## Initial Delay
 

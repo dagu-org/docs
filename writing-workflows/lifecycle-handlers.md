@@ -8,8 +8,8 @@ Lifecycle handlers let you run extra steps after the main DAG completes. Use the
 |---------|---------|-------------------|
 | `init` | Runs before any workflow steps (after DAG-level preconditions pass) | Setup tasks, acquire locks, validate environment |
 | `success` | All steps completed successfully, or the DAG ended in `partially_succeeded` (some steps failed but were allowed via `continue_on`) | Deliver success notifications, enqueue downstream jobs |
-| `failure` | The DAG ended with `failed` or `rejected` status, including DAG-level precondition evaluation errors | Page on-call, collect diagnostics |
-| `abort` | The run was aborted by a stop request, queue eviction, timeout cancellation, or unmet DAG-level precondition | Roll back partial work, release locks |
+| `failure` | The DAG ended with `failed` or `rejected` status, including a DAG timeout or DAG-level precondition evaluation error | Page on-call, collect diagnostics |
+| `abort` | The run was aborted by a stop request, queue eviction, or unmet DAG-level precondition | Roll back partial work, release locks |
 | `wait` | The DAG has paused waiting for approval or human-task completion | Notify operators, send Slack messages |
 | `exit` | Always runs after the status-specific handler finishes (including when it fails or is skipped) | File system clean-up, archival tasks |
 
@@ -50,6 +50,7 @@ Each handler is a normal step definition. You can use `run`, `script`, `action` 
 - It chooses the status-specific handler based on the canonical DAG status (`partially_succeeded` behaves like `success`).
 - After the status-specific handler finishes (or if none was defined), the `exit` handler runs last.
 - Handlers are executed sequentially and synchronously. The DAG is still considered running until they finish.
+- When Dagu's DAG-level timeout expires, terminal handlers receive a fresh budget from their own `timeout_sec`. An external caller cancellation or deadline remains in effect.
 - If a handler exits with a non-zero status, the overall DAG run ends in `failed`, even if every main step succeeded.
 - Handler logs appear alongside other steps in the run history and respect the same log retention policy.
 - Each handler receives `${context.run.status}` and the `DAG_RUN_STATUS` environment variable. The value depends on when the handler runs: `running` (init), `succeeded`, `partially_succeeded`, `failed`, `rejected`, `aborted`, or `waiting` (wait handler).
@@ -122,6 +123,7 @@ handler_on:
   exit:
     run: |
       find "/tmp/${context.run.id}" -maxdepth 1 -type f -delete
+    timeout_sec: 300
 ```
 
 ### Notify on Wait
