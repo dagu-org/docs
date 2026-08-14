@@ -110,6 +110,8 @@ Required shared directories:
 > [!NOTE]
 > DAG definitions (`dags/`) do **not** need to be shared. Workers receive DAG definitions via gRPC when tasks are dispatched.
 
+When upgrading from a version that stored work directories inside DAG-run history, drain all execution processes that use the shared filesystem before starting the new version. Old and new versions must not execute the same run concurrently because they select different work-directory layouts.
+
 Packaged actions are also transferred as workspace bundles after the worker executing the action resolves the reference. Use pinned GitHub references such as `owner/repo@version` for third-party action packages across mixed worker pools. See [Third-Party Actions](/dagu-actions/third-party).
 
 ## Configuration

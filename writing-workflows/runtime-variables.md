@@ -88,9 +88,11 @@ Each DAG run gets an isolated work directory. The path is set in `DAG_RUN_WORK_D
 └── <child-run-id-hash>/
 ```
 
-The `<dag>` component is the same filesystem-safe DAG name used under `paths.dag_runs_dir`. The root run uses `root/`; each child run uses its hashed sibling directory. Run hashes are lowercase, unpadded Base32 encodings of the first eight SHA-256 bytes of the run ID. Attempts are not represented, so retries reuse the same directory. Deleting a DAG run, including through history retention, removes its complete root-run work tree.
+The `<dag>` component is the same filesystem-safe DAG name used under `paths.dag_runs_dir`. The root run uses `root/`; each child run uses its hashed sibling directory. Run hashes are lowercase, unpadded Base32 encodings of the first 16 SHA-256 bytes of the run ID. Attempts are not represented, so retries reuse the same directory. Deleting a DAG run, including through history retention, removes its complete root-run work tree.
 
 After an upgrade, an existing run continues using its previous nested work directory when that directory is already present. New runs use the separate root; Dagu does not copy or move legacy work files.
+
+Do not let old and new Dagu versions execute the same run concurrently when they share a durable work root. Drain or stop those processes, upgrade them together, and then resume execution. Otherwise, the versions can select different work directories for the same run.
 
 **Shared-nothing (distributed) mode:** The directory is a temporary directory under the system temp dir (`/tmp/dagu_<dag-name>_<run-id>`). It is cleaned up when the worker process exits.
 

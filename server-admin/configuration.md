@@ -166,6 +166,8 @@ Most persistent runtime data is stored under `paths.data_dir` by default.
 | `paths.contexts_dir` | `{data_dir}/contexts` | CLI contexts |
 | `paths.workspaces_dir` | `{data_dir}/workspaces` | Web UI workspaces |
 
+A backup of the complete `paths.data_dir` includes both DAG-run history and per-run work directories at their default locations. If backups select individual subdirectories, include both `paths.dag_runs_dir` and `paths.dag_run_work_dir`; restoring history alone can leave retries without files created by earlier attempts.
+
 ## Wiki Directory
 
 `paths.wiki_dir` is the storage root for Markdown files managed by the Wiki Web UI and Git Sync:
