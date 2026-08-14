@@ -1,11 +1,11 @@
 ---
 title: Local-first orchestration that just works
-description: Local-first workflow orchestration in declarative YAML. One open-source binary with schedules, retries, approvals, logs, and a Web UI. No external database, no framework.
+description: Local-first workflow orchestration in declarative YAML. One open-source binary with schedules, retries, human tasks, logs, and a Web UI. No external database, no framework.
 ---
 
 # Local-first orchestration that just works
 
-Define workflows in declarative YAML over your existing commands and tools. One open-source binary adds schedules, retries, approvals, logs, and a Web UI, with state in local files. No database, no decorators, no framework. The same engine runs AI coding agents, LLM calls, and human tasks.
+Define workflows in declarative YAML over your existing commands and tools. One open-source binary adds schedules, retries, human tasks, logs, and a Web UI, with state in local files. No database, no decorators, no framework. The same engine runs AI coding agents and LLM calls.
 
 <div class="hero-section">
   <div class="hero-actions">
@@ -14,6 +14,35 @@ Define workflows in declarative YAML over your existing commands and tools. One 
     <a href="/writing-workflows/examples" class="VPButton alt">View Examples</a>
   </div>
   <p>Live demo login: username <code>demouser</code>, password <code>demouser</code>.</p>
+</div>
+
+## What Dagu adds
+
+<div class="overview-card-grid overview-strengths-grid">
+  <div class="overview-card">
+    <h3><a href="/writing-workflows/">Commands, containers, and SSH</a></h3>
+    <p>Run shell commands, scripts, Docker containers, Kubernetes Jobs, SSH commands, SQL, HTTP requests, and other tools without rewriting them into a framework.</p>
+  </div>
+  <div class="overview-card">
+    <h3><a href="/writing-workflows/sub-dags">Parallel and reusable Sub-DAGs</a></h3>
+    <p>Call child DAGs with parameters, run them over lists of items with concurrency limits, and inspect every nested run independently.</p>
+  </div>
+  <div class="overview-card">
+    <h3><a href="/writing-workflows/scheduling">Scheduling and execution control</a></h3>
+    <p>Use cron schedules, timezones, overlap policies, catch-up windows, queues, retries, timeouts, and human tasks in workflow YAML.</p>
+  </div>
+  <div class="overview-card">
+    <h3><a href="/web-ui/notifications">Notifications and webhooks</a></h3>
+    <p>Route run events to notification providers and trigger workflows from external systems through per-DAG webhooks.</p>
+  </div>
+  <div class="overview-card">
+    <h3><a href="/overview/web-ui">Logs and run history</a></h3>
+    <p>Use the Web UI to inspect live status, read step logs, review history, retry failures, and edit workflow YAML.</p>
+  </div>
+  <div class="overview-card">
+    <h3><a href="/getting-started/installation/">One binary, no external database</a></h3>
+    <p>Run Dagu on Linux, macOS, or Windows with local file-backed state. Add queues or distributed workers when needed.</p>
+  </div>
 </div>
 
 ## Run your first workflow
@@ -91,36 +120,11 @@ Most teams that land here are not looking for a workflow platform. Their scripts
 
 **Orchestration is not your main work.** A big platform brings its own database, worker fleet, upgrades, and alerts. You wanted to schedule some jobs. Now you operate a second system.
 
-**A workflow is configuration, not a program.** Order, retries, schedules, and approvals are declared; there is no framework logic to write or dependency environment to maintain.
+**A workflow is configuration, not a program.** Order, retries, schedules, and human tasks are declared; there is no framework logic to write or dependency environment to maintain.
 
-**A script should not know its schedule.** The script that moves data does not need to know when it runs, where it runs, or who approved it.
+**A script should not know its schedule.** The script that moves data does not need to know when it runs, where it runs, or how operator input is collected.
 
 Dagu keeps workflow structure in one YAML file next to the tools that do the work. Delete the YAML and the scripts still run. Keep it, and every run gets a dependency graph, retries, per-step logs, history, and a Web UI.
-
-## What Dagu adds
-
-<div class="overview-card-grid overview-strengths-grid">
-  <div class="overview-card">
-    <h3><a href="/writing-workflows/">Keep your existing tools</a></h3>
-    <p>Run shell commands, scripts, containers, SSH commands, SQL, HTTP requests, and other tools without rewriting them into a framework.</p>
-  </div>
-  <div class="overview-card">
-    <h3><a href="/writing-workflows/sub-dags">Compose reusable workflows</a></h3>
-    <p>Call a child DAG from a parent, pass parameters, wait for its result, and inspect every nested run independently.</p>
-  </div>
-  <div class="overview-card">
-    <h3><a href="/overview/web-ui">See every run</a></h3>
-    <p>Use the Web UI to inspect live status, read step logs, review history, retry failures, and edit workflow YAML.</p>
-  </div>
-  <div class="overview-card">
-    <h3><a href="/writing-workflows/error-handling">Make jobs reliable</a></h3>
-    <p>Add dependencies, schedules, retries, timeouts, approvals, notifications, and artifacts in the workflow file.</p>
-  </div>
-  <div class="overview-card">
-    <h3><a href="/overview/deployment-models">Start on one machine</a></h3>
-    <p>Use local file-backed state first. Add queues or distributed workers later if the workload outgrows one machine.</p>
-  </div>
-</div>
 
 ## What Dagu is not
 
@@ -132,12 +136,20 @@ Dagu keeps workflow structure in one YAML file next to the tools that do the wor
 
 <div class="next-steps">
   <div class="step-card">
-    <h3><a href="/getting-started/quickstart">Quickstart</a></h3>
-    <p>Install Dagu, run a workflow, and open the Web UI.</p>
+    <h3><a href="/writing-workflows/sub-dags">Parallel Sub-DAGs</a></h3>
+    <p>Compose reusable child workflows and run them over items with concurrency limits.</p>
   </div>
   <div class="step-card">
-    <h3><a href="/getting-started/quickstart-ai">AI workflows</a></h3>
-    <p>Run coding agents as steps, call LLMs, or let a controller pick the path.</p>
+    <h3><a href="/step-types/ssh">SSH execution</a></h3>
+    <p>Run commands on remote hosts while keeping status and logs in Dagu.</p>
+  </div>
+  <div class="step-card">
+    <h3><a href="/writing-workflows/scheduling">Scheduling</a></h3>
+    <p>Configure cron expressions, timezones, overlap policies, and catch-up behavior.</p>
+  </div>
+  <div class="step-card">
+    <h3><a href="/web-ui/notifications">Notifications and webhooks</a></h3>
+    <p>Route workflow events and trigger DAGs from external systems.</p>
   </div>
   <div class="step-card">
     <h3><a href="/writing-workflows/examples">Workflow examples</a></h3>
@@ -147,9 +159,14 @@ Dagu keeps workflow structure in one YAML file next to the tools that do the wor
     <h3><a href="/overview/deployment-models">Deployment models</a></h3>
     <p>Compare a local server, headless execution, and distributed workers.</p>
   </div>
+</div>
+
+### Optional AI integrations
+
+<div class="next-steps">
   <div class="step-card">
-    <h3><a href="/server-admin/">Server administration</a></h3>
-    <p>Configure authentication, queues, storage, Git sync, and production operation.</p>
+    <h3><a href="/getting-started/quickstart-ai">AI workflows</a></h3>
+    <p>Run coding agents as steps, call LLMs, or let a controller pick the path.</p>
   </div>
   <div class="step-card">
     <h3><a href="/mcp/">MCP server</a></h3>
