@@ -1,18 +1,20 @@
 ---
 title: Local-first orchestration that just works
 description: Local-first workflow orchestration in declarative YAML. One open-source binary with schedules, retries, approvals, logs, and a Web UI. No external database, no framework.
-sidebar: false
-aside: false
-pageClass: overview-page
 ---
 
-<script setup>
-import OverviewWorkflowDemo from '/.vitepress/theme/components/OverviewWorkflowDemo.vue'
-</script>
+# Local-first orchestration that just works
 
-<OverviewWorkflowDemo />
+Define workflows in declarative YAML over your existing commands and tools. One open-source binary adds schedules, retries, approvals, logs, and a Web UI, with state in local files. No database, no decorators, no framework. The same engine runs AI coding agents, LLM calls, and human tasks.
 
-<p class="overview-demo-guides">Explore the building blocks: <a href="/writing-workflows/scheduling">Scheduling</a> · <a href="/step-types/docker">Docker</a> · <a href="/writing-workflows/sub-dags">Nested workflows</a> · <a href="/step-types/harness/opencode">OpenCode</a> · <a href="/writing-workflows/human-tasks">Human tasks</a> · <a href="/step-types/ssh">SSH</a> · <a href="/step-types/mail">Email</a></p>
+<div class="hero-section">
+  <div class="hero-actions">
+    <a href="#run-your-first-workflow" class="VPButton brand">Get started</a>
+    <a href="https://dagu-demo-f5e33d0e.dagu.sh/" class="VPButton alt">Try the Live Demo</a>
+    <a href="/writing-workflows/examples" class="VPButton alt">View Examples</a>
+  </div>
+  <p>Live demo login: username <code>demouser</code>, password <code>demouser</code>.</p>
+</div>
 
 ## Run your first workflow
 

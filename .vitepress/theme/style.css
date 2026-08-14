@@ -688,108 +688,6 @@ h1.title {
 }
 
 /* ───────────────────────── Overview page ───────────────────────── */
-.overview-page .VPLocalNav {
-  display: none;
-}
-
-.overview-page .VPDoc:not(.has-sidebar) .container,
-.overview-page .VPDoc:not(.has-sidebar) .content,
-.overview-page .VPDoc:not(.has-sidebar) .content-container {
-  max-width: none;
-}
-
-.overview-page .VPDoc:not(.has-sidebar) .container {
-  width: min(100%, 1480px);
-}
-
-.overview-page .vp-doc > div {
-  width: 100%;
-}
-
-.overview-page .vp-doc > div > :not(.overview-landing) {
-  width: min(100%, 820px);
-  margin-right: auto;
-  margin-left: auto;
-}
-
-.overview-page .vp-doc > div > .overview-card-grid,
-.overview-page .vp-doc > div > .next-steps {
-  width: min(100%, 1000px);
-}
-
-.overview-landing {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: clamp(2rem, 5vw, 5rem);
-  align-items: center;
-  width: 100%;
-  margin: 0 auto 1rem;
-  padding: clamp(1rem, 3vw, 2.5rem) 0 1.5rem;
-}
-
-.overview-landing-copy {
-  min-width: 0;
-  max-width: 680px;
-}
-
-.overview-landing-copy h1 {
-  max-width: 11ch;
-  margin: 0.8rem 0 1.25rem;
-  font-family: var(--vp-font-family-display);
-  font-size: clamp(2.75rem, 4.6vw, 4.45rem);
-  line-height: 1.03;
-  letter-spacing: -0.045em;
-  text-wrap: balance;
-}
-
-.overview-landing-lead {
-  max-width: 52ch;
-  margin: 0;
-  color: var(--vp-c-text-2);
-  font-size: 1.04rem;
-  line-height: 1.68;
-}
-
-.overview-landing-prompt {
-  margin: 0.9rem 0 0;
-  color: var(--vp-c-text-1);
-  font-size: 0.9rem;
-  font-weight: 650;
-}
-
-.overview-demo-login {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  margin: 0.85rem 0 0;
-  color: var(--vp-c-text-3);
-  font-size: 0.78rem;
-}
-
-.overview-demo-login span {
-  font-weight: 600;
-}
-
-.overview-demo-login code {
-  color: var(--vp-c-text-1);
-  font-size: 0.76rem;
-}
-
-.overview-demo-guides {
-  margin-top: 0;
-  padding-bottom: 1.5rem;
-  color: var(--vp-c-text-2);
-  font-size: 0.82rem;
-  line-height: 1.7;
-  text-align: center;
-}
-
-@media (min-width: 1100px) {
-  .overview-landing {
-    grid-template-columns: minmax(390px, 0.72fr) minmax(660px, 1.28fr);
-  }
-}
-
 .overview-hero {
   display: grid;
   grid-template-columns: 1fr;
@@ -1087,17 +985,6 @@ h1.title {
 }
 
 @media (max-width: 760px) {
-  .overview-landing {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-    padding-top: 0.5rem;
-  }
-
-  .overview-landing-copy h1 {
-    max-width: 12ch;
-    font-size: clamp(2.45rem, 12vw, 3.4rem);
-  }
-
   .overview-hero {
     padding: 1.25rem;
   }
@@ -1116,35 +1003,6 @@ h1.title {
 }
 
 @media (max-width: 480px) {
-  .overview-page .VPDoc {
-    padding-right: 18px;
-    padding-left: 18px;
-  }
-
-  .overview-landing {
-    gap: 1rem;
-    padding-top: 0;
-  }
-
-  .overview-landing-copy h1 {
-    margin: 0.6rem 0 1rem;
-    font-size: clamp(2rem, 10.5vw, 2.55rem);
-  }
-
-  .overview-landing-lead {
-    display: none;
-  }
-
-  .overview-landing-prompt {
-    margin-top: 0;
-  }
-
-  .overview-demo-login {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 0.3rem;
-  }
-
   .hero-section {
     padding: 1rem 0 1.5rem;
     margin-bottom: 1.5rem;
@@ -1162,15 +1020,10 @@ h1.title {
 
   .overview-actions {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.5rem;
   }
 
   .vp-doc .overview-button {
     width: 100%;
-    padding-right: 0.4rem;
-    padding-left: 0.4rem;
-    font-size: 0.78rem;
   }
 
   .overview-lifecycle {
