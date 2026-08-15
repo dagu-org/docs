@@ -18,7 +18,7 @@ For the visual version on the website, see [Deployment models](https://dagu.sh/p
 |-------|--------------------|--------------------|----------|------------------|
 | **Local single server** | One machine you operate. | On the same machine. | Development, small internal automation, edge devices, or a first production host. | [Quickstart](/getting-started/quickstart), [Installation](/getting-started/installation/) |
 | **Self-hosted** | Your infrastructure, using the open-source Dagu server. | On the server or on workers you operate. | Teams that want Dagu inside their own network and security boundary. | [Deployment](/server-admin/deployment/), [Distributed Execution](/server-admin/distributed/) |
-| **Licensed self-hosted** | Your infrastructure, with a paid self-host license when enterprise features are needed. | On the server or on self-hosted workers. Workers are not licensed separately. | Teams that need enterprise controls such as SSO, RBAC, audit logging, more API keys, and support while keeping Dagu self-hosted. | [License comparison](/overview/self-host-license), [Self-host pricing](https://dagu.sh/pricing#self-host) |
+| **Licensed self-hosted (Team or Pro)** | Your infrastructure, with a paid self-host license when enterprise features are needed. | On the server or on self-hosted workers. Workers are not licensed separately. | Teams that need enterprise controls such as SSO, RBAC, audit logging, more API keys, and support while keeping Dagu self-hosted. | [License comparison](/overview/self-host-license), [Self-host pricing](https://dagu.sh/pricing#self-host) |
 
 ## Common Topologies
 
@@ -50,14 +50,14 @@ Workers are useful for:
 |-------------|-------------------|
 | Try Dagu locally or run small automation on one host. | Local single server |
 | Keep all control, state, and execution in your own environment. | Self-hosted |
-| Add enterprise controls while staying self-hosted. | Licensed self-hosted |
+| Add enterprise controls while staying self-hosted. | Team or Pro licensed self-host |
 | Run Docker/private-network/data-local steps on dedicated hosts. | Self-hosted with workers |
 
 ## Pricing and Licensing Links
 
 - [Community self-host](https://dagu.sh/pricing#self-host): open-source Dagu for self-hosted use.
-- [Paid self-host licenses](https://dagu.sh/pricing#self-host): enterprise controls and more API keys for self-hosted Dagu servers.
-- [License Comparison](/overview/self-host-license): feature comparison for Community and licensed self-host.
+- [Team and Pro self-host licenses](https://dagu.sh/pricing#self-host): enterprise controls and more API keys for self-hosted Dagu servers.
+- [License Comparison](/overview/self-host-license): feature comparison for Community, Team, and Pro self-host.
 - [Contact](https://dagu.sh/contact): sizing, deployment, or security review questions.
 
 For setup details and operating guides, use:
