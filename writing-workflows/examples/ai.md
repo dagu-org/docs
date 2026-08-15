@@ -194,10 +194,10 @@ An ordered `model` list tries the next entry after retries for the current one a
 
 <div class="example-card">
 
-### Controller Workflow
+### Agent Workflow
 
 ```yaml
-type: controller
+type: agent
 
 llm:
   provider: openrouter
@@ -216,9 +216,9 @@ tasks:
     description: Finished when both disk and load have been checked.
 ```
 
-Steps become a catalog of actions and `tasks` state the goals; the model decides what runs next. Built up example by example on the [controller examples page](/writing-workflows/examples/controller).
+Steps become a catalog of actions and `tasks` state the goals; the model decides what runs next. Built up example by example on the [agent examples page](/writing-workflows/examples/agent).
 
-<a href="/writing-workflows/examples/controller" class="learn-more">Learn more →</a>
+<a href="/writing-workflows/examples/agent" class="learn-more">Learn more →</a>
 
 </div>
 

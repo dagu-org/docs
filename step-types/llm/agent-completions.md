@@ -1,6 +1,6 @@
-# Controllers & Completions
+# Agent DAGs & Completions
 
-Dagu gives a model two different jobs. A `chat.completion` step generates content inside a workflow you laid out. A `type: controller` workflow hands the model the layout itself: it decides which step runs next until stated goals are met. This page builds from one to the other, ending with both at once.
+Dagu gives a model two different jobs. A `chat.completion` step generates content inside a workflow you laid out. An Agent DAG (`type: agent`) hands the model the layout itself: it decides which step runs next until stated goals are met. This page builds from one to the other, ending with both at once.
 
 Every example runs as-is with an `OPENROUTER_API_KEY` exported; swap the `llm` block for [any configured provider](/step-types/llm/providers).
 
@@ -35,10 +35,10 @@ The order is yours, the retries are yours, the model never chooses anything. For
 
 ## Invert control
 
-Add `type: controller` and the relationship flips: steps stop being a plan and become a catalog, and `tasks` state what must be true when the run is done.
+Add `type: agent` and the relationship flips: steps stop being a plan and become a catalog, and `tasks` state what must be true when the run is done.
 
 ```yaml
-type: controller
+type: agent
 
 secrets:
   - name: OPENROUTER_API_KEY
@@ -64,14 +64,14 @@ tasks:
 
 No `depends` anywhere, and none allowed: ordering belongs to the model now. Each turn it picks one action, observes the output, and decides again; the run records the decision timeline and full transcript. The steps themselves stay deterministic commands, which is the point: the model chooses *what runs*, never *what the commands are*.
 
-[Controller Workflows](/writing-workflows/controller) is the full reference; the [controller examples](/writing-workflows/examples/controller) build every capability step by step, including failure recovery and asking a person.
+[Agent DAGs](/writing-workflows/agent) is the full reference; the [Agent DAG examples](/writing-workflows/examples/agent) build every capability step by step, including failure recovery and asking a person.
 
 ## Generate inside the loop
 
-The two jobs compose directly: a `chat.completion` step can sit in the controller's catalog. The model schedules it like any other action, and because finished actions are upstream of the one starting now, the completion can read their `output:` variables.
+The two jobs compose directly: a `chat.completion` step can sit in the agent's catalog. The model schedules it like any other action, and because finished actions are upstream of the one starting now, the completion can read their `output:` variables.
 
 ```yaml
-type: controller
+type: agent
 
 secrets:
   - name: OPENROUTER_API_KEY
@@ -112,14 +112,14 @@ tasks:
 
 One model decides the order and depth of the checks; the same model, invoked as a step, writes the summary. The chat step inherits the workflow's `llm` block, so composing the two costs no configuration.
 
-When a goal cannot be settled without a person, the controller's built-in `ask_user` tool opens a human task, the run releases its process while it waits, and the answer becomes the next observation. See [asking a person](/writing-workflows/examples/controller#asking-a-person).
+When a goal cannot be settled without a person, the agent's built-in `ask_user` tool opens a human task, the run releases its process while it waits, and the answer becomes the next observation. See [asking a person](/writing-workflows/examples/agent#asking-a-person).
 
 ## LLM at both layers
 
-The ceiling of the pattern: the controller dispatches a sub-workflow, filling its parameters from the goal, and the sub-workflow runs its own completion. The model above schedules; the model below writes.
+The ceiling of the pattern: the agent dispatches a sub-workflow, filling its parameters from the goal, and the sub-workflow runs its own completion. The model above schedules; the model below writes.
 
 ```yaml
-type: controller
+type: agent
 
 secrets:
   - name: OPENROUTER_API_KEY
@@ -179,16 +179,16 @@ steps:
     depends: probe
 ```
 
-The `investigate` step leaves `symptom` open, so it becomes an argument of the tool offered to the controller, which fills it from the goal text: the child run receives `symptom="disk filling up"`. Inside the child, order is fixed again (`probe` then `findings`), and the child's `FINDINGS` output is reported back to the controller as the observation it settles the task against.
+The `investigate` step leaves `symptom` open, so it becomes an argument of the tool offered to the agent, which fills it from the goal text: the child run receives `symptom="disk filling up"`. Inside the child, order is fixed again (`probe` then `findings`), and the child's `FINDINGS` output is reported back to the agent as the observation it settles the task against.
 
-This is the shape that scales: a library of reviewed, parameterized sub-workflows as the vocabulary, goals as the interface, and every model decision and generation persisted per run, at both layers. See [a catalog of workflows](/writing-workflows/examples/controller#a-catalog-of-workflows) for the dispatch pattern on its own.
+This is the shape that scales: a library of reviewed, parameterized sub-workflows as the vocabulary, goals as the interface, and every model decision and generation persisted per run, at both layers. See [a catalog of workflows](/writing-workflows/examples/agent#a-catalog-of-workflows) for the dispatch pattern on its own.
 
 ## Cost and control
 
-The controller normally resends each observation on every later turn, so keep step output small and publish selectively from children with `outputs.write`. Each controller-facing observation is capped at 512 KiB by default. After the provider reports a 200,000-token prompt, older observations are compacted while the 20 most recent remain complete. Configure those values with `llm.observation_max_bytes`, `llm.max_context_tokens`, and `llm.observation_keep_recent` on the controller root. `llm.max_tool_iterations` separately bounds the run at 50 decisions by default. The [controller reference](/writing-workflows/controller#what-the-controller-sees) covers the author-facing levers, and [Controller Internals](/writing-workflows/controller-internals) the runtime mechanics behind them — limits, overflow recovery, and durability.
+The agent normally resends each observation on every later turn, so keep step output small and publish selectively from children with `outputs.write`. Each agent-facing observation is capped at 512 KiB by default. After the provider reports a 200,000-token prompt, older observations are compacted while the 20 most recent remain complete. Configure those values with `llm.observation_max_bytes`, `llm.max_context_tokens`, and `llm.observation_keep_recent` on the Agent DAG root. `llm.max_tool_iterations` separately bounds the run at 50 decisions by default. The [Agent DAG reference](/writing-workflows/agent#what-the-agent-sees) covers the author-facing levers, and [Agent DAG Internals](/writing-workflows/agent-internals) the runtime mechanics behind them — limits, overflow recovery, and durability.
 
 ## Related
 
 - [LLM Overview](/step-types/llm/) for `chat.completion` itself
-- [Controller Examples](/writing-workflows/examples/controller) for the capability-by-capability tutorial
-- [When to reach for a controller](/writing-workflows/examples/controller#when-to-reach-for-a-controller) for use cases and the inverse cases
+- [Agent DAG Examples](/writing-workflows/examples/agent) for the capability-by-capability tutorial
+- [When to reach for an Agent DAG](/writing-workflows/examples/agent#when-to-reach-for-an-agent-dag) for use cases and the inverse cases

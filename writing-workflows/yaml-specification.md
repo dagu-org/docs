@@ -101,8 +101,8 @@ Unknown top-level fields are rejected. The accepted top-level fields are listed 
 
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
-| `type` | string | Step scheduling mode. Accepted values are `graph`, `chain`, `controller`, and `build`. | `graph` |
-| `tasks` | array | Goals a `controller` workflow must satisfy. Required with `type: controller`, invalid otherwise. | `[]` |
+| `type` | string | Step scheduling mode. Accepted values are `graph`, `chain`, `agent`, and `build`. | `graph` |
+| `tasks` | array | Goals an Agent DAG must satisfy. Required with `type: agent`, invalid otherwise. | `[]` |
 
 `graph` schedules steps from their `depends` relationships.
 
@@ -129,12 +129,12 @@ steps:
   - run: echo "second"
 ```
 
-`controller` hands the ordering decision to an LLM: `steps` become a catalog of
+`agent` creates an Agent DAG: `steps` become a catalog of
 actions, and `tasks` states when the run is finished. See
-[Controller Workflows](/writing-workflows/controller).
+[Agent DAGs](/writing-workflows/agent).
 
 ```yaml
-type: controller
+type: agent
 
 env:
   - ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
@@ -460,7 +460,7 @@ Action names in steps can refer to built-ins, local custom actions, base-config 
 | `registry_auths` | object or string | Docker registry auth configuration as a map or Docker auth JSON string. |
 | `ssh` | object | DAG-level SSH defaults. Mutually exclusive with top-level `container`. |
 | `s3` | object | DAG-level defaults for `s3.*` actions. |
-| `llm` | object | DAG-level defaults for chat completion steps, or the decision model and context controls for a controller DAG. |
+| `llm` | object | DAG-level defaults for chat completion steps, or the decision model and context controls for an Agent DAG. |
 | `redis` | object | DAG-level defaults for `redis.<operation>` actions. |
 | `harnesses` | object | Named harness configurations used by `harness.run`. |
 | `harness` | object | Default harness configuration used by `harness.run`. |
@@ -594,7 +594,7 @@ Supported provider values are `openai`, `openai-codex`, `anthropic`, `gemini`, `
 LLM config fields include `provider`, `model`, `system`, `temperature`, `max_tokens`, `top_p`, `base_url`, `api_key_name`, `stream`, `thinking`, `tools`, `max_tool_iterations`, and `web_search`.
 
 `model` accepts either a model-name string paired with `provider`, or an
-ordered array used by `chat.completion` actions and controller decisions:
+ordered array used by `chat.completion` actions and Agent DAG decisions:
 
 ```yaml
 llm:
@@ -607,23 +607,23 @@ llm:
 
 Each array entry requires `provider` and `name` and can override
 `temperature`, `max_tokens`, `top_p`, `base_url`, and `api_key_name`. The first
-entry is primary; failures advance through later entries in order. A controller
+entry is primary; failures advance through later entries in order. An Agent DAG
 keeps a successful fallback selected for later decisions in the same process.
 
-A `type: controller` DAG accepts three additional fields in its root `llm`
+A `type: agent` DAG accepts three additional fields in its root `llm`
 block. They are invalid on a step-level LLM configuration and on the root of a
-non-controller DAG.
+non-Agent DAG.
 
 | Field | Type | Default | Description |
 |---|---|---:|---|
 | `max_context_tokens` | integer | `200000` | Provider-reported prompt-token threshold that starts observation aging. Dagu does not infer the model's context window. `0` disables proactive aging. |
-| `observation_max_bytes` | integer | `524288` | Maximum bytes in each controller-facing tool result and repeated human answer. The source output remains unchanged, truncation preserves valid UTF-8, and `0` disables the limit. |
+| `observation_max_bytes` | integer | `524288` | Maximum bytes in each agent-facing tool result and repeated human answer. The source output remains unchanged, truncation preserves valid UTF-8, and `0` disables the limit. |
 | `observation_keep_recent` | integer | `20` | Recent tool results kept complete after aging starts. Older results become deterministic one-line summaries. `0` disables aging, including overflow recovery. |
 
-When an enabled controller receives a context-too-long error, it compacts every
+When an enabled Agent DAG receives a context-too-long error, it compacts every
 tool result whose summary is smaller and retries the current model once before
 advancing through any remaining fallback models. See
-[Controller Internals](/writing-workflows/controller-internals#context-window)
+[Agent DAG Internals](/writing-workflows/agent-internals#context-window)
 for the full trigger, persistence, and failure behavior.
 
 ### Redis

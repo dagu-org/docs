@@ -1,26 +1,26 @@
-# Controller Examples
+# Agent DAG Examples
 
-A `type: controller` workflow declares what a run must achieve instead of the order steps run in. Steps become a catalog of actions, `tasks` state the goals, and an LLM picks one action per turn until every goal is settled.
+An Agent DAG (`type: agent`) declares what a run must achieve instead of the order steps run in. Steps become a catalog of actions, `tasks` state the goals, and an LLM picks one action per turn until every goal is settled.
 
-This page builds up the feature one capability at a time. Every example runs as-is with an `OPENROUTER_API_KEY` exported; swap the `llm` block for [any configured provider](/step-types/llm/providers), and see the [LLM configuration fields](/step-types/llm/#configuration) for everything the block accepts (model fallback, `system`, `temperature`, `thinking`, and more). For the full semantics behind these examples, see [Controller Workflows](/writing-workflows/controller).
+This page builds up the feature one capability at a time. Every example runs as-is with an `OPENROUTER_API_KEY` exported; swap the `llm` block for [any configured provider](/step-types/llm/providers), and see the [LLM configuration fields](/step-types/llm/#configuration) for everything the block accepts (model fallback, `system`, `temperature`, `thinking`, and more). For the full semantics behind these examples, see [Agent DAGs](/writing-workflows/agent).
 
-## When to reach for a controller
+## When to reach for an Agent DAG
 
-A controller earns its cost when the decision logic, not the work, is what keeps needing maintenance. A `graph` workflow encodes *how*; a controller encodes *what must be true*. The pattern fits when the "how" varies from run to run:
+An Agent DAG earns its cost when the decision logic, not the work, is what keeps needing maintenance. A `graph` workflow encodes *how*; an Agent DAG encodes *what must be true*. The pattern fits when the "how" varies from run to run:
 
 - **Runbook automation.** Probes and remedies as steps, the goal as a task: "service healthy, or escalated with evidence". A diagnosis tree is never finished as branching logic; as judgment against a goal it does not have to be. The [triage example](#judgment-and-reporting) is this in miniature.
 - **Self-healing operations.** Different failures need different remedies: a full disk, a stale lock, a missing directory. Because [failure is an observation](#failure-is-an-observation), remedies do not have to be wired to every way a step can break.
 - **A dispatcher over reviewed workflows.** With open parameters, tested sub-workflows become a vocabulary and goals become the interface. Power grows with the [catalog](#a-catalog-of-workflows); safety stays inside the sub-workflows.
-- **Human judgment at the right moment.** Fixed workflows gate at fixed points. A controller [asks only when it is uncertain](#asking-a-person), and a waiting run holds no process while it waits.
+- **Human judgment at the right moment.** Fixed workflows gate at fixed points. The agent [asks only when it is uncertain](#asking-a-person), and a waiting run holds no process while it waits.
 
-The inverse cases matter as much. When the order is known and the branches are enumerable, a plain workflow is cheaper, faster, and reproducible. A single condition is `preconditions` or a `router` step, not a controller. The signal to switch: a workflow whose branches get edited after every incident is encoding judgment as wiring; move the goals to `tasks` and the remedies to `steps`.
+The inverse cases matter as much. When the order is known and the branches are enumerable, a plain workflow is cheaper, faster, and reproducible. A single condition is `preconditions` or a `router` step, not an Agent DAG. The signal to switch: a workflow whose branches get edited after every incident is encoding judgment as wiring; move the goals to `tasks` and the remedies to `steps`.
 
 ## The loop
 
-The smallest useful controller: a catalog of two commands and one goal.
+The smallest useful Agent DAG is a catalog of two commands and one goal.
 
 ```yaml
-type: controller
+type: agent
 
 secrets:
   - name: OPENROUTER_API_KEY
@@ -56,14 +56,14 @@ graph LR
 
 Each turn the model picks exactly one action. The step runs, a bounded tail of its stdout and stderr comes back as the observation, and the model decides again. When no task is left open, the run concludes.
 
-Steps declare no `depends`, and may not: ordering belongs to the controller. The run page records the order that was actually chosen as a decision timeline, and the **Chat** tab holds the full transcript.
+Steps declare no `depends`, and may not: ordering belongs to the agent. The run page records the order that was actually chosen as a decision timeline, and the **Chat** tab holds the full transcript.
 
 ## Judgment and reporting
 
-Descriptions steer the controller the way a runbook steers an operator. This workflow triages the machine it runs on: the task tells the controller when digging deeper is warranted, and a `chat.completion` step turns the findings into prose.
+Descriptions steer the agent the way a runbook steers an operator. This workflow triages the machine it runs on: the task tells the agent when digging deeper is warranted, and a `chat.completion` step turns the findings into prose.
 
 ```yaml
-type: controller
+type: agent
 
 secrets:
   - name: OPENROUTER_API_KEY
@@ -104,17 +104,17 @@ tasks:
 
 Two mechanics carry this example:
 
-- A controller workflow has no dependency edges, so every action that has already finished counts as upstream of the one starting now. The `output:` variables `${DISK}` and `${LOAD}` are in scope for `summarize` once those probes have run.
+- An Agent DAG has no dependency edges, so every action that has already finished counts as upstream of the one starting now. The `output:` variables `${DISK}` and `${LOAD}` are in scope for `summarize` once those probes have run.
 - `chat.completion` steps inherit the workflow-level `llm` config, so the summary uses the same provider with no extra configuration.
 
-On a healthy machine the controller checks disk and load, skips `processes`, writes the summary, and completes the task. Under load it inspects processes first and says so in the completion reason. Put the file on a `schedule` and it is a nightly check that explains itself.
+On a healthy machine the agent checks disk and load, skips `processes`, writes the summary, and completes the task. Under load it inspects processes first and says so in the completion reason. Put the file on a `schedule` and it is a nightly check that explains itself.
 
 ## Failure is an observation
 
-A failed step does not abort a controller run. The failure comes back as that turn's observation, and the model decides what to do about it.
+A failed step does not abort an Agent DAG run. The failure comes back as that turn's observation, and the model decides what to do about it.
 
 ```yaml
-type: controller
+type: agent
 
 secrets:
   - name: OPENROUTER_API_KEY
@@ -144,7 +144,7 @@ The marker file stands in for a real service. On a fresh machine the run plays o
 
 ```mermaid
 sequenceDiagram
-    participant C as Controller
+    participant C as Agent
     participant S as Steps
     C->>S: check-service
     S-->>C: failed, exit status 1
@@ -154,16 +154,16 @@ sequenceDiagram
     S-->>C: responding
 ```
 
-The controller checked first because the task forbids blind restarts, observed the failure, ran the remedy, and re-ran the check to confirm. It then closed the task with its own account of what happened: "The service was down; I started it and verified it is now responding." Recovery paths like this normally cost explicit error-handling wiring; here the failing observation and the goal are enough. A single action may be re-run at most 5 times per run.
+The agent checked first because the task forbids blind restarts, observed the failure, ran the remedy, and re-ran the check to confirm. It then closed the task with its own account of what happened: "The service was down; I started it and verified it is now responding." Recovery paths like this normally cost explicit error-handling wiring; here the failing observation and the goal are enough. A single action may be re-run at most 5 times per run.
 
 Delete `/tmp/demo-service.pid` to watch the recovery again; while it exists, the first check succeeds and the run completes in one action.
 
 ## Asking a person
 
-When the goal cannot be settled without a human decision, the controller asks one. `ask_user` opens a human task with the controller's question, the run releases its process while it waits, and the answer becomes the next observation.
+When the goal cannot be settled without a human decision, the agent asks one. `ask_user` opens a human task with the agent's question, the run releases its process while it waits, and the answer becomes the next observation.
 
 ```yaml
-type: controller
+type: agent
 
 secrets:
   - name: OPENROUTER_API_KEY
@@ -203,12 +203,12 @@ Answer it in the Web UI, or from the CLI:
 dagu human-task complete <dag-name> --run-id <run-id> --step ask_user --input answer=staging
 ```
 
-Completing the task re-queues the run; a running scheduler (or `dagu start-all`) picks it up and the controller resumes with its transcript and goal progress intact. Given the answer `staging`, it runs `clean-staging`, leaves `clean-production` untouched, and completes. The untouched step is marked `skipped`.
+Completing the task re-queues the run; a running scheduler (or `dagu start-all`) picks it up and the agent resumes with its transcript and goal progress intact. Given the answer `staging`, it runs `clean-staging`, leaves `clean-production` untouched, and completes. The untouched step is marked `skipped`.
 
 ```mermaid
 sequenceDiagram
     participant H as Operator
-    participant C as Controller
+    participant C as Agent
     participant S as Steps
     C->>H: Which environment should I clean?
     Note over C,S: run reports waiting, process exits
@@ -218,14 +218,14 @@ sequenceDiagram
     S-->>C: cleaned staging
 ```
 
-A controller asks at most 5 questions per run, never repeats an answered one, and only asks when it is the root run, so controllers stay composable as sub-workflows.
+An agent asks at most 5 questions per run, never repeats an answered one, and only asks when it is the root run, so agents stay composable as sub-workflows.
 
 ## A catalog of workflows
 
-Plain command steps are nullary tools: the model chooses when they run, never what they run. A step that launches a sub-workflow is different. Parameters the step leaves open become tool arguments, and the controller fills them in.
+Plain command steps are nullary tools: the model chooses when they run, never what they run. A step that launches a sub-workflow is different. Parameters the step leaves open become tool arguments, and the agent fills them in.
 
 ```yaml
-type: controller
+type: agent
 
 secrets:
   - name: OPENROUTER_API_KEY
@@ -261,7 +261,7 @@ steps:
     run: echo "deploying ${params.version} to ${params.env}"
 ```
 
-The `deploy` step names no `env` or `version`, so both become arguments of the `deploy` tool. Reading the goal, the controller calls it twice:
+The `deploy` step names no `env` or `version`, so both become arguments of the `deploy` tool. Reading the goal, the agent calls it twice:
 
 ```
 deploy   succeeded              env=staging     version=2.4.1
@@ -273,8 +273,8 @@ Each call is a real child DAG run with its own run ID, logs, and history. A para
 
 ## Cost and limits
 
-New observations are resent to the model on later turns until context aging compacts them. Each controller-facing observation is capped at 512 KiB by default, but smaller reports still reduce cost on every turn before aging; for sub-workflows, end the child with `outputs.write` to control exactly what crosses back. See [reporting](/writing-workflows/controller#reporting-from-a-sub-workflow).
+New observations are resent to the model on later turns until context aging compacts them. Each agent-facing observation is capped at 512 KiB by default, but smaller reports still reduce cost on every turn before aging; for sub-workflows, end the child with `outputs.write` to control exactly what crosses back. See [reporting](/writing-workflows/agent#reporting-from-a-sub-workflow).
 
-`llm.max_tool_iterations` caps decisions per run (default 50). A task the controller cannot achieve should be settled as `failed` with a reason rather than left to exhaust the limit.
+`llm.max_tool_iterations` caps decisions per run (default 50). A task the agent cannot achieve should be settled as `failed` with a reason rather than left to exhaust the limit.
 
-[Controller Internals](/writing-workflows/controller-internals) has the full runtime accounting: observation aging defaults, one-shot overflow recovery, every limit in one table, and what survives a suspension or a retry.
+[Agent DAG Internals](/writing-workflows/agent-internals) has the full runtime accounting: observation aging defaults, one-shot overflow recovery, every limit in one table, and what survives a suspension or a retry.

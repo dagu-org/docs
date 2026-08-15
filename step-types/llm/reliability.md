@@ -24,19 +24,19 @@ steps:
 
 Each model entry requires `provider` and `name`. It can override `temperature`, `max_tokens`, `top_p`, `base_url`, and `api_key_name`. Streaming is disabled while fallback is configured so a partial response from a failed model is not mixed with the next response.
 
-Fallback applies to both `chat.completion` actions and `type: controller`
-decision calls. A controller starts with the first entry and advances in order
+Fallback applies to both `chat.completion` actions and `type: agent`
+decision calls. An agent starts with the first entry and advances in order
 when the current model fails. Once a fallback succeeds, later decisions in the
 same process start with that model instead of probing the primary again.
 
-A failed decision request does not consume a controller turn or append an
+A failed decision request does not consume an agent turn or append an
 assistant message. The next model receives the same provider-agnostic
-transcript, including every earlier decision and observation. A controller
+transcript, including every earlier decision and observation. An agent
 process created by resume or `dagu retry` starts from the configured primary
 again, while keeping the saved transcript. Successful decisions record the
 provider and model that actually answered.
 
-Context-overflow recovery runs before controller failover. When observation
+Context-overflow recovery runs before agent failover. When observation
 aging is enabled, Dagu compacts the transcript and retries the current model
 once. If compaction cannot reduce the request or the retry still fails, Dagu
 advances to the next model. With `llm.observation_keep_recent: 0`, the recovery
@@ -82,15 +82,15 @@ For a `chat.completion` action, recovery happens in this order:
 2. If configured, Dagu tries the next fallback model.
 3. After all models fail, the step's `retry_policy` can rerun the complete action.
 
-For each controller decision:
+For each agent decision:
 
 1. The current model receives the provider and logical retry layers described in
-   [Controller Internals](/writing-workflows/controller-internals#decision-calls).
+   [Agent DAG Internals](/writing-workflows/agent-internals#decision-calls).
 2. A context-overflow response can trigger one compaction and retry of that
    model.
 3. Dagu advances through the remaining models in order.
 
-Controller decisions do not have a step-level `retry_policy`.
+Agent decisions do not have a step-level `retry_policy`.
 
 ## Related
 

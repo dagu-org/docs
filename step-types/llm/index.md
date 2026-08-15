@@ -9,13 +9,13 @@ graph LR
     W[Workflow] --> C[chat.completion]
     W --> H[harness.run]
     C --> T[DAGs as tools]
-    K[controller] --> W
+    K[Agent DAG] --> W
     X[AI client via MCP] --> W
 ```
 
 - **A model call inside a step**: `action: chat.completion` sends a prompt or message list; the response streams to stdout. This page.
 - **Workflows as functions**: a completion with `tools` can call your DAGs, with arguments derived from their `params`. See [Tool Calling](/features/chat/tool-calling).
-- **A model deciding what runs**: `type: controller` inverts control; steps become a catalog and the model picks one action per turn until the goals are met. See [Controller Workflows](/writing-workflows/controller) and the [controller examples](/writing-workflows/examples/controller).
+- **A model deciding what runs**: `type: agent` inverts control; steps become a catalog and the model picks one action per turn until the goals are met. See [Agent DAGs](/writing-workflows/agent) and the [Agent DAG examples](/writing-workflows/examples/agent).
 - **A coding agent as a step**: `harness.run` launches Claude Code, Codex, Copilot, or OpenCode inside a workflow. See [Harness](/step-types/harness/).
 - **AI operating Dagu**: the [MCP server](/mcp/) is the inverse relationship; an external AI client inspects workflows, starts runs, and reads results.
 
@@ -196,7 +196,7 @@ Values registered as Dagu secrets are masked before messages are sent to the pro
 
 - [AI Examples](/writing-workflows/examples/ai) for runnable copy-paste versions of every capability above
 - [Providers & Endpoints](/step-types/llm/providers) for credentials, custom endpoints, and shared defaults
-- [Controllers & Completions](/step-types/llm/controller-completions) for the step-by-step path from one completion to LLM-directed workflows
-- [Controller Workflows](/writing-workflows/controller) when the order of the work is itself the model's decision
+- [Agent DAGs & Completions](/step-types/llm/agent-completions) for the step-by-step path from one completion to LLM-directed workflows
+- [Agent DAGs](/writing-workflows/agent) when the order of the work is itself the model's decision
 - [Harness](/step-types/harness/) for running external coding agents as steps
 - [Chat & LLM](/features/chat/) for choosing between the shapes at a glance

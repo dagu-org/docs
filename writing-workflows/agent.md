@@ -1,29 +1,29 @@
-# Controller Workflows
+# Agent DAGs
 
-A `graph` or `chain` workflow says *what runs in what order*. A **controller**
-workflow says *what must be true when the run is finished*, and lets an LLM
-decide the order. Steps stop being a plan and become a catalog of actions;
+A `graph` or `chain` workflow says *what runs in what order*. An **Agent DAG**
+says *what must be true when the run is finished* and lets an LLM decide the
+order. Steps stop being a plan and become a catalog of actions;
 `tasks` state the goals; each turn the model picks one action, watches what
 happens, and picks again until every goal is settled.
 
 That inversion is what the type buys. The order can follow from what earlier
 steps revealed, a failure becomes information rather than an abort, and a run
 can stop to wait for a person without holding a process. This page builds the
-machinery up from a first runnable controller to driving a coding agent.
-[Controller Examples](/writing-workflows/examples/controller) drills complete
+machinery up from a first runnable Agent DAG to driving a coding agent.
+[Agent DAG Examples](/writing-workflows/examples/agent) drills complete
 scenarios the same way, and
-[Controller Internals](/writing-workflows/controller-internals) covers the
+[Agent DAG Internals](/writing-workflows/agent-internals) covers the
 runtime mechanics — cost, limits, recovery — behind all of it.
 
 Every example runs as-is with an `OPENROUTER_API_KEY` exported; swap the `llm`
 block for [any configured provider](/step-types/llm/providers).
 
-## A first controller
+## A first Agent DAG
 
-The smallest controller is a catalog of two commands and one goal:
+The smallest Agent DAG is a catalog of two commands and one goal:
 
 ```yaml
-type: controller
+type: agent
 
 secrets:
   - name: OPENROUTER_API_KEY
@@ -47,10 +47,10 @@ tasks:
     description: Finished when both the time and the user have been reported.
 ```
 
-Save it as `hello-controller.yaml` in your DAGs directory and run it:
+Save it as `hello-agent.yaml` in your DAGs directory and run it:
 
 ```bash
-dagu start hello-controller
+dagu start hello-agent
 ```
 
 The model is offered both steps as tools, runs each once — in whichever order
@@ -76,7 +76,7 @@ to look like.
 
 ### Model fallback
 
-Set `llm.model` to an ordered array when the controller should continue after
+Set `llm.model` to an ordered array when the agent should continue after
 a model or provider failure:
 
 ```yaml
@@ -97,7 +97,7 @@ successful decision records the provider and model that answered.
 Each provider still needs its own credential binding. A process created after
 suspension or by `dagu retry` begins with the primary again and continues from
 the saved transcript. See [Reliability](/step-types/llm/reliability) for retry
-order and [Controller Internals](/writing-workflows/controller-internals#decision-calls)
+order and [Agent DAG Internals](/writing-workflows/agent-internals#decision-calls)
 for the complete decision-call behavior.
 
 ## The loop
@@ -124,8 +124,8 @@ graph LR
     P -->|no task open| F[Run concludes]
 ```
 
-Ordering belongs to the controller, so `depends` is not allowed, and neither
-are router steps. Steps the controller never chose are marked skipped when the
+Ordering belongs to the agent, so `depends` is not allowed, and neither
+are router steps. Steps the agent never chose are marked skipped when the
 run finishes.
 
 ## Tasks
@@ -138,13 +138,13 @@ tasks:
     description: Finished when the design workflow ran and a person approved it.
 ```
 
-The `description` is what the controller judges against, so write it as a
+The `description` is what the agent judges against, so write it as a
 completion test rather than a summary. "Finished when the PR URL has been
 produced" gives the model something to check; "open a PR" does not.
 
 Both fields are required, and names must be unique.
 
-Every task starts open, and the controller settles it with one call:
+Every task starts open, and the agent settles it with one call:
 
 | Status | When | Run outcome |
 |---|---|---|
@@ -154,12 +154,12 @@ Every task starts open, and the controller settles it with one call:
 | `open` | undo a decision later work invalidated | back into the loop |
 
 `skipped` matters more than it looks. Without it, a task that is moot — signing
-a Windows build for a project that has none — leaves the controller with no
+a Windows build for a project that has none — leaves the agent with no
 honest move: it either burns turns pretending to work, or stalls out and fails
 a run that was fine. Here it is in action:
 
 ```yaml
-type: controller
+type: agent
 
 secrets:
   - name: OPENROUTER_API_KEY
@@ -186,16 +186,16 @@ tasks:
 ```
 
 On a machine with no scratch directory, the check reports nothing to do, the
-controller settles `cleaned` as skipped without ever running `clean_scratch`,
-and the run succeeds — with the controller's reason recorded on the task.
+agent settles `cleaned` as skipped without ever running `clean_scratch`,
+and the run succeeds — with the agent's reason recorded on the task.
 
 ## Parameterising the instructions
 
-`llm.system` and each task `description` take variables, so the same controller
+`llm.system` and each task `description` take variables, so the same Agent DAG
 can be pointed at different work per run:
 
 ```yaml
-type: controller
+type: agent
 
 params:
   - TARGET: staging
@@ -231,16 +231,16 @@ dagu start release -- TARGET=production # deploys to production
 A plain command step is a tool that takes no arguments: the model chooses
 *when* it runs, never *what* it runs. A step that launches a sub-workflow is
 different. Parameters the step leaves open are advertised as tool arguments,
-and the controller fills them in from the goal.
+and the agent fills them in from the goal.
 
-Write a value in `params` for anything the controller should not decide. A
+Write a value in `params` for anything the agent should not decide. A
 parameter the step supplies is not advertised, so the model cannot supply its
 own value for it, and a step that supplies every parameter takes no arguments
 at all. Use this to fix what a step is for and leave the model only the genuine
 choices:
 
 ```yaml
-type: controller
+type: agent
 
 secrets:
   - name: OPENROUTER_API_KEY
@@ -295,13 +295,13 @@ reports success.
 Each call is a real child DAG run with its own run ID, logs, and history. This
 is the pattern that scales: a library of reviewed, parameterized workflows as
 the catalog, goals as the interface. The
-[catalog example](/writing-workflows/examples/controller#a-catalog-of-workflows)
-shows a controller reading `staging first` out of a goal and calling the same
+[catalog example](/writing-workflows/examples/agent#a-catalog-of-workflows)
+shows an agent reading `staging first` out of a goal and calling the same
 deploy tool twice with different arguments.
 
-## What the controller sees
+## What the agent sees
 
-After an action runs, the controller reads a short report of it and nothing
+After an action runs, the agent reads a short report of it and nothing
 else. It never sees the step's command, its environment, or the state of any
 other step. Everything it knows about the run it built up from these reports,
 one per turn.
@@ -329,7 +329,7 @@ step's stored output, logs, or human-task submission. Before observation aging
 starts, each report is sent again on every later turn, so keeping reports small
 still matters. Once the provider-reported prompt reaches
 `llm.max_context_tokens`, older reports become one-line summaries while the
-most recent reports stay complete. [Controller Internals](/writing-workflows/controller-internals)
+most recent reports stay complete. [Agent DAG Internals](/writing-workflows/agent-internals)
 has the full accounting and recovery behavior.
 
 ### Reporting from a sub-workflow
@@ -342,14 +342,14 @@ includes variables the child only uses internally, such as a file loaded to
 build a prompt, and a large one costs tokens on every turn that follows.
 
 End the child with `outputs.write` (or `stdout.outputs`) to decide what crosses
-the boundary. When a child publishes outputs that way, the controller reports
+the boundary. When a child publishes outputs that way, the agent reports
 those and stops listing the child's internal variables:
 
 ```yaml
 # check.yaml
 steps:
   - id: load_standard
-    run: cat standard.txt      # internal: never reported to the controller
+    run: cat standard.txt      # internal: never reported to the agent
     output: STANDARD
 
   - id: grade
@@ -358,7 +358,7 @@ steps:
     with: { prompt: "..." }
     output: FINDINGS
 
-  - id: publish                # the report the controller reads
+  - id: publish                # the report the agent reads
     depends: [grade]
     action: outputs.write
     with:
@@ -373,32 +373,32 @@ how the same two mechanisms work for an ordinary caller.
 
 ## Failure and repetition
 
-A failing action does not abort a controller run. The failure is reported to the
-controller like any other outcome, and it can retry the action, try something
+A failing action does not abort an agent run. The failure is reported to the
+agent like any other outcome, and it can retry the action, try something
 else, or give up and fail the run.
 
-The controller may also re-run an action it has already run, which is what makes
+The agent may also re-run an action it has already run, which is what makes
 a review-and-redo cycle work. Any single action runs at most 5 times per run.
 
 Final status follows the steps as they ended up. If a failed action was re-run
 and passed, the run is **succeeded**. If an action was left failed and the
-controller completed every task anyway, the run is **partially succeeded**.
+agent completed every task anyway, the run is **partially succeeded**.
 
 The
-[service-recovery example](/writing-workflows/examples/controller#failure-is-an-observation)
+[service-recovery example](/writing-workflows/examples/agent#failure-is-an-observation)
 plays this out as a full cycle: check fails, remedy runs, check re-runs and
 passes — with no error-handling wiring anywhere in the file.
 
 ## Waiting for a person
 
 An `action: human.task` step works exactly as it does elsewhere, and it is the
-reason controllers are durable. When the controller opens one, the run reports
+reason agents are durable. When the agent opens one, the run reports
 `waiting` and the process exits, releasing the worker slot. Completing the task
-resumes the same run, and the controller picks the conversation back up with the
+resumes the same run, and the agent picks the conversation back up with the
 submitted answer as its next observation.
 
 ```yaml
-type: controller
+type: agent
 
 secrets:
   - name: OPENROUTER_API_KEY
@@ -439,7 +439,7 @@ tasks:
       the notes were published.
 ```
 
-The controller drafts, opens the approval, and the run waits. Answer from the
+The agent drafts, opens the approval, and the run waits. Answer from the
 Web UI or the CLI, and a running scheduler (or `dagu start-all`) resumes the
 run:
 
@@ -448,44 +448,44 @@ dagu human-task complete release-notes --run-id <id> --step approve \
   --inputs-json '{"approved":true,"feedback":"ship it"}'
 ```
 
-Human tasks stay root-only, so declare them on the controller itself rather
+Human tasks stay root-only, so declare them on the agent itself rather
 than inside a child workflow.
 
 ## Asking a person
 
-Not every question can be written down in advance. When the controller hits one,
+Not every question can be written down in advance. When the agent hits one,
 it calls `ask_user` with a question of its own wording. The run reports
 `waiting`, exactly as a declared human task does, and the reply comes back as the
-controller's next observation.
+agent's next observation.
 
 ```bash
 dagu human-task complete <dag-name> --run-id <run-id> --step ask_user \
   --input answer="staging only, never production"
 ```
 
-No configuration is needed: every controller can ask. Three things keep it from
-pestering anyone. The answers so far are restated to the controller every turn,
+No configuration is needed: every agent can ask. Three things keep it from
+pestering anyone. The answers so far are restated to the agent every turn,
 an exact repeat is refused with the answer it already got, and a run may ask at
-most 5 questions. A controller running as somebody's child cannot ask at all,
-since nobody is watching a sub-workflow — which is what keeps controllers
+most 5 questions. An agent running as somebody's child cannot ask at all,
+since nobody is watching a sub-workflow — which is what keeps agents
 composable as sub-workflows. The
-[asking example](/writing-workflows/examples/controller#asking-a-person) runs
+[asking example](/writing-workflows/examples/agent#asking-a-person) runs
 the whole cycle, wait and resume included.
 
 ## Driving a coding agent
 
 An [`action: harness.run`](/step-types/harness/) step runs a coding agent CLI,
 which makes it the natural action for work too open-ended to write down. Declare
-it on the controller and the model can fire it, but not aim it: only `dag.run`
+it on the agent and the model can fire it, but not aim it: only `dag.run`
 advertises parameters, so every other action is a tool that takes no arguments
 and the prompt stays whatever the author wrote.
 
-To let the controller write the instruction, put the harness in a child workflow
+To let the agent write the instruction, put the harness in a child workflow
 and expose the prompt as a parameter. This example needs the `claude` CLI
-installed for the child; the controller itself stays on OpenRouter:
+installed for the child; the agent itself stays on OpenRouter:
 
 ```yaml
-type: controller
+type: agent
 
 secrets:
   - name: OPENROUTER_API_KEY
@@ -546,9 +546,9 @@ steps:
         slogan: ${RESULT}
 ```
 
-Rejecting the review resumes the run, and the controller reaches for the same
+Rejecting the review resumes the run, and the agent reaches for the same
 action with a new `INSTRUCTION` written against the feedback. That cycle is what
-the pairing buys: a person judges, and the controller re-aims the agent.
+the pairing buys: a person judges, and the agent re-aims the agent.
 
 The `publish` step is not decoration. An agent CLI writes a lot to stdout, and a
 step that publishes nothing is reported as the last 40 lines of its log, resent
@@ -564,25 +564,25 @@ that declare a command are unaffected and still run it.
 
 ## Watching a run
 
-A controller has no dependency edges, so a graph of it carries no information.
+An agent has no dependency edges, so a graph of it carries no information.
 The **Status** tab shows a decision timeline in that slot instead: one row per
 turn, in the order things happened.
 
-![Decision timeline of a controller run: a failed test run, the fix, the passing re-run, two completed tasks, and a sign-off waiting on a person](/controller-decision-timeline-light.png)
+![Decision timeline of an agent run: a failed test run, the fix, the passing re-run, two completed tasks, and a sign-off waiting on a person](/agent-decision-timeline-light.png)
 
 Repeated actions carry an attempt number, and durations are wall time, so a step
 that retried internally reads as the time it actually consumed. The steps table
 sits below, showing each step's latest attempt.
 
 The **Tasks** tab shows each goal, whether it is complete, and the reason the
-controller gave. The **Chat** tab has the saved transcript. If observation
+agent gave. The **Chat** tab has the saved transcript. If observation
 aging has started, older tool results appear there as the same one-line
 summaries sent to the model on later turns.
 
 ## Limits
 
 `llm.max_tool_iterations` caps the number of decisions in one run; it defaults
-to 50 for controllers. Hitting the cap with tasks still open fails the run and
+to 50 for agents. Hitting the cap with tasks still open fails the run and
 names the tasks that were left open.
 
 The root `llm` block also controls observation size and context aging:
@@ -597,7 +597,7 @@ llm:
 
 | Field | Default | Effect | Zero value |
 |---|---:|---|---|
-| `observation_max_bytes` | 524288 | Caps each controller-facing tool result and repeated human answer without changing the source record. | Disables the size cap. |
+| `observation_max_bytes` | 524288 | Caps each agent-facing tool result and repeated human answer without changing the source record. | Disables the size cap. |
 | `max_context_tokens` | 200000 | Starts aging after a decision reports a prompt at or above the threshold. | Disables proactive aging. |
 | `observation_keep_recent` | 20 | Keeps this many recent tool results complete after aging starts; older results become one-line summaries. | Disables aging and overflow recovery. |
 
@@ -614,11 +614,11 @@ one reminder. A second silent turn fails the run.
 These are the caps an author sets. For the full runtime picture — every limit
 in one table, context-window behavior, retry layers, and what survives a
 suspension or a retry — see
-[Controller Internals](/writing-workflows/controller-internals).
+[Agent DAG Internals](/writing-workflows/agent-internals).
 
-## When to reach for a controller
+## When to reach for an Agent DAG
 
-Reach for a controller when the order genuinely cannot be written down in
+Reach for an Agent DAG when the order genuinely cannot be written down in
 advance: the next step depends on what a reviewer says, on what an earlier step
 produced, or on how many times something has already been tried.
 
@@ -627,4 +627,4 @@ reproducible.
 
 For concrete shapes this fits — runbook automation, self-healing operations,
 dispatch over a workflow library, human-in-the-loop — see
-[when to reach for a controller](/writing-workflows/examples/controller#when-to-reach-for-a-controller).
+[when to reach for an Agent DAG](/writing-workflows/examples/agent#when-to-reach-for-an-agent-dag).

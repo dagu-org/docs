@@ -29,7 +29,7 @@ const llmItems = [
   { text: "Providers & Endpoints", link: "/step-types/llm/providers" },
   { text: "Local Models", link: "/step-types/llm/local-models" },
   { text: "Reliability", link: "/step-types/llm/reliability" },
-  { text: "Controllers & Completions", link: "/step-types/llm/controller-completions" },
+  { text: "Agent DAGs & Completions", link: "/step-types/llm/agent-completions" },
   { text: "Reasoning & Web Search", link: "/step-types/llm/reasoning-web-search" },
   { text: "Tool Calling", link: "/features/chat/tool-calling" },
 ];
@@ -174,7 +174,7 @@ const fullSidebar = [
             link: "/writing-workflows/examples/ai",
             collapsed: false,
             items: [
-              { text: "Controller", link: "/writing-workflows/examples/controller" },
+              { text: "Agent DAG", link: "/writing-workflows/examples/agent" },
               { text: "Chat & LLM", link: "/writing-workflows/examples/ai" },
               { text: "Harness Run", link: "/writing-workflows/examples/harness-run" },
             ],
@@ -266,8 +266,8 @@ const fullSidebar = [
         collapsed: true,
         items: [
           { text: "AI Quickstart", link: "/getting-started/quickstart-ai" },
-          { text: "Controller Workflows", link: "/writing-workflows/controller" },
-          { text: "Controller Internals", link: "/writing-workflows/controller-internals" },
+          { text: "Agent DAGs", link: "/writing-workflows/agent" },
+          { text: "Agent DAG Internals", link: "/writing-workflows/agent-internals" },
           {
             text: "Chat & LLM",
             link: "/features/chat/",

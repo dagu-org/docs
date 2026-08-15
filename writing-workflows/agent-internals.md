@@ -1,18 +1,18 @@
-# Controller Internals
+# Agent DAG Internals
 
-[Controller Workflows](/writing-workflows/controller) explains how to write a
-controller. This page explains how one runs: what the model is actually sent
+[Agent DAGs](/writing-workflows/agent) explains how to write an Agent DAG.
+This page explains how one runs: what the model is actually sent
 each turn, where every limit sits, which failures end a run, and what survives
-a crash or a retry. It is the page to read before putting a controller into
-production, because in a controller the conversation *is* the run — its size
+a crash or a retry. It is the page to read before putting an Agent DAG into
+production, because the conversation *is* the run — its size
 sets the cost, and its persistence sets the recovery story.
 
 ## The conversation
 
-Each turn, the controller makes one completion request built from two parts:
+Each turn, the agent makes one completion request built from two parts:
 
 - **A system prompt, rebuilt every turn.** Your `llm.system` text, the
-  controller's own framing, every task with its current status and reason, every
+  agent's own framing, every task with its current status and reason, every
   answer a person has given so far, and the rules of the loop. Task
   descriptions and collected answers are therefore paid for on every turn, not
   once.
@@ -24,14 +24,14 @@ Each turn, the controller makes one completion request built from two parts:
 
 Until aging starts, requests grow with every turn: an observation added on turn
 10 of a 40-turn run may be resent 30 times. That is why
-[keeping reports small](/writing-workflows/controller#what-the-controller-sees)
+[keeping reports small](/writing-workflows/agent#what-the-agent-sees)
 is the main cost lever — a line saved in an observation is saved once per
 remaining turn. Aging reduces the older part of the transcript, but the latest
 observations stay complete so the model can reason about recent work.
 
 ## Context window
 
-Controller context management has three settings on the root `llm` block:
+Agent context management has three settings on the root `llm` block:
 
 ```yaml
 llm:
@@ -63,7 +63,7 @@ are saved in the run transcript and do not expand again after suspension or
 Provider overflow errors have one recovery path before model failover. Dagu
 immediately ages every tool result whose summary would be smaller, including
 recent results normally kept complete, then retries that decision once with
-the current model. The rejected request does not consume a controller turn. If
+the current model. The rejected request does not consume an agent turn. If
 compaction cannot reduce the request, or the rebuilt request still fails, Dagu
 advances to the next configured model. The run fails if no model remains.
 
@@ -96,7 +96,7 @@ The safeguards reduce risk, but input size still matters:
 | Log observation | Last 40 lines each of stdout and stderr | No | Older lines never reach the model. |
 | Child outputs (default listing) | 2,000 characters per value | No | Longer values are cut at the limit. |
 | Stored step output | `max_output_size` (1 MiB) | Yes, per DAG | Captured output beyond the limit is not stored. |
-| Controller-facing observation | 512 KiB | `llm.observation_max_bytes` | The transcript copy is truncated as valid UTF-8; stored step data stays complete. |
+| Agent-facing observation | 512 KiB | `llm.observation_max_bytes` | The transcript copy is truncated as valid UTF-8; stored step data stays complete. |
 | Proactive aging threshold | 200,000 prompt tokens | `llm.max_context_tokens` | Older observations are compacted before the next decision. |
 | Complete observations after aging | 20 most recent | `llm.observation_keep_recent` | Older observations become one-line summaries. |
 
@@ -111,10 +111,10 @@ Three details worth knowing:
 - **Storage and observation limits are separate.**
   [`max_output_size`](/writing-workflows/yaml-specification#history-and-output-limits)
   controls what the step stores. `llm.observation_max_bytes` controls only the
-  copy added to the controller transcript. Setting either one to zero does not
+  copy added to the agent transcript. Setting either one to zero does not
   disable the other.
 - **Human answers use the observation limit too.** Answers remain complete in
-  their human-task records, but the copy repeated in the controller's system
+  their human-task records, but the copy repeated in the agent's system
   prompt is bounded by `llm.observation_max_bytes`.
 
 ## Decision calls
@@ -136,9 +136,9 @@ llm:
 ```
 
 The first entry is primary. A failed request is retried according to the rules
-below, then the controller advances through the remaining entries. A fallback
+below, then the agent advances through the remaining entries. A fallback
 that succeeds remains selected for later turns in the same process. If it
-later fails, the controller continues forward through the chain; it does not
+later fails, the agent continues forward through the chain; it does not
 return to an earlier model.
 
 Failed model requests neither advance the turn counter nor append an assistant
@@ -164,12 +164,12 @@ overflow is handled separately: when observation aging is enabled, Dagu
 compacts the transcript and retries the current model once before advancing.
 After every entry in a fallback chain fails, the run error identifies each
 exhausted model and preserves the underlying errors. There is no step-level
-`retry_policy` for decisions — the controller is not a step you configure.
+`retry_policy` for decisions — the agent is not a step you configure.
 `dagu retry` resumes the saved conversation rather than starting over.
 
 ## Durability and recovery
 
-After every decision, the controller persists its state on the run: task
+After every decision, the agent persists its state on the run: task
 statuses and reasons, the decision timeline, per-action run counts, the turn
 count, collected answers, whether observation aging is active, and the action
 currently in flight. The conversation, including any compacted observations,
@@ -186,7 +186,7 @@ That persistence is what makes three things work:
   restores the state, reports what became of the pending action as the next
   observation, and asks for the next decision.
 - **Retry as resume.** `dagu retry` on a failed run restores the same state
-  and transcript. The controller continues from where it failed — it does not
+  and transcript. The agent continues from where it failed — it does not
   replay decisions or re-run actions that already succeeded.
 - **A pinned definition.** Retry and resume replay the DAG recorded with the
   run, not the current source file. Editing the YAML between attempts changes
@@ -212,6 +212,6 @@ prompts and observations. The copy sent to the provider is masked — the values
 of declared `secrets` are replaced before the request leaves. The transcript
 the run stores is not: it keeps the resolved values readable, so the **Chat**
 tab and the run's data on disk contain them. Two consequences: treat access to
-controller run data as access to the secrets the run resolved, and declare
+agent run data as access to the secrets the run resolved, and declare
 sensitive values as `secrets` rather than plain `env` entries — masking covers
 only what is declared.
