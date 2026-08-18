@@ -169,6 +169,58 @@ const fullSidebar = [
     ],
   },
   {
+    text: "AI",
+    items: [
+      { text: "Overview", link: "/ai/" },
+      { text: "Quickstart", link: "/getting-started/quickstart-ai" },
+      {
+        text: "Examples",
+        collapsed: true,
+        items: [
+          { text: "Chat & LLM", link: "/writing-workflows/examples/ai" },
+          { text: "Harness Run", link: "/writing-workflows/examples/harness-run" },
+          { text: "Agent DAG", link: "/writing-workflows/examples/agent" },
+        ],
+      },
+      {
+        text: "LLM Steps",
+        link: "/step-types/llm/",
+        collapsed: true,
+        items: llmItems,
+      },
+      {
+        text: "Harness Steps",
+        link: "/step-types/harness/",
+        collapsed: true,
+        items: harnessItems,
+      },
+      {
+        text: "Agent DAGs",
+        link: "/writing-workflows/agent",
+        collapsed: true,
+        items: [
+          { text: "Overview", link: "/writing-workflows/agent" },
+          { text: "Internals", link: "/writing-workflows/agent-internals" },
+        ],
+      },
+      {
+        text: "MCP",
+        link: "/mcp/",
+        collapsed: true,
+        items: mcpItems,
+      },
+      { text: "Skills", link: "/ai/skills" },
+      {
+        text: "Human-in-the-Loop",
+        collapsed: true,
+        items: [
+          { text: "Approval Gates", link: "/writing-workflows/approval" },
+          { text: "Human Tasks", link: "/writing-workflows/human-tasks" },
+        ],
+      },
+    ],
+  },
+  {
     text: "Workflows",
     items: [
       {
@@ -487,58 +539,6 @@ const fullSidebar = [
       { text: "Licensing", link: "/embedding/licensing" },
     ],
   },
-  {
-    text: "AI",
-    items: [
-      { text: "Overview", link: "/ai/" },
-      { text: "Quickstart", link: "/getting-started/quickstart-ai" },
-      {
-        text: "LLM Steps",
-        link: "/step-types/llm/",
-        collapsed: true,
-        items: llmItems,
-      },
-      {
-        text: "Agent DAGs",
-        link: "/writing-workflows/agent",
-        collapsed: true,
-        items: [
-          { text: "Overview", link: "/writing-workflows/agent" },
-          { text: "Internals", link: "/writing-workflows/agent-internals" },
-        ],
-      },
-      {
-        text: "Harness Steps",
-        link: "/step-types/harness/",
-        collapsed: true,
-        items: harnessItems,
-      },
-      {
-        text: "MCP Server",
-        link: "/mcp/",
-        collapsed: true,
-        items: mcpItems,
-      },
-      { text: "Authoring with AI", link: "/ai/authoring" },
-      {
-        text: "Approvals",
-        collapsed: true,
-        items: [
-          { text: "Approval Gates", link: "/writing-workflows/approval" },
-          { text: "Human Tasks", link: "/writing-workflows/human-tasks" },
-        ],
-      },
-      {
-        text: "Examples",
-        collapsed: true,
-        items: [
-          { text: "Agent DAG", link: "/writing-workflows/examples/agent" },
-          { text: "Chat & LLM", link: "/writing-workflows/examples/ai" },
-          { text: "Harness Run", link: "/writing-workflows/examples/harness-run" },
-        ],
-      },
-    ],
-  },
 ];
 
 // "Kiln" code theme — phosphor amber keys, signal-green strings, violet
@@ -720,11 +720,11 @@ export default withMermaid(
       nav: [
         { text: "Quickstart", link: "/getting-started/quickstart", activeMatch: "^/(overview/(?:$|architecture|deployment-models|self-host-license|contributing|changelog)|getting-started/|migration/)" },
         { text: "Web UI", link: "/overview/web-ui", activeMatch: "^/(overview/web-ui|web-ui/)" },
+        { text: "AI", link: "/ai/", activeMatch: "^/(ai|mcp)/" },
         { text: "Workflows", link: "/writing-workflows/", activeMatch: "^/(writing-workflows/(?!examples/)|features/)" },
         { text: "Examples", link: "/writing-workflows/examples/", activeMatch: "^/writing-workflows/examples/" },
         { text: "Actions", link: "/step-types/shell", activeMatch: "/(step-types|dagu-actions)/" },
         { text: "Operation", link: "/server-admin/", activeMatch: "/server-admin/" },
-        { text: "AI", link: "/ai/", activeMatch: "^/(ai|mcp)/" },
         { text: "llms.txt", link: "https://raw.githubusercontent.com/dagucloud/dagu/main/llms.txt" },
       ],
 

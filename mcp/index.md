@@ -1,4 +1,4 @@
-# MCP Server
+# MCP
 
 Dagu includes a built-in Model Context Protocol (MCP) server. There is no separate Dagu MCP package to install: run the Dagu HTTP server and point an MCP client at the `/mcp` endpoint.
 

@@ -5,7 +5,9 @@ description: Call models from workflow steps, run coding agents as steps, let a 
 
 # AI
 
-AI shows up in Dagu in two directions. A workflow can call a model, or a model can operate Dagu. The same binary and the same YAML cover both, so a run that uses AI keeps the schedule, retries, logs, artifacts, and run history that every other run gets.
+A workflow can call a model, and an AI client can operate the server from outside through the same authenticated boundary as the REST API. Both ship in the single binary; there is no separate AI package to install.
+
+Inside a workflow, AI is an ordinary step. `chat.completion` and `harness.run` take dependencies, retries, approvals, and artifacts like any other action, and their output lands in the same run history with the same logs.
 
 ```mermaid
 flowchart LR
@@ -31,10 +33,59 @@ flowchart LR
 | Let a model call your DAGs as functions | `with.tools` on a completion | [Tool Calling](/features/chat/tool-calling) |
 | Run Claude Code, Codex, Copilot, or another agent CLI as a step | `action: harness.run` | [Harness Steps](/step-types/harness/) |
 | Let a model decide which declared step runs next | `type: agent` | [Agent DAGs](/writing-workflows/agent) |
-| Let an external AI client inspect and control a running server | Built-in MCP endpoint | [MCP Server](/mcp/) |
-| Let an AI coding tool write correct workflow YAML | Bundled skill and `llms.txt` | [Authoring with AI](/ai/authoring) |
+| Let an external AI client inspect and control a running server | Built-in MCP endpoint | [MCP](/mcp/) |
+| Have an AI tool write your workflows for you | MCP, or the skill with no server | [Write workflows with an AI tool](#write-workflows-with-an-ai-tool) |
 
 New to this? The [AI Quickstart](/getting-started/quickstart-ai) runs a coding agent and an Agent DAG with one OpenRouter key.
+
+## Write workflows with an AI tool
+
+The most common use of AI here involves no model call inside a workflow at all. You describe what you want in a chat or a coding agent, and it writes the YAML.
+
+### Connect an MCP client (recommended)
+
+Point any MCP client at a running server:
+
+```bash
+dagu start-all
+export DAGU_MCP_URL=http://localhost:8080/mcp
+```
+
+From there you just talk to it. Ask for a workflow and it writes one, checks it against the server before saving, and says what is wrong if it does not build. Ask for a change and it reads the current spec first. Ask it to run, and it starts the run, reads the logs, and explains a failure.
+
+Nothing is installed on the client side. The server supplies the authoring reference itself, so the agent already knows the field names and which action to reach for.
+
+```mermaid
+flowchart LR
+    P["describe the workflow"] --> C["MCP client"]
+    C --> V["checked against the server"]
+    V -->|does not build| C
+    V -->|saved| R["run"]
+    R -->|logs| C
+
+    style P stroke:lightblue,stroke-width:1.6px,color:#333
+    style C stroke:orange,stroke-width:1.6px,color:#333
+    style V stroke:lime,stroke-width:1.6px,color:#333
+    style R stroke:green,stroke-width:1.6px,color:#333
+```
+
+See the [MCP Quickstart](/mcp/quickstart) for auth and remote URLs, and [Clients](/mcp/clients/) for per-client setup.
+
+### Install the skill (no server needed)
+
+When the tool works on files with no server to talk to, give it the reference directly:
+
+```bash
+gh skill install dagucloud/dagu dagu
+```
+
+Tools that read a URL instead of installing a skill can point at the same material as one file:
+
+```text
+https://raw.githubusercontent.com/dagucloud/dagu/main/llms.txt
+```
+
+Here the validation loop is yours to wire up: tell the tool to run `dagu validate` after each edit, which builds the DAG and reports the same errors the server would without running anything. [Skills](/ai/skills) covers the full setup.
 
 ## Call a model from a step
 
@@ -83,7 +134,41 @@ flowchart LR
     style F stroke:green,stroke-width:1.6px,color:#333
 ```
 
-Seven providers ship built in: Anthropic, OpenAI, OpenAI Codex, Gemini, OpenRouter, Z.ai, and any OpenAI-compatible local endpoint. See [Providers & Endpoints](/step-types/llm/providers) and [Local Models](/step-types/llm/local-models) for Ollama, vLLM, and LM Studio.
+### Supported providers
+
+Eight providers ship built in. Set `llm.provider` to the key and the endpoint and credential variable follow from it, both overridable with `base_url` and `api_key_name`.
+
+| Provider | `provider:` | Models | API key |
+|---|---|---|---|
+| OpenAI | `openai` | GPT | `OPENAI_API_KEY` |
+| Anthropic | `anthropic` | Claude | `ANTHROPIC_API_KEY` |
+| Google Gemini | `gemini` | Gemini | `GOOGLE_API_KEY` |
+| OpenRouter | `openrouter` | Multi-vendor gateway | `OPENROUTER_API_KEY` |
+| Z.AI | `zai` | GLM | `ZAI_API_KEY` |
+| OpenCode | `opencode` | Kimi, DeepSeek, GLM via opencode.ai | `OPENCODE_API_KEY` |
+| ChatGPT / Codex | `openai-codex` | GPT through an existing subscription | None |
+| Local | `local` | Whatever the local server hosts | None |
+
+Aliases: `google` for `gemini`; `ollama`, `vllm`, and `llama` for `local`; `zhipu`, `zhipuai`, and `glm` for `zai`.
+
+### Local models
+
+`provider: local` targets any OpenAI-compatible server on your own hardware, including Ollama, llama.cpp, vLLM, and LM Studio. It needs no API key and defaults to the Ollama endpoint at `http://localhost:11434/v1`:
+
+```yaml
+llm:
+  provider: local
+  model: qwen3
+  base_url: http://localhost:11434/v1
+
+steps:
+  - id: summarize
+    action: chat.completion
+    with:
+      prompt: Summarize this release in two sentences.
+```
+
+Because the request never leaves the machine, this is the path for prompts carrying data that cannot go to a vendor. [Local Models](/step-types/llm/local-models) covers the base-URL rules, the networking trap when Dagu runs in a container, and the current limits. Any other OpenAI-compatible endpoint works the same way through `base_url`: see [Providers & Endpoints](/step-types/llm/providers).
 
 ## Run a coding agent as a step
 
@@ -266,11 +351,11 @@ For a step that should wait for a person without running anything first, use a [
     <p>Declare goals instead of order, recover from failure as information, and dispatch sub-workflows.</p>
   </div>
   <div class="overview-card">
-    <h3><a href="/mcp/">MCP Server</a></h3>
+    <h3><a href="/mcp/">MCP</a></h3>
     <p>Connect Claude Code, Cursor, VS Code, or any MCP client to a running server with scoped credentials.</p>
   </div>
   <div class="overview-card">
-    <h3><a href="/ai/authoring">Authoring with AI</a></h3>
+    <h3><a href="/ai/skills">Skills</a></h3>
     <p>Install the bundled skill and point a coding tool at <code>llms.txt</code> so it writes valid Dagu YAML.</p>
   </div>
 </div>

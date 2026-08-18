@@ -1,11 +1,15 @@
 ---
-title: Authoring with AI
+title: Skills
 description: Install the bundled Dagu skill, point a coding tool at llms.txt, and validate what it writes so an AI assistant produces workflow YAML that runs.
 ---
 
-# Authoring with AI
+# Skills
 
-An AI coding tool that has never seen Dagu will invent field names. Three things fix that, and they stack: a skill that teaches the shape of a DAG, a compact reference the model can read in one pass, and a validator that rejects what is still wrong.
+The Dagu skill is a packaged authoring reference for AI coding tools. It ships in the repository and covers which DAG type to pick, the step fields, the built-in actions, the harnesses, and the CLI. Reference files load per task rather than all at once.
+
+`llms.txt` is the same material flattened into one file, for tools that read a URL instead of installing a skill.
+
+Both target tools working on files. When a server is running, [MCP](/mcp/) is the better path: it supplies the reference itself and checks every edit before it is saved.
 
 ```mermaid
 flowchart LR
@@ -26,7 +30,7 @@ flowchart LR
 
 ## Install the skill
 
-The Dagu skill ships in the repository and installs through the GitHub CLI:
+Install it with the GitHub CLI:
 
 ```bash
 gh skill install dagucloud/dagu dagu
@@ -38,7 +42,7 @@ Run `gh skill install --help` for tool-specific installation targets.
 
 ## Point a tool at llms.txt
 
-`llms.txt` is the same material flattened into a single file for tools that read a URL instead of installing a skill:
+The flattened file lives at:
 
 ```text
 https://raw.githubusercontent.com/dagucloud/dagu/main/llms.txt
@@ -57,16 +61,19 @@ dagu schema dag steps
 
 `validate` builds the DAG and reports the same errors the server would, without running anything. `schema` prints the accepted fields for any dot-separated path (`dagu schema dag steps.container`), so an agent can look up a shape instead of guessing it. Telling a coding tool to run `dagu validate` after every edit turns a plausible-looking file into a verified one, and the same command is what checks every YAML example in this documentation.
 
-## Operating a server instead of writing files
+## When to use MCP instead
 
-Authoring stops at the file. When an AI tool should read run state, apply scoped edits, maintain Wiki pages, or control runs on a live server, that is the [MCP server](/mcp/), not the skill.
+A skill stops at the file. [MCP](/mcp/) covers the same authoring job and more, which is why it is the recommended path whenever a server is running.
 
-| Integration | Configure | Best for |
+| | Skill or `llms.txt` | MCP |
 |---|---|---|
-| Skill or `llms.txt` | `gh skill install dagucloud/dagu dagu` | Writing valid workflow YAML in an editor or repository. |
-| MCP server | `http://localhost:8080/mcp` | Reading state, applying scoped edits, and controlling runs on a running server. |
+| Configure | `gh skill install dagucloud/dagu dagu` | `http://localhost:8080/mcp` |
+| Needs a running server | No | Yes |
+| Authoring reference | Installed on the client | Supplied by the server |
+| Validation | You tell the tool to run `dagu validate` | The server checks every edit before it is saved |
+| After the edit | Nothing further | Starts the run, reads logs, debugs the failure |
 
-Most setups want both: the skill so the tool writes correct YAML, and MCP so it can see what happened when the workflow ran. See [MCP Clients](/mcp/clients/) for the thirteen client-specific guides.
+Use the skill when the tool edits files with no server to reach, or alongside MCP when you want the authoring rules present in the editor too. See [MCP Clients](/mcp/clients/) for per-client setup.
 
 ## Regenerating the reference
 

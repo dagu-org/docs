@@ -4,14 +4,15 @@ description: Run an AI workflow in under five minutes. Launch a coding agent wit
 
 # AI Quickstart
 
-Dagu supports two different roles for AI:
+There are three AI surfaces:
 
 | What you want | Start with |
 |---|---|
 | Run Codex, Claude Code, Copilot, OpenCode, or another agent inside a predictable workflow | [`harness.run`](#_3-run-a-coding-agent) |
 | Let an LLM decide which declared action should run next | [`type: agent`](#_4-try-an-agent-dag) |
+| Let an AI client inspect and control a running server | [MCP](#_5-connect-an-mcp-client) |
 
-Start with `harness.run` when the workflow order is known and the agent has a specific job. Reach for an Agent DAG when choosing the next action is itself part of the problem. This quickstart tries both with one OpenRouter key.
+Start with `harness.run` when the workflow order is known and the agent has a specific job. Reach for an Agent DAG when choosing the next action is itself part of the problem. Those two run AI inside a workflow and share one OpenRouter key. MCP is the reverse direction and needs a running server instead.
 
 ## 1. Install Dagu
 
@@ -135,7 +136,24 @@ On a healthy machine the agent checks disk and load, skips the process listing, 
 
 The run page shows each decision in a timeline. Its **Chat** tab holds the full transcript: what the agent saw after each step and why it settled the task.
 
-## How the patterns differ
+## 5. Connect an MCP client
+
+Steps 3 and 4 put AI inside a workflow. MCP runs the other direction: an AI client connects to a running server and operates it, using the same authenticated boundary as the REST API.
+
+Start the server and point the client at the `/mcp` endpoint:
+
+```bash
+dagu start-all
+export DAGU_MCP_URL=http://localhost:8080/mcp
+```
+
+In the client, add an HTTP (Streamable HTTP) MCP server named `dagu` with that URL. Once it connects, three tools are available: `dagu_read` for workflows and run state, `dagu_change` for scoped edits, and `dagu_execute` for run control. A good first read is the built-in authoring reference at `dagu://reference/authoring`.
+
+Use `localhost` only when the client and the server run on the same machine. If the server uses `builtin` authentication, create an [API key](/server-admin/authentication/api-keys) and send it as a bearer token; pick a role that matches what the client should do, so `viewer` for read-only inspection and `operator` to start and stop runs.
+
+The [MCP Quickstart](/mcp/quickstart) covers remote URLs, base paths, and the auth setup in full. [Clients](/mcp/clients/) has the exact commands per client.
+
+## How harness.run and Agent DAGs differ
 
 | | `harness.run` | `type: agent` |
 |---|---|---|
@@ -153,3 +171,5 @@ The patterns also compose: an Agent DAG can dispatch a graph workflow containing
 - [Agent DAG Examples](/writing-workflows/examples/agent) builds the feature step by step: failure recovery, asking a person, and dispatching sub-workflows.
 - [Agent DAGs & Completions](/step-types/llm/agent-completions) shows how scheduling decisions and LLM generation fit together.
 - [LLM Overview](/step-types/llm/) covers `chat.completion`, local models, and provider configuration.
+- [MCP Tools](/mcp/tools) and [Resources](/mcp/resources) cover what a connected client can read and change.
+- [AI](/ai/) compares every surface on one page, including the approval gates and sandboxing that bound what an agent can do.
