@@ -1,5 +1,9 @@
 # Chat & LLM
 
+::: tip
+[AI](/ai/) is the current entry point for every AI surface, including MCP and agent authoring. This page covers the completion-focused subset.
+:::
+
 Dagu can call language models from workflows, let models invoke DAGs as tools, or run external agent CLIs. This section helps choose the right approach; exact `chat.completion` syntax lives in the [LLM action reference](/step-types/llm/).
 
 ## Choose an Approach

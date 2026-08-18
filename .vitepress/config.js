@@ -67,6 +67,36 @@ const harnessItems = [
   },
 ];
 
+const mcpItems = [
+  { text: "Overview", link: "/mcp/" },
+  { text: "Quickstart", link: "/mcp/quickstart" },
+  {
+    text: "Clients",
+    link: "/mcp/clients/",
+    collapsed: true,
+    items: [
+      { text: "Overview", link: "/mcp/clients/" },
+      { text: "Claude Code", link: "/mcp/clients/claude-code" },
+      { text: "Codex", link: "/mcp/clients/codex" },
+      { text: "Cursor", link: "/mcp/clients/cursor" },
+      { text: "VS Code", link: "/mcp/clients/vscode" },
+      { text: "Gemini CLI", link: "/mcp/clients/gemini-cli" },
+      { text: "OpenCode", link: "/mcp/clients/opencode" },
+      { text: "Zed", link: "/mcp/clients/zed" },
+      { text: "Cline", link: "/mcp/clients/cline" },
+      { text: "Windsurf", link: "/mcp/clients/windsurf" },
+      { text: "Claude Desktop & Web", link: "/mcp/clients/claude-apps" },
+      { text: "Other Clients", link: "/mcp/clients/other-clients" },
+      { text: "Team Setup", link: "/mcp/clients/team-setup" },
+    ],
+  },
+  { text: "Authentication", link: "/mcp/authentication" },
+  { text: "Architecture", link: "/mcp/architecture" },
+  { text: "Tools", link: "/mcp/tools" },
+  { text: "Resources", link: "/mcp/resources" },
+  { text: "Auditability", link: "/mcp/auditability" },
+];
+
 // Define the complete sidebar structure
 const fullSidebar = [
   {
@@ -261,27 +291,6 @@ const fullSidebar = [
           { text: "YAML Specification", link: "/writing-workflows/yaml-specification" },
         ],
       },
-      {
-        text: "Optional AI integrations",
-        collapsed: true,
-        items: [
-          { text: "AI Quickstart", link: "/getting-started/quickstart-ai" },
-          { text: "Agent DAGs", link: "/writing-workflows/agent" },
-          { text: "Agent DAG Internals", link: "/writing-workflows/agent-internals" },
-          {
-            text: "Chat & LLM",
-            link: "/features/chat/",
-            collapsed: true,
-            items: llmItems,
-          },
-          {
-            text: "Harness",
-            link: "/step-types/harness/",
-            collapsed: true,
-            items: harnessItems,
-          },
-        ],
-      },
     ],
   },
   {
@@ -332,12 +341,7 @@ const fullSidebar = [
               { text: "JQ", link: "/step-types/jq" },
             ],
           },
-          {
-            text: "LLM",
-            link: "/step-types/llm/",
-            collapsed: true,
-            items: llmItems,
-          },
+          { text: "LLM", link: "/step-types/llm/" },
           {
             text: "SQL",
             link: "/step-types/sql/",
@@ -349,12 +353,7 @@ const fullSidebar = [
               { text: "DuckDB", link: "/step-types/sql/duckdb" },
             ],
           },
-          {
-            text: "Harness",
-            link: "/step-types/harness/",
-            collapsed: true,
-            items: harnessItems,
-          },
+          { text: "Harness", link: "/step-types/harness/" },
         ],
       },
       {
@@ -489,36 +488,55 @@ const fullSidebar = [
     ],
   },
   {
-    text: "MCP",
-    collapsed: true,
+    text: "AI",
     items: [
-      { text: "Overview", link: "/mcp/" },
-      { text: "Quickstart", link: "/mcp/quickstart" },
+      { text: "Overview", link: "/ai/" },
+      { text: "Quickstart", link: "/getting-started/quickstart-ai" },
       {
-        text: "Clients",
-        link: "/mcp/clients/",
+        text: "LLM Steps",
+        link: "/step-types/llm/",
+        collapsed: true,
+        items: llmItems,
+      },
+      {
+        text: "Agent DAGs",
+        link: "/writing-workflows/agent",
         collapsed: true,
         items: [
-          { text: "Overview", link: "/mcp/clients/" },
-          { text: "Claude Code", link: "/mcp/clients/claude-code" },
-          { text: "Codex", link: "/mcp/clients/codex" },
-          { text: "Cursor", link: "/mcp/clients/cursor" },
-          { text: "VS Code", link: "/mcp/clients/vscode" },
-          { text: "Gemini CLI", link: "/mcp/clients/gemini-cli" },
-          { text: "OpenCode", link: "/mcp/clients/opencode" },
-          { text: "Zed", link: "/mcp/clients/zed" },
-          { text: "Cline", link: "/mcp/clients/cline" },
-          { text: "Windsurf", link: "/mcp/clients/windsurf" },
-          { text: "Claude Desktop & Web", link: "/mcp/clients/claude-apps" },
-          { text: "Other Clients", link: "/mcp/clients/other-clients" },
-          { text: "Team Setup", link: "/mcp/clients/team-setup" },
+          { text: "Overview", link: "/writing-workflows/agent" },
+          { text: "Internals", link: "/writing-workflows/agent-internals" },
         ],
       },
-      { text: "Authentication", link: "/mcp/authentication" },
-      { text: "Architecture", link: "/mcp/architecture" },
-      { text: "Tools", link: "/mcp/tools" },
-      { text: "Resources", link: "/mcp/resources" },
-      { text: "Auditability", link: "/mcp/auditability" },
+      {
+        text: "Harness Steps",
+        link: "/step-types/harness/",
+        collapsed: true,
+        items: harnessItems,
+      },
+      {
+        text: "MCP Server",
+        link: "/mcp/",
+        collapsed: true,
+        items: mcpItems,
+      },
+      { text: "Authoring with AI", link: "/ai/authoring" },
+      {
+        text: "Approvals",
+        collapsed: true,
+        items: [
+          { text: "Approval Gates", link: "/writing-workflows/approval" },
+          { text: "Human Tasks", link: "/writing-workflows/human-tasks" },
+        ],
+      },
+      {
+        text: "Examples",
+        collapsed: true,
+        items: [
+          { text: "Agent DAG", link: "/writing-workflows/examples/agent" },
+          { text: "Chat & LLM", link: "/writing-workflows/examples/ai" },
+          { text: "Harness Run", link: "/writing-workflows/examples/harness-run" },
+        ],
+      },
     ],
   },
 ];
@@ -706,7 +724,7 @@ export default withMermaid(
         { text: "Examples", link: "/writing-workflows/examples/", activeMatch: "^/writing-workflows/examples/" },
         { text: "Actions", link: "/step-types/shell", activeMatch: "/(step-types|dagu-actions)/" },
         { text: "Operation", link: "/server-admin/", activeMatch: "/server-admin/" },
-        { text: "MCP", link: "/mcp/", activeMatch: "^/mcp/" },
+        { text: "AI", link: "/ai/", activeMatch: "^/(ai|mcp)/" },
         { text: "llms.txt", link: "https://raw.githubusercontent.com/dagucloud/dagu/main/llms.txt" },
       ],
 
@@ -714,6 +732,7 @@ export default withMermaid(
         "/": fullSidebar,
         "/overview/": fullSidebar,
         "/getting-started/": fullSidebar,
+        "/ai/": fullSidebar,
         "/mcp/": fullSidebar,
         "/writing-workflows/": fullSidebar,
         "/step-types/": fullSidebar,

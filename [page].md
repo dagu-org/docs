@@ -241,11 +241,15 @@ Dagu keeps workflow structure in one YAML file next to the tools that do the wor
   </div>
 </div>
 
-### Optional AI integrations
+### AI
 
 <div class="next-steps">
   <div class="step-card">
-    <h3><a href="/getting-started/quickstart-ai">AI workflows</a></h3>
+    <h3><a href="/ai/">AI overview</a></h3>
+    <p>Compare every surface: model calls, coding agents, LLM-directed runs, and MCP.</p>
+  </div>
+  <div class="step-card">
+    <h3><a href="/getting-started/quickstart-ai">AI quickstart</a></h3>
     <p>Run coding agents as steps, call LLMs, or let an agent pick the path.</p>
   </div>
   <div class="step-card">
