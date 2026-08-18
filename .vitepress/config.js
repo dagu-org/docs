@@ -72,7 +72,7 @@ const fullSidebar = [
   {
     text: "Quickstart",
     items: [
-      { text: "What is Dagu?", link: "/overview/" },
+      { text: "Overview", link: "/overview/" },
       { text: "Quickstart", link: "/getting-started/quickstart" },
       { text: "Core Concepts", link: "/getting-started/concepts" },
       {
