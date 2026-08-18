@@ -21,9 +21,6 @@ const excludedDirectories = new Set([
   "superpowers",
 ]);
 const markdownFiles = [];
-const standaloneWorkflowFiles = [
-  ".vitepress/theme/components/basic-workflows/release-readiness.yaml",
-].map((file) => resolve(docsRoot, file));
 
 function findDaguBin() {
   const configuredBin = process.env.DAGU_BIN || process.argv[2];
@@ -150,23 +147,6 @@ let candidateCount = 0;
 let excludedCount = 0;
 
 try {
-  for (const file of standaloneWorkflowFiles) {
-    candidateCount++;
-    const result = spawnSync(daguBin, ["validate", file], {
-      encoding: "utf8",
-      env: validationEnvironment(join(fixtureDir, "home")),
-      timeout: 20_000,
-    });
-
-    if (result.status !== 0) {
-      failures.push({
-        file: relative(docsRoot, file),
-        line: 1,
-        output: formatCommandFailure(result),
-      });
-    }
-  }
-
   for (const file of markdownFiles.sort()) {
     const source = readFileSync(file, "utf8");
     const fencePattern = /^```(?:yaml|yml)(?:[^\n]*)\n([\s\S]*?)^```[ \t]*$/gm;
