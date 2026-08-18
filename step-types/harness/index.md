@@ -2,9 +2,9 @@
 
 Run coding agents as workflow steps. Harnesses run external CLI agents on the host or inside a container.
 
-For CLI providers, the harness executor starts a subprocess, captures stdout and stderr, and uses the process exit status as the step result.
+For CLI providers, the harness executor normally starts a subprocess, captures stdout and stderr, and uses the process exit status as the step result. Built-in OpenCode steps use a managed server session by default on long-lived Dagu execution hosts; see [OpenCode](./opencode).
 
-The selected CLI attempt's binary must either be available in `PATH` or be referenced by path. Dagu resolves each CLI provider binary when that attempt runs, so a missing fallback binary does not fail a successful primary attempt. Agent CLIs that authenticate with an environment variable can also be installed per-DAG with [`tools`](/writing-workflows/tools); the managed toolset directory is prepended to `PATH` for the run.
+The selected CLI attempt's binary must either be available in `PATH` or be referenced by path. Dagu resolves each CLI provider binary when that attempt runs, so a missing fallback binary does not fail a successful primary attempt. Agent CLIs that authenticate with an environment variable can also be installed per-DAG with [`tools`](/writing-workflows/tools); the managed toolset directory is prepended to `PATH` for the run. DAG-level tools and secrets supply CLI steps only, not the process-owned OpenCode managed service.
 
 To run CLI agents inside a container sandbox, see [Harness Sandboxed Execution](./sandbox/). This is the recommended shape when an AI or coding agent should run with explicit filesystem mounts, toolchains, network mode, external egress controls, and credentials.
 
@@ -121,7 +121,7 @@ Built-in CLI providers have fixed prompt placement:
 | `claude` | `claude` | `claude -p "<prompt>"` |
 | `codex` | `codex` | `codex exec "<prompt>"` |
 | `copilot` | `copilot` | `copilot -p "<prompt>"` |
-| `opencode` | `opencode` | `opencode run "<prompt>"` |
+| `opencode` | `opencode` | Managed session when available; otherwise `opencode run "<prompt>"` |
 | `pi` | `pi` | `pi -p "<prompt>"` |
 
 For built-in CLI providers:

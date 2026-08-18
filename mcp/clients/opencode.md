@@ -34,4 +34,6 @@ opencode mcp list
 
 OpenCode can also run as a workflow step through the [harness executor](/step-types/harness/opencode), which is the inverse relationship: Dagu drives OpenCode instead of OpenCode driving Dagu.
 
+This MCP configuration is always opt-in. Managed OpenCode harness sessions do not create it, enable it, or modify configuration files. Existing user MCP entries are honored. If an entry references an environment variable, add that exact name to the Dagu service's `opencode.env_passthrough` list; DAG-level secrets are available only to CLI steps.
+
 Reference: [OpenCode MCP servers documentation](https://opencode.ai/docs/mcp-servers/).

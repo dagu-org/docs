@@ -8,9 +8,63 @@ See the [OpenCode installation guide](https://opencode.ai).
 
 For containerized Dagu runs, see [Run OpenCode in a Container](./sandbox/opencode).
 
-## Zero-Install via Tools
+## Managed Sessions
 
-Declare OpenCode under DAG-level [`tools`](/writing-workflows/tools) and Dagu installs the pinned release before the run starts, with nothing preinstalled on the worker:
+Built-in OpenCode harness steps use a host-owned OpenCode server session by default when launched by a standalone Dagu server, by `dagu start-all`, or on a distributed worker. The run page gets an **Agent** tab with the live timeline, tool activity, changed files, token usage, and native controls for permission requests and questions. Each managed step has its own conversation by default; when a run has multiple managed steps, choose the conversation by step name in the Agent tab. When OpenCode needs an answer, the step and DAG-run enter `waiting`; answering resumes the same session.
+
+```yaml
+steps:
+  - id: implement
+    action: harness.run
+    with:
+      provider: opencode
+      model: openai/gpt-5
+      variant: high
+      prompt: Implement the requested change and run the relevant tests.
+```
+
+The final assistant text is captured as step stdout. Resuming a waiting or interrupted attempt reconnects to work already submitted to OpenCode without sending the prompt twice. Retrying a step after a terminal session error starts a new session generation and submits the original prompt again. Rescheduling as a new DAG run starts an independent conversation. In distributed mode, Dagu pins retries and resumes to the worker that owns the session.
+
+The session survives Dagu and OpenCode server restarts when the same service account, OpenCode data directory, workspace, and worker identity are retained. If the owning worker is offline or the session cannot be found, an answer remains pending and the run offers a clean-session restart.
+
+### Service setup
+
+Install OpenCode for the Dagu service account and authenticate that same account with `opencode auth login`. OpenCode normally stores those credentials in `~/.local/share/opencode/auth.json`. Alternatively, explicitly pass selected provider credentials to the managed host:
+
+```yaml
+opencode:
+  executable: opencode
+  env_passthrough:
+    - OPENAI_API_KEY
+```
+
+The environment equivalents are `DAGU_OPENCODE_EXECUTABLE` and comma-separated `DAGU_OPENCODE_ENV_PASSTHROUGH`.
+
+Dagu does not add a Dagu MCP entry, install an OpenCode plugin, or modify configuration files. Existing OpenCode configuration, including user-configured MCP servers, is honored. Any environment variables referenced by those MCP servers must be included in `opencode.env_passthrough`. Add the [Dagu MCP configuration](/mcp/clients/opencode) yourself only when the agent needs to operate Dagu.
+
+Managed mode supports `agent`, `model`, `variant`, `session`, `fork`, `title`, `file`, `command`, and `format: default`. OpenCode sharing is disabled in managed mode. `share: true` uses the CLI integration and may publish the conversation at a public URL; combining it with `managed: true` is rejected. Use `managed: false` for the one-shot CLI path:
+
+```yaml
+with:
+  provider: opencode
+  managed: false
+  format: json
+  prompt: Review the current branch.
+```
+
+Containers, non-default output formats, unsupported OpenCode flags, standalone scheduler launches, embedded-engine runs, and direct Dagu CLI execution use the CLI path automatically. Set `managed: true` when falling back would be undesirable; Dagu then reports a configuration or host-availability error. Automatic fallback occurs only before a managed session is created.
+
+“Allow for this Dagu session” applies only OpenCode's proposed wildcard scope to the current Dagu session generation. Dagu answers matching later requests once and never stores an OpenCode process-wide `always` grant.
+
+Dagu-created and forked OpenCode sessions belong to the DAG run, not to one attempt. They remain available after success, failure, abort, and retry. Manual DAG-run deletion and history retention enqueue their removal; Dagu completes that cleanup when the owning server or worker is available. Sessions supplied with `session:` are externally owned and are never deleted by Dagu.
+
+**Start clean session** creates a new conversation generation and retries the step with its original prompt. Previous generations remain registered until the DAG run is deleted. This does not revert file changes already made in the workspace.
+
+The managed server shares one service identity among trusted workflows in the same Dagu process. Use separate workers or containerized CLI execution for untrusted workloads that need isolation. Dagu checks required API capabilities at host startup rather than relying on a version range; OpenCode v1.18.11 is the currently tested release.
+
+## CLI Installation via Tools
+
+Declare OpenCode under DAG-level [`tools`](/writing-workflows/tools) to install a pinned release for the one-shot CLI integration:
 
 ```yaml
 working_dir: .
@@ -28,15 +82,16 @@ steps:
     action: harness.run
     with:
       provider: opencode
+      managed: false
       model: openrouter/deepseek/deepseek-v4-flash
       prompt: |
         Review the most recent commit in this repository.
         Reply with: what changed, one risk, a verdict.
 ```
 
-The managed toolset is prepended to `PATH`, so the pinned release wins even when another OpenCode version is installed on the worker. OpenCode reads the OpenRouter credential from the environment; the `secrets` block is required because Dagu does not propagate arbitrary shell variables to steps.
+The managed toolset is prepended to the step `PATH`, so the pinned release wins for CLI execution. It does not install the long-lived process-owned managed server. The `secrets` block supplies the CLI step only; it is not an authentication source for managed mode.
 
-## Base Invocation
+## CLI Fallback Invocation
 
 ```text
 opencode run "<prompt>"
@@ -60,13 +115,13 @@ steps:
       provider: opencode
       prompt: |
         Review the current branch and list problems
-      model: claude-sonnet-4
+      model: openai/gpt-5
 ```
 
 Generated invocation:
 
 ```text
-opencode run "Review the current branch and list problems" --model claude-sonnet-4
+opencode run "Review the current branch and list problems" --model openai/gpt-5
 ```
 
 ## YOLO Mode
