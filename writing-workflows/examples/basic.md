@@ -1,5 +1,5 @@
 ---
-description: Start with any command, then compose schedules, containers, AI agents, human tasks, and artifacts in one Dagu workflow.
+description: Complete example workflows covering command graphs, typed outputs, scheduling, containers, LLM steps, coding agents, human tasks, artifacts, and sub-workflows.
 aside: false
 ---
 
@@ -8,7 +8,7 @@ import BasicWorkflowDemo from '/.vitepress/theme/components/BasicWorkflowDemo.vu
 import BasicRecipeVisual from '/.vitepress/theme/components/BasicRecipeVisual.vue'
 </script>
 
-# Powerful workflow basics
+# Workflow building blocks
 
 Give Dagu the commands you already use. Wire them into a graph, then add scheduling, retries, containers, AI steps, human input, or artifacts as the job grows. The result is still one YAML file.
 
@@ -21,7 +21,7 @@ Give Dagu the commands you already use. Wire them into a graph, then add schedul
 
 ## Build with the same pieces
 
-Every example below is a complete, copyable workflow. The flagship demo is just these basics composed together.
+Every example below is a complete, copyable workflow. The demo above is these building blocks composed together.
 
 <nav class="basic-recipe-map" aria-label="Basic workflow recipes">
   <a href="#commands-become-a-graph"><b>01</b><span>Commands become a graph</span></a>
@@ -362,7 +362,7 @@ dagu start-all
 
 Want an AI agent to write the YAML? Connect Claude Code, Codex, Cursor, VS Code, or another MCP client to Dagu, then ask it to create, validate, run, and inspect the workflow. [Set up Dagu MCP →](/mcp/quickstart)
 
-## Next power-ups
+## Next steps
 
 <div class="basic-next-grid">
   <a href="/writing-workflows/examples/actions-integrations"><b>Operate anything</b><span>SSH, mail, HTTP, Kubernetes, databases, object storage, and more.</span></a>

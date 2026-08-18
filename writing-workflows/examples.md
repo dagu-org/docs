@@ -4,7 +4,7 @@ Use these examples as copy-paste starting points for common Dagu workflow patter
 
 ## Workflow Basics
 
-- [Powerful Workflow Basics](/writing-workflows/examples/basic) - Commands, graphs, typed values, schedules, containers, AI agents, human tasks, artifacts, and reusable sub-workflows.
+- [Workflow Building Blocks](/writing-workflows/examples/basic) - Commands, graphs, typed values, schedules, containers, AI agents, human tasks, artifacts, and reusable sub-workflows.
 - [Control Flow](/writing-workflows/examples/control-flow) - Human tasks, conditions, repetition, routing, nested workflows, and worker placement.
 - [Reliability](/writing-workflows/examples/reliability) - Continue-on behavior, retries, backoff, and lifecycle handlers.
 
