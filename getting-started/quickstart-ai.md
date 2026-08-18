@@ -29,12 +29,6 @@ One [OpenRouter](https://openrouter.ai) key reaches models from every major vend
 export OPENROUTER_API_KEY=sk-or-...
 ```
 
-The examples below use a low-cost model. To try without adding payment, OpenRouter also serves free model variants.
-
-::: tip No payment method?
-Swap the model for a free variant such as `openrouter/openai/gpt-oss-20b:free` in the harness workflow and `openai/gpt-oss-20b:free` in the Agent DAG. Free variants are rate-limited and the lineup changes; browse the current list at [openrouter.ai/models](https://openrouter.ai/models).
-:::
-
 ## 3. Run a coding agent
 
 Save this as `review.yaml` in a Git repository. It installs a pinned OpenCode CLI for the run, asks it to review the latest commit without modifying files, and stores the response as a Markdown artifact:
