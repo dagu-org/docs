@@ -27,6 +27,13 @@ steps:
 
 Declare `ssh` once and every `run` step executes on that host, with retries, logs, and history kept in Dagu.
 
+```mermaid
+flowchart LR
+    H["health · ssh web-1.internal"] --> R["restart · systemctl"]
+    style H stroke:lightblue,stroke-width:1.6px,color:#333
+    style R stroke:green,stroke-width:1.6px,color:#333
+```
+
 <a href="/step-types/ssh" class="learn-more">Learn more →</a>
 
 </div>
@@ -65,6 +72,21 @@ steps:
 
 One sub-DAG per host, each with its own logs, status, and retries.
 
+```mermaid
+flowchart TD
+    P["patch · dag.run: patch-host"] --> A["web-1.internal"]
+    P --> B["web-2.internal"]
+    P --> C["db-1.internal"]
+    A --> AP["apply · child DAG"]
+    B --> AP
+    C --> AP
+    style P stroke:lightblue,stroke-width:1.6px,color:#333
+    style A stroke:lime,stroke-width:1.6px,color:#333
+    style B stroke:lime,stroke-width:1.6px,color:#333
+    style C stroke:lime,stroke-width:1.6px,color:#333
+    style AP stroke:green,stroke-width:1.6px,color:#333
+```
+
 <a href="/step-types/ssh" class="learn-more">Learn more →</a>
 
 </div>
@@ -86,6 +108,15 @@ steps:
 
 Control how long execution history is retained.
 
+```mermaid
+flowchart LR
+    S["schedule · 00:00 daily"] --> A["archive_old_data"]
+    A --> C["cleanup_archive"]
+    style S stroke:lightblue,stroke-width:1.6px,color:#333
+    style A stroke:lightblue,stroke-width:1.6px,color:#333
+    style C stroke:green,stroke-width:1.6px,color:#333
+```
+
 <a href="/writing-workflows/yaml-specification#data-fields" class="learn-more">Learn more →</a>
 
 </div>
@@ -100,6 +131,13 @@ steps:
   - run: ./analyze-logs --format markdown
     stdout:
       artifact: reports/analysis.md
+```
+
+```mermaid
+flowchart LR
+    A["analyze-logs · max 10MB"] --> AR["reports/analysis.md · artifact"]
+    style A stroke:lightblue,stroke-width:1.6px,color:#333
+    style AR stroke:lime,stroke-width:1.6px,color:#333
 ```
 
 <a href="/writing-workflows/yaml-specification#data-fields" class="learn-more">Learn more →</a>
@@ -126,6 +164,13 @@ steps:
 
 Organize logs in custom directories with retention.
 
+```mermaid
+flowchart LR
+    E["extract · extract.log"] --> T["transform · transform.log"]
+    style E stroke:lightblue,stroke-width:1.6px,color:#333
+    style T stroke:green,stroke-width:1.6px,color:#333
+```
+
 <a href="/writing-workflows/yaml-specification#data-fields" class="learn-more">Learn more →</a>
 
 </div>
@@ -143,6 +188,13 @@ steps:
 handler_on:
   exit:
     run: echo "Cleaning up resources"
+```
+
+```mermaid
+flowchart LR
+    A["Processing data · 2h timeout"] --> H["handler_on.exit · cleanup"]
+    style A stroke:lightblue,stroke-width:1.6px,color:#333
+    style H stroke:orange,stroke-width:1.6px,color:#333
 ```
 
 <a href="/writing-workflows/yaml-specification#execution-control-fields" class="learn-more">Learn more →</a>
@@ -180,6 +232,19 @@ steps:
       interval_sec: 30
 ```
 
+```mermaid
+flowchart TD
+    A["Checking health"] --> B{success?}
+    B --> |no| M["mail_on.failure"]
+    B --> |no| H["handler_on.failure · curl alert"]
+    B --> |yes| I["mail_on.success"]
+    style A stroke:lightblue,stroke-width:1.6px,color:#333
+    style B stroke:lightblue,stroke-width:1.6px,color:#333
+    style M stroke:orange,stroke-width:1.6px,color:#333
+    style H stroke:red,stroke-width:1.6px,color:#333
+    style I stroke:green,stroke-width:1.6px,color:#333
+```
+
 <a href="/writing-workflows/yaml-specification" class="learn-more">Learn more →</a>
 
 </div>
@@ -214,6 +279,15 @@ steps:
 
 Enable OpenTelemetry tracing for observability.
 
+```mermaid
+flowchart LR
+    F["fetch"] --> P["process · uv"]
+    P --> T["transform · dag.run"]
+    style F stroke:lightblue,stroke-width:1.6px,color:#333
+    style P stroke:lightblue,stroke-width:1.6px,color:#333
+    style T stroke:green,stroke-width:1.6px,color:#333
+```
+
 <a href="/server-admin/opentelemetry" class="learn-more">Learn more →</a>
 
 </div>
@@ -243,6 +317,17 @@ steps:
     depends: validate
 ```
 
+```mermaid
+flowchart TD
+    V["validate"] --> B1["process_batch_1"]
+    V --> B2["process_batch_2"]
+    V --> B3["process_batch_3"]
+    style V stroke:lightblue,stroke-width:1.6px,color:#333
+    style B1 stroke:lime,stroke-width:1.6px,color:#333
+    style B2 stroke:lime,stroke-width:1.6px,color:#333
+    style B3 stroke:lime,stroke-width:1.6px,color:#333
+```
+
 <a href="/writing-workflows/yaml-specification#execution-control-fields" class="learn-more">Learn more →</a>
 
 </div>
@@ -265,6 +350,15 @@ steps:
     depends: compute
 ```
 
+```mermaid
+flowchart LR
+    P["prepare"] --> C["compute"]
+    C --> S["store"]
+    style P stroke:lightblue,stroke-width:1.6px,color:#333
+    style C stroke:lightblue,stroke-width:1.6px,color:#333
+    style S stroke:green,stroke-width:1.6px,color:#333
+```
+
 <a href="/writing-workflows/queues" class="learn-more">Learn more →</a>
 
 </div>
@@ -277,6 +371,12 @@ steps:
 hist_retention_days: 60     # Keep 60 days history
 steps:
   - run: echo "Running periodic maintenance"
+```
+
+```mermaid
+flowchart LR
+    A["periodic maintenance"]
+    style A stroke:green,stroke-width:1.6px,color:#333
 ```
 
 <a href="/writing-workflows/yaml-specification#data-fields" class="learn-more">Learn more →</a>
@@ -295,6 +395,13 @@ run_config:
 params:
   - ENVIRONMENT: production
   - VERSION: 1.0.0
+```
+
+```mermaid
+flowchart LR
+    P["params · locked"] --> A["step"]
+    style P stroke:lightblue,stroke-width:1.6px,color:#333
+    style A stroke:green,stroke-width:1.6px,color:#333
 ```
 
 <a href="/writing-workflows/yaml-specification#runconfig" class="learn-more">Learn more →</a>
@@ -341,6 +448,19 @@ handler_on:
 steps:
   - id: validate_environment
     run: 'echo "Validating environment: ${params.ENVIRONMENT}"'
+```
+
+```mermaid
+flowchart TD
+    S["schedule · 02:00 daily"] --> V["validate_environment"]
+    V -->|success| H1["handler_on.success"]
+    V -->|failure| H2["handler_on.failure"]
+    V --> H3["handler_on.exit"]
+    style S stroke:lightblue,stroke-width:1.6px,color:#333
+    style V stroke:lightblue,stroke-width:1.6px,color:#333
+    style H1 stroke:green,stroke-width:1.6px,color:#333
+    style H2 stroke:red,stroke-width:1.6px,color:#333
+    style H3 stroke:orange,stroke-width:1.6px,color:#333
 ```
 
 <a href="/writing-workflows/yaml-specification" class="learn-more">Learn more →</a>

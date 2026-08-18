@@ -40,6 +40,15 @@ steps:
       interval_sec: 30
 ```
 
+```mermaid
+flowchart LR
+    P["patch · stdin"] --> R["harness.run: codex · review_patch"]
+    R --> A["ai/codex-review.md · artifact"]
+    style P stroke:lightblue,stroke-width:1.6px,color:#333
+    style R stroke:green,stroke-width:1.6px,color:#333
+    style A stroke:lime,stroke-width:1.6px,color:#333
+```
+
 ## Validated JSON Result
 
 Ask the agent for one JSON object, validate the complete stdout, and use the
@@ -81,6 +90,15 @@ fails if stdout includes logs, Markdown fences, JSONL events, or data that does
 not match the schema. This is a step-level feature, so it works with both
 built-in providers and custom harness definitions.
 
+```mermaid
+flowchart LR
+    A["harness.run: codex · analyze_auth"] --> R["log.write · report_result"]
+    A -. "output_schema" .-> V["validated JSON"]
+    style A stroke:lightblue,stroke-width:1.6px,color:#333
+    style V stroke:lightblue,stroke-width:1.6px,color:#333
+    style R stroke:green,stroke-width:1.6px,color:#333
+```
+
 ## Zero-Install OpenCode Review
 
 Declare the agent under DAG-level [`tools`](/writing-workflows/tools) and Dagu installs the pinned OpenCode release before the run starts, with nothing preinstalled on the worker. The reply is stored as a run artifact.
@@ -111,6 +129,15 @@ steps:
 ```
 
 The `secrets` block is required: Dagu does not propagate arbitrary shell variables to steps, and a zero-install worker has no OpenCode auth store to fall back on.
+
+```mermaid
+flowchart LR
+    T["tools · opencode@v1.18.11"] --> R["harness.run: opencode · review"]
+    R --> A["ai/opencode-review.md · artifact"]
+    style T stroke:lightblue,stroke-width:1.6px,color:#333
+    style R stroke:green,stroke-width:1.6px,color:#333
+    style A stroke:lime,stroke-width:1.6px,color:#333
+```
 
 ## Pi Summary From Stdin
 
@@ -158,6 +185,17 @@ steps:
         Two malformed records were written to the quarantine report.
     stdout:
       artifact: ai/pi-summary.md
+```
+
+```mermaid
+flowchart LR
+    H["harnesses: pi_agent"] --> R["harness.run: pi_agent · summarize_notes"]
+    N["run notes · stdin"] --> R
+    R --> A["ai/pi-summary.md · artifact"]
+    style H stroke:lightblue,stroke-width:1.6px,color:#333
+    style N stroke:lightblue,stroke-width:1.6px,color:#333
+    style R stroke:green,stroke-width:1.6px,color:#333
+    style A stroke:lime,stroke-width:1.6px,color:#333
 ```
 
 ## See Also

@@ -34,6 +34,14 @@ steps:
 
 `with` is validated by `input_schema`; the rendered template runs as a builtin `exec` action.
 
+```mermaid
+flowchart LR
+    A["action: say"] --> E["exec · echo"]
+    A -. "input_schema" .-> E
+    style A stroke:lightblue,stroke-width:1.6px,color:#333
+    style E stroke:green,stroke-width:1.6px,color:#333
+```
+
 Add `outputs` when a step should publish validated values for downstream steps. Downstream references then use `steps.<id>.outputs.<name>`.
 
 <a href="/dagu-actions/custom" class="learn-more">Learn more →</a>
@@ -65,6 +73,15 @@ steps:
     depends: test
 ```
 
+```mermaid
+flowchart LR
+    I["install · pip install"] --> T["test · pytest"]
+    T --> B["build · setup.py"]
+    style I stroke:lightblue,stroke-width:1.6px,color:#333
+    style T stroke:lightblue,stroke-width:1.6px,color:#333
+    style B stroke:green,stroke-width:1.6px,color:#333
+```
+
 <a href="/writing-workflows/yaml-specification#container-configuration" class="learn-more">Learn more →</a>
 
 </div>
@@ -94,6 +111,13 @@ steps:
     depends: start_postgres
 ```
 
+```mermaid
+flowchart LR
+    S["start_postgres · keep_container"] --> W["wait_for_postgres · retry 10x"]
+    style S stroke:lightblue,stroke-width:1.6px,color:#333
+    style W stroke:green,stroke-width:1.6px,color:#333
+```
+
 <a href="/writing-workflows/yaml-specification#container-configuration" class="learn-more">Learn more →</a>
 
 </div>
@@ -111,6 +135,12 @@ steps:
         - ./src:/app
       working_dir: /app
     run: npm run build
+```
+
+```mermaid
+flowchart LR
+    A["build · container node:18"]
+    style A stroke:green,stroke-width:1.6px,color:#333
 ```
 
 <a href="/step-types/docker" class="learn-more">Learn more →</a>
@@ -134,6 +164,13 @@ steps:
       command: sh -c 'echo hello from kubernetes'
 ```
 
+```mermaid
+flowchart LR
+    K["kubernetes · namespace batch"] --> R["k8s.run · alpine:3.20"]
+    style K stroke:lightblue,stroke-width:1.6px,color:#333
+    style R stroke:green,stroke-width:1.6px,color:#333
+```
+
 <a href="/step-types/kubernetes" class="learn-more">Learn more →</a>
 
 </div>
@@ -152,6 +189,13 @@ steps:
   - id: clear_cache
     run: php artisan cache:clear
     depends: migrate
+```
+
+```mermaid
+flowchart LR
+    M["migrate · exec my-app-container"] --> C["clear_cache"]
+    style M stroke:lightblue,stroke-width:1.6px,color:#333
+    style C stroke:green,stroke-width:1.6px,color:#333
 ```
 
 <a href="/writing-workflows/container#exec-mode-use-existing-container" class="learn-more">Learn more →</a>
@@ -177,6 +221,13 @@ steps:
   - id: fix_permissions
     run: chown -R www-data:www-data storage
     depends: install
+```
+
+```mermaid
+flowchart LR
+    I["install · composer"] --> F["fix_permissions"]
+    style I stroke:lightblue,stroke-width:1.6px,color:#333
+    style F stroke:green,stroke-width:1.6px,color:#333
 ```
 
 <a href="/writing-workflows/container#exec-mode-use-existing-container" class="learn-more">Learn more →</a>
@@ -208,6 +259,15 @@ steps:
     depends: migrate
 ```
 
+```mermaid
+flowchart LR
+    M["maintenance_mode · exec my-app"] --> G["migrate · image my-app:latest"]
+    G --> R["restart · exec my-app"]
+    style M stroke:lightblue,stroke-width:1.6px,color:#333
+    style G stroke:lightblue,stroke-width:1.6px,color:#333
+    style R stroke:green,stroke-width:1.6px,color:#333
+```
+
 <a href="/step-types/docker#mixed-mode-example" class="learn-more">Learn more →</a>
 
 </div>
@@ -231,6 +291,13 @@ steps:
     depends: health_check
 ```
 
+```mermaid
+flowchart LR
+    H["health_check · ssh"] --> R["restart_app"]
+    style H stroke:lightblue,stroke-width:1.6px,color:#333
+    style R stroke:green,stroke-width:1.6px,color:#333
+```
+
 <a href="/step-types/ssh" class="learn-more">Learn more →</a>
 
 </div>
@@ -250,6 +317,13 @@ steps:
   - run: python process.py
 ```
 
+```mermaid
+flowchart LR
+    V["volumes · ./data → /data"] --> A["python process.py"]
+    style V stroke:lightblue,stroke-width:1.6px,color:#333
+    style A stroke:green,stroke-width:1.6px,color:#333
+```
+
 <a href="/writing-workflows/yaml-specification#working-directory-and-volume-resolution" class="learn-more">Learn more →</a>
 
 </div>
@@ -267,6 +341,13 @@ steps:
       headers:
         Content-Type: application/json
       body: '{"status": "started"}'
+```
+
+```mermaid
+flowchart LR
+    A["http.request · POST"] --> E["api.example.com/webhook"]
+    style A stroke:lightblue,stroke-width:1.6px,color:#333
+    style E stroke:green,stroke-width:1.6px,color:#333
 ```
 
 <a href="/step-types/http" class="learn-more">Learn more →</a>
@@ -290,6 +371,13 @@ steps:
   - id: continue_after_ready
     run: ./run-after-ready.sh
     depends: wait_for_api
+```
+
+```mermaid
+flowchart LR
+    W["wait.http · health 200"] --> C["continue_after_ready"]
+    style W stroke:lightblue,stroke-width:1.6px,color:#333
+    style C stroke:green,stroke-width:1.6px,color:#333
 ```
 
 <a href="/step-types/wait" class="learn-more">Learn more →</a>
@@ -324,6 +412,13 @@ steps:
     depends: fetch_users
 ```
 
+```mermaid
+flowchart LR
+    F["fetch_users · output: api_response"] --> J["jq.filter · emails"]
+    style F stroke:lightblue,stroke-width:1.6px,color:#333
+    style J stroke:green,stroke-width:1.6px,color:#333
+```
+
 <a href="/step-types/jq" class="learn-more">Learn more →</a>
 
 </div>
@@ -340,6 +435,13 @@ steps:
     with:
       source: dataset.tar.zst
       destination: ./dataset
+```
+
+```mermaid
+flowchart LR
+    A["archive.extract"] --> D["dataset.tar.zst → ./dataset"]
+    style A stroke:lightblue,stroke-width:1.6px,color:#333
+    style D stroke:green,stroke-width:1.6px,color:#333
 ```
 
 <a href="/step-types/archive" class="learn-more">Learn more →</a>
@@ -395,6 +497,15 @@ container:
 
 steps:
   - run: ./app
+```
+
+```mermaid
+flowchart LR
+    R["registry_auths · ghcr.io"] --> C["container · ghcr.io/myorg/private-app"]
+    C --> A["./app"]
+    style R stroke:lightblue,stroke-width:1.6px,color:#333
+    style C stroke:lightblue,stroke-width:1.6px,color:#333
+    style A stroke:green,stroke-width:1.6px,color:#333
 ```
 
 <a href="/step-types/docker#registry-authentication" class="learn-more">Learn more →</a>
@@ -461,6 +572,12 @@ ssh:
 
 steps:
   - run: systemctl status myapp
+```
+
+```mermaid
+flowchart LR
+    A["systemctl status · ssh app.example.com"]
+    style A stroke:green,stroke-width:1.6px,color:#333
 ```
 
 <a href="/writing-workflows/yaml-specification#ssh-configuration" class="learn-more">Learn more →</a>

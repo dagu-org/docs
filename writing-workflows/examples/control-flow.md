@@ -69,6 +69,13 @@ dagu human-task complete \
 
 The first command exits after the run reaches `Waiting`. Completing the task enqueues the same run, and the scheduler resumes it with the validated form value available to `deploy`.
 
+```mermaid
+flowchart LR
+    H["release_review · human.task"] --> D["deploy.sh"]
+    style H stroke:orange,stroke-width:1.6px,color:#333
+    style D stroke:green,stroke-width:1.6px,color:#333
+```
+
 <a href="/writing-workflows/human-tasks" class="learn-more">Learn more →</a>
 
 </div>
@@ -174,6 +181,16 @@ steps:
       interval_sec: 60
 ```
 
+```mermaid
+flowchart TD
+    A[echo heartbeat] --> B{exit code == 0?}
+    B --> |yes| W[wait 60s] --> A
+    B --> |no| N[Next step]
+    style A stroke:lightblue,stroke-width:1.6px,color:#333
+    style W stroke:lightblue,stroke-width:1.6px,color:#333
+    style N stroke:green,stroke-width:1.6px,color:#333
+```
+
 <a href="/writing-workflows/control-flow#repeat-basic" class="learn-more">Learn more →</a>
 
 </div>
@@ -190,6 +207,16 @@ steps:
       exit_code: [0]
       interval_sec: 30
       limit: 20            # Maximum 10 minutes
+```
+
+```mermaid
+flowchart TD
+    A[echo Checking status] --> B{exit code == 0?}
+    B --> |no| W[wait 30s] --> A
+    B --> |yes| N[Next step]
+    style A stroke:lightblue,stroke-width:1.6px,color:#333
+    style W stroke:lightblue,stroke-width:1.6px,color:#333
+    style N stroke:green,stroke-width:1.6px,color:#333
 ```
 
 <a href="/writing-workflows/control-flow#repeat-basic" class="learn-more">Learn more →</a>
@@ -577,6 +604,17 @@ steps:
   - run: uv run --python 3.13.9 python gpu_process.py
 ```
 
+```mermaid
+flowchart LR
+    D[download_dataset] --> P["dag.run: process-on-gpu"]
+    P --> |worker_selector gpu| G[(GPU Worker)]
+    G --> F["finish · local"]
+    style D stroke:lightblue,stroke-width:1.6px,color:#333
+    style P stroke:lightblue,stroke-width:1.6px,color:#333
+    style G stroke:orange,stroke-width:1.6px,color:#333
+    style F stroke:green,stroke-width:1.6px,color:#333
+```
+
 <a href="/server-admin/distributed/#task-routing" class="learn-more">Learn more →</a>
 
 </div>
@@ -597,6 +635,13 @@ steps:
   - id: finish
     run: echo "Ran locally"
     depends: health_check
+```
+
+```mermaid
+flowchart LR
+    H[health_check] --> F["finish · local"]
+    style H stroke:lightblue,stroke-width:1.6px,color:#333
+    style F stroke:green,stroke-width:1.6px,color:#333
 ```
 
 Use `worker_selector: local` as an escape hatch in distributed deployments for lightweight DAGs that should never leave the main instance.

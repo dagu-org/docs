@@ -28,6 +28,15 @@ steps:
 
 The `secrets` entry resolves the key at run time and masks it in logs. The DAG-level `llm` block is inherited by every chat step that sets no LLM fields of its own.
 
+```mermaid
+flowchart LR
+    K["OPENROUTER_API_KEY"] --> L["llm · deepseek-v4-flash"]
+    L --> A["ask · chat.completion"]
+    style K stroke:lightblue,stroke-width:1.6px,color:#333
+    style L stroke:lightblue,stroke-width:1.6px,color:#333
+    style A stroke:green,stroke-width:1.6px,color:#333
+```
+
 <a href="/step-types/llm/providers" class="learn-more">Learn more →</a>
 
 </div>
@@ -56,6 +65,13 @@ steps:
 
 `base_url` points at any [OpenAI-compatible endpoint](/step-types/llm/providers#openai-compatible-endpoints) (shown with OpenRouter's own URL made explicit; the same field targets [vLLM, Ollama, or LM Studio](/step-types/llm/local-models) or a corporate proxy), `api_key_name` picks the environment variable holding the key, and `system` plus the sampling fields become defaults for every chat step. The [full field list](/step-types/llm/#configuration) has the rest.
 
+```mermaid
+flowchart LR
+    L["llm · base_url + system + temperature"] --> A["ask · chat.completion"]
+    style L stroke:lightblue,stroke-width:1.6px,color:#333
+    style A stroke:green,stroke-width:1.6px,color:#333
+```
+
 <a href="/step-types/llm/providers#openai-compatible-endpoints" class="learn-more">Learn more →</a>
 
 </div>
@@ -79,6 +95,14 @@ steps:
 ```
 
 `output` captures the completion text as a variable for downstream steps.
+
+```mermaid
+flowchart LR
+    A["ask · chat.completion"] --> U["use_answer"]
+    A -. "output: ANSWER" .-> U
+    style A stroke:lightblue,stroke-width:1.6px,color:#333
+    style U stroke:green,stroke-width:1.6px,color:#333
+```
 
 <a href="/writing-workflows/outputs" class="learn-more">Learn more →</a>
 
@@ -106,6 +130,14 @@ steps:
 
 Chat steps inherit the conversation from the steps they depend on, so "that" resolves to the earlier answer.
 
+```mermaid
+flowchart LR
+    A["ask · turn 1"] --> F["follow_up · turn 2"]
+    A -. "session" .-> F
+    style A stroke:lightblue,stroke-width:1.6px,color:#333
+    style F stroke:green,stroke-width:1.6px,color:#333
+```
+
 <a href="/step-types/llm/#sessions" class="learn-more">Learn more →</a>
 
 </div>
@@ -131,6 +163,13 @@ steps:
 ```
 
 `thinking` maps to the provider's reasoning controls; raise `effort` for harder problems.
+
+```mermaid
+flowchart LR
+    L["llm · thinking enabled"] --> R["reason · chat.completion"]
+    style L stroke:lightblue,stroke-width:1.6px,color:#333
+    style R stroke:green,stroke-width:1.6px,color:#333
+```
 
 <a href="/step-types/llm/reasoning-web-search#reasoning" class="learn-more">Learn more →</a>
 
@@ -164,6 +203,14 @@ steps:
 
 Each name in `tools` exposes a DAG as a callable tool; its `params` become the tool's argument schema, and each call is a real child run. The explicit `provider` and `model` are required here: setting any LLM field under `with` (such as `tools`) replaces the DAG-level `llm` block instead of merging with it.
 
+```mermaid
+flowchart TD
+    A["ask · chat.completion"] -->|tool call| C["calculator · child DAG"]
+    C -->|result| A
+    style A stroke:lightblue,stroke-width:1.6px,color:#333
+    style C stroke:lime,stroke-width:1.6px,color:#333
+```
+
 <a href="/features/chat/tool-calling" class="learn-more">Learn more →</a>
 
 </div>
@@ -187,6 +234,16 @@ steps:
 ```
 
 An ordered `model` list tries the next entry after retries for the current one are exhausted.
+
+```mermaid
+flowchart LR
+    M1["deepseek-v4"] --> M2["deepseek-v4-flash"]
+    M1 -. "retries exhausted" .-> M2
+    M2 --> S["summarize · chat.completion"]
+    style M1 stroke:lightblue,stroke-width:1.6px,color:#333
+    style M2 stroke:lightblue,stroke-width:1.6px,color:#333
+    style S stroke:green,stroke-width:1.6px,color:#333
+```
 
 <a href="/step-types/llm/reliability#model-fallback" class="learn-more">Learn more →</a>
 
@@ -217,6 +274,21 @@ tasks:
 ```
 
 Steps become a catalog of actions and `tasks` state the goals; the model decides what runs next. Built up example by example on the [agent examples page](/writing-workflows/examples/agent).
+
+```mermaid
+flowchart LR
+    M["LLM decides"] --> D["disk"]
+    M --> L["load"]
+    D --> R["observe"]
+    L --> R
+    R --> M
+    R -->|task: checked| F["run concludes"]
+    style M stroke:lightblue,stroke-width:1.6px,color:#333
+    style D stroke:lime,stroke-width:1.6px,color:#333
+    style L stroke:lime,stroke-width:1.6px,color:#333
+    style R stroke:lightblue,stroke-width:1.6px,color:#333
+    style F stroke:green,stroke-width:1.6px,color:#333
+```
 
 <a href="/writing-workflows/examples/agent" class="learn-more">Learn more →</a>
 

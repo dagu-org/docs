@@ -14,6 +14,13 @@ steps:
   - run: echo "Running scheduled job"
 ```
 
+```mermaid
+flowchart LR
+    S["schedule · 04:05 daily"] --> A["scheduled job"]
+    style S stroke:lightblue,stroke-width:1.6px,color:#333
+    style A stroke:green,stroke-width:1.6px,color:#333
+```
+
 <a href="/writing-workflows/scheduling" class="learn-more">Learn more →</a>
 
 </div>
@@ -37,6 +44,15 @@ steps:
     depends: transform
 ```
 
+```mermaid
+flowchart LR
+    E["extract"] --> T["transform"]
+    T --> L["load"]
+    style E stroke:lightblue,stroke-width:1.6px,color:#333
+    style T stroke:lightblue,stroke-width:1.6px,color:#333
+    style L stroke:green,stroke-width:1.6px,color:#333
+```
+
 <a href="/writing-workflows/scheduling#skip-redundant" class="learn-more">Learn more →</a>
 
 </div>
@@ -49,6 +65,13 @@ steps:
 queue: "batch"        # Assign to global queue for concurrency control
 steps:
   - run: echo "Processing data"
+```
+
+```mermaid
+flowchart LR
+    Q["queue: batch"] --> A["Processing data"]
+    style Q stroke:orange,stroke-width:1.6px,color:#333
+    style A stroke:green,stroke-width:1.6px,color:#333
 ```
 
 <a href="/writing-workflows/queues" class="learn-more">Learn more →</a>
@@ -67,6 +90,15 @@ steps:
   - run: echo "Run on multiple times"
 ```
 
+```mermaid
+flowchart LR
+    S1["weekdays · 09:00"] --> A["Run on multiple times"]
+    S2["weekends · 14:00"] --> A
+    style S1 stroke:lightblue,stroke-width:1.6px,color:#333
+    style S2 stroke:lightblue,stroke-width:1.6px,color:#333
+    style A stroke:green,stroke-width:1.6px,color:#333
+```
+
 <a href="/writing-workflows/scheduling#multiple-schedules" class="learn-more">Learn more →</a>
 
 </div>
@@ -79,6 +111,13 @@ steps:
 schedule: "CRON_TZ=America/New_York 0 9 * * *"
 steps:
   - run: echo "9AM New York"
+```
+
+```mermaid
+flowchart LR
+    S["schedule · CRON_TZ New_York 09:00"] --> A["9AM New York"]
+    style S stroke:lightblue,stroke-width:1.6px,color:#333
+    style A stroke:green,stroke-width:1.6px,color:#333
 ```
 
 <a href="/writing-workflows/scheduling#timezone-support" class="learn-more">Learn more →</a>
@@ -97,6 +136,17 @@ schedule:
 restart_wait_sec: 60
 steps:
   - run: echo "Long-running service"
+```
+
+```mermaid
+flowchart LR
+    S["start · 08:00"] --> R["long-running service"]
+    R -->|"restart · 12:00"| R2["restart"]
+    R -->|"stop · 18:00"| E["stop"]
+    style S stroke:lightblue,stroke-width:1.6px,color:#333
+    style R stroke:green,stroke-width:1.6px,color:#333
+    style R2 stroke:orange,stroke-width:1.6px,color:#333
+    style E stroke:orange,stroke-width:1.6px,color:#333
 ```
 
 <a href="/writing-workflows/scheduling#restart-schedule" class="learn-more">Learn more →</a>
@@ -126,6 +176,13 @@ steps:
   - run: echo "Processing critical task"
 ```
 
+```mermaid
+flowchart LR
+    Q["queue: critical · max 5"] --> A["Processing critical task"]
+    style Q stroke:orange,stroke-width:1.6px,color:#333
+    style A stroke:green,stroke-width:1.6px,color:#333
+```
+
 Configure queues globally and assign DAGs using the `queue` field.
 
 <a href="/server-admin/queues" class="learn-more">Learn more →</a>
@@ -148,6 +205,13 @@ smtp:
 steps:
   - run: echo "Running critical job"
     mail_on_error: true
+```
+
+```mermaid
+flowchart LR
+    A["Running critical job"] --> M["mail_on · failure/success"]
+    style A stroke:lightblue,stroke-width:1.6px,color:#333
+    style M stroke:orange,stroke-width:1.6px,color:#333
 ```
 
 <a href="/writing-workflows/email-notifications" class="learn-more">Learn more →</a>

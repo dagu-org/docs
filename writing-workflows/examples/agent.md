@@ -109,6 +109,23 @@ Two mechanics carry this example:
 
 On a healthy machine the agent checks disk and load, skips `processes`, writes the summary, and completes the task. Under load it inspects processes first and says so in the completion reason. Put the file on a `schedule` and it is a nightly check that explains itself.
 
+```mermaid
+flowchart LR
+    M["LLM decides"] --> D["disk"]
+    M --> L["load"]
+    M --> P["processes · only if unhealthy"]
+    D --> S["summarize"]
+    L --> S
+    P --> S
+    S --> T["task: triage"]
+    style M stroke:lightblue,stroke-width:1.6px,color:#333
+    style D stroke:lime,stroke-width:1.6px,color:#333
+    style L stroke:lime,stroke-width:1.6px,color:#333
+    style P stroke:lime,stroke-width:1.6px,color:#333
+    style S stroke:lightblue,stroke-width:1.6px,color:#333
+    style T stroke:green,stroke-width:1.6px,color:#333
+```
+
 ## Failure is an observation
 
 A failed step does not abort an Agent DAG run. The failure comes back as that turn's observation, and the model decides what to do about it.
@@ -270,6 +287,18 @@ task deployed  completed
 ```
 
 Each call is a real child DAG run with its own run ID, logs, and history. A parameter the step does supply is never offered to the model: values written in the workflow are the author's decision. This is the pattern that scales: a library of reviewed, parameterized workflows as the catalog, goals as the interface.
+
+```mermaid
+flowchart LR
+    A["LLM decides deploy"] -->|env=staging| S1["deploy-app · child DAG"]
+    A -->|env=production| S2["deploy-app · child DAG"]
+    S1 --> T["task: deployed"]
+    S2 --> T
+    style A stroke:lightblue,stroke-width:1.6px,color:#333
+    style S1 stroke:lime,stroke-width:1.6px,color:#333
+    style S2 stroke:lime,stroke-width:1.6px,color:#333
+    style T stroke:green,stroke-width:1.6px,color:#333
+```
 
 ## Cost and limits
 

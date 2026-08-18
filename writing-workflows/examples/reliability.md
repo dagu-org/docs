@@ -21,6 +21,13 @@ steps:
     depends: optional_task
 ```
 
+```mermaid
+flowchart LR
+    O["optional_task · continue_on: failure"] --> R["required_task"]
+    style O stroke:lightblue,stroke-width:1.6px,color:#333
+    style R stroke:green,stroke-width:1.6px,color:#333
+```
+
 <a href="/writing-workflows/error-handling#continue" class="learn-more">Learn more →</a>
 
 </div>
@@ -45,6 +52,13 @@ steps:
     depends: optional_feature
 ```
 
+```mermaid
+flowchart LR
+    O["optional_feature · continue_on: skipped"] --> M["main_task"]
+    style O stroke:lightblue,stroke-width:1.6px,color:#333
+    style M stroke:green,stroke-width:1.6px,color:#333
+```
+
 <a href="/writing-workflows/control-flow#continue-on-skipped" class="learn-more">Learn more →</a>
 
 </div>
@@ -59,6 +73,17 @@ steps:
     retry_policy:
       limit: 3
       interval_sec: 30
+```
+
+```mermaid
+flowchart TD
+    A["curl api.example.com"] --> B{failed?}
+    B --> |yes| R["retry 3x · 30s"] --> A
+    B --> |no| N[Next step]
+    style A stroke:lightblue,stroke-width:1.6px,color:#333
+    style B stroke:lightblue,stroke-width:1.6px,color:#333
+    style R stroke:orange,stroke-width:1.6px,color:#333
+    style N stroke:green,stroke-width:1.6px,color:#333
 ```
 
 <a href="/writing-workflows/error-handling#retry" class="learn-more">Learn more →</a>
@@ -78,6 +103,17 @@ steps:
       exit_code: [429, 503, 504]  # Rate limit, service unavailable
 ```
 
+```mermaid
+flowchart TD
+    A["curl -f api.example.com/data"] --> B{"exit in 429/503/504?"}
+    B --> |yes| R["retry 5x · 30s"] --> A
+    B --> |no| N[Next step]
+    style A stroke:lightblue,stroke-width:1.6px,color:#333
+    style B stroke:lightblue,stroke-width:1.6px,color:#333
+    style R stroke:orange,stroke-width:1.6px,color:#333
+    style N stroke:green,stroke-width:1.6px,color:#333
+```
+
 <a href="/writing-workflows/error-handling#retry" class="learn-more">Learn more →</a>
 
 </div>
@@ -95,6 +131,17 @@ steps:
       backoff: true        # 2x multiplier
       max_interval_sec: 60   # Cap at 60s
       # Intervals: 2s, 4s, 8s, 16s, 32s → 60s
+```
+
+```mermaid
+flowchart TD
+    A["curl api.example.com/data"] --> B{failed?}
+    B --> |yes| R["backoff · 2s → 60s"] --> A
+    B --> |no| N[Next step]
+    style A stroke:lightblue,stroke-width:1.6px,color:#333
+    style B stroke:lightblue,stroke-width:1.6px,color:#333
+    style R stroke:orange,stroke-width:1.6px,color:#333
+    style N stroke:green,stroke-width:1.6px,color:#333
 ```
 
 <a href="/writing-workflows/error-handling#exponential-backoff" class="learn-more">Learn more →</a>
@@ -118,6 +165,17 @@ steps:
       max_interval_sec: 30
       limit: 20
       # Check intervals: 1s, 2s, 4s, 8s, 16s, 30s...
+```
+
+```mermaid
+flowchart TD
+    A["nc -z localhost 8080"] --> B{"exit code == 1?"}
+    B --> |yes| W["wait · 1s → 30s backoff"] --> A
+    B --> |no| N[Next step]
+    style A stroke:lightblue,stroke-width:1.6px,color:#333
+    style B stroke:lightblue,stroke-width:1.6px,color:#333
+    style W stroke:orange,stroke-width:1.6px,color:#333
+    style N stroke:green,stroke-width:1.6px,color:#333
 ```
 
 <a href="/writing-workflows/control-flow#exponential-backoff-for-repeats" class="learn-more">Learn more →</a>
