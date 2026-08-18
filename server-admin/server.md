@@ -40,6 +40,15 @@ check_updates: true       # Automatic web UI update checks (default: true)
 metrics: "private"        # Metrics endpoint access: "private" (default) or "public"
 cors_allowed_origins: []  # Empty disables cross-origin browser access (default)
 
+# Restrict HTTP access by client IP address (empty allowed_ips disables filtering)
+ip_access:
+  allowed_ips:
+    - 203.0.113.10
+    - 10.0.0.0/8
+  trusted_proxies:
+    - 127.0.0.1
+    - 10.42.0.0/16
+
 # Directory Paths (must be under "paths" key)
 paths:
   dags_dir: "~/.config/dagu/dags"                    # DAG definitions
@@ -185,6 +194,8 @@ All options support `DAGU_` prefix:
 - `DAGU_CHECK_UPDATES` - Enable automatic web UI update checks (default: `true`)
 - `DAGU_SERVER_METRICS` - Metrics endpoint access: `private` (default) or `public`
 - `DAGU_CORS_ALLOWED_ORIGINS` - Comma-separated list of allowed CORS origins (e.g. `https://app.example.com,https://other.example.com`). An empty value disables cross-origin browser access. An explicit `*` allows any origin without credentials and emits a security warning.
+- `DAGU_IP_ACCESS_ALLOWED_IPS` - Comma-separated IPv4/IPv6 addresses and CIDR ranges allowed to access the HTTP server. An empty value disables filtering.
+- `DAGU_IP_ACCESS_TRUSTED_PROXIES` - Comma-separated proxy addresses and CIDR ranges permitted to supply forwarded client IP headers.
 
 **Paths:**
 - `DAGU_HOME` - Set all paths
@@ -260,6 +271,27 @@ cors_allowed_origins:
 
 Wildcard access does not allow credentials and emits a security warning at startup. With `auth.mode: none`, any website can execute workflows through the browser, so use the wildcard only when that exposure is intentional. The initial builtin-auth setup endpoint (`/api/v1/auth/setup`) never accepts cross-origin requests, including when the wildcard is configured.
 
+## IP Access Allowlist
+
+Restrict the entire HTTP server to specific client addresses or networks:
+
+```yaml
+ip_access:
+  allowed_ips:
+    - 203.0.113.10
+    - 10.0.0.0/8
+    - 2001:db8:1234::/48
+  trusted_proxies:
+    - 127.0.0.1
+    - 10.42.0.0/16
+```
+
+`allowed_ips` accepts individual IPv4 or IPv6 addresses and CIDR ranges. An empty list disables the filter. When enabled, the allowlist applies to every HTTP route, including the Web UI, REST API, health and metrics endpoints, webhooks, SSE, terminal, MCP, and extensions. Requests from addresses outside the allowlist receive `403 Forbidden`.
+
+When Dagu runs behind a reverse proxy or ingress, add only that proxy's address or network to `trusted_proxies`. Dagu honors `X-Forwarded-For` and `X-Real-IP` only when the direct peer is trusted. It resolves a forwarded chain from right to left through trusted proxies, so every proxy that appends to the chain must be listed. Forwarding headers from untrusted peers are ignored, and malformed headers from a trusted proxy are rejected.
+
+Configure the proxy to remove client-supplied forwarding headers before setting or appending the verified client address. Keep trusted proxy ranges as narrow as possible.
+
 ## Common Setups
 
 ### Development
@@ -298,6 +330,7 @@ Before exposing Dagu beyond a single-user localhost setup, review these controls
 - **Secure distributed traffic.** For coordinator and worker traffic that crosses host or network boundaries, configure peer TLS or mTLS. See [Distributed Transport Security](/server-admin/distributed/transport-security).
 - **Treat host executors as privileged.** Docker socket mounts, root containers, host bind mounts, and shell-capable workflows should be treated as administrative access to the machine that runs Dagu.
 - **Allow only trusted cross-origin applications.** Cross-origin browser access is disabled by default. Configure explicit origins only when another browser application must access Dagu, and avoid `*`, especially with `auth.mode: none`.
+- **Restrict network access when appropriate.** Configure `ip_access.allowed_ips` for instances that should be reachable only from known clients or networks. Trust forwarded client addresses only from controlled proxies.
 
 Example production-focused baseline:
 

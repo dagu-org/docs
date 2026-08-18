@@ -260,6 +260,9 @@ Common top-level settings include:
 config:
   publicUrl: https://dagu.example.com
   corsAllowedOrigins: []
+  ipAccess:
+    allowedIPs: []
+    trustedProxies: []
   envPassthrough: []
   envPassthroughPrefixes: []
 
@@ -267,6 +270,24 @@ extraEnv: []
 ```
 
 `extraEnv` adds variables to every Dagu Deployment. `config.envPassthrough` and `config.envPassthroughPrefixes` control which pod environment variables Dagu forwards into workflow processes; they do not create those variables.
+
+### IP access allowlist
+
+Restrict all UI and API routes to selected addresses or networks:
+
+```yaml
+config:
+  ipAccess:
+    allowedIPs:
+      - 203.0.113.10
+      - 10.0.0.0/8
+    trustedProxies:
+      - 10.42.0.0/16
+```
+
+Both lists accept IPv4 and IPv6 addresses or CIDR ranges. Leave `allowedIPs` empty to disable filtering. For an ingress or reverse proxy, set `trustedProxies` to the narrowest network containing the proxy addresses. The proxy must remove client-supplied forwarding headers and set or append the verified client address.
+
+The allowlist includes health and metrics endpoints. When `allowedIPs` is non-empty, the chart renders TCP liveness and readiness probes and uses a TCP connection check for `helm test`, so cluster node and test-pod addresses do not need HTTP allowlist exemptions.
 
 ## Authentication and licensing
 

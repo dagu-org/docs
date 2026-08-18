@@ -26,6 +26,11 @@ metrics: "private"        # Metrics endpoint: "private" (default) or "public"
 cors_allowed_origins: []  # Empty disables cross-origin browser access (default)
 cache: "normal"            # Cache mode
 
+# HTTP client IP allowlist
+ip_access:
+  allowed_ips: []         # IPv4/IPv6 addresses or CIDR ranges; empty disables filtering
+  trusted_proxies: []     # Proxies permitted to supply forwarded client IP headers
+
 # Terminal (web-based shell access)
 terminal:
   enabled: false          # Enable web terminal (default: false)
@@ -295,6 +300,8 @@ All options support `DAGU_` prefix.
 - `DAGU_LATEST_STATUS_TODAY` - Show only today's status
 - `DAGU_SKIP_EXAMPLES` - Skip automatic creation of example DAGs (default: `false`)
 - `DAGU_SERVER_METRICS` - Metrics endpoint access: `private` (default) or `public`
+- `DAGU_IP_ACCESS_ALLOWED_IPS` - Comma-separated IPv4/IPv6 addresses and CIDR ranges allowed to access the HTTP server. An empty value disables filtering.
+- `DAGU_IP_ACCESS_TRUSTED_PROXIES` - Comma-separated proxy addresses and CIDR ranges permitted to supply forwarded client IP headers.
 - `DAGU_CACHE` - Cache mode (default: `normal`)
 
 ### Terminal
@@ -768,6 +775,8 @@ peer:
 - `check_updates`: `true`
 - `metrics`: `private`
 - `cors_allowed_origins`: empty (cross-origin browser access disabled)
+- `ip_access.allowed_ips`: empty (HTTP client IP filtering disabled)
+- `ip_access.trusted_proxies`: empty (forwarded client IP headers are ignored)
 - `default_execution_mode`: `local`
 - `coordinator.enabled`: `true`
 - `terminal.enabled`: `false`
