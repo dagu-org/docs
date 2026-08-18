@@ -16,7 +16,27 @@ Define workflows in declarative YAML over your existing commands and tools. One 
   <p>Live demo login: username <code>demouser</code>, password <code>demouser</code>.</p>
 </div>
 
-## What Dagu adds
+## Simple declarative orchestration
+
+Your commands stay the same. One declarative YAML file adds the operational layer around them — schedule, retries, parallel runs, human tasks, and run history:
+
+```mermaid
+flowchart LR
+    C["Your command<br/>script · container · SSH"] --> W["One declarative YAML file"]
+    W --> S["Schedule"]
+    W --> R["Retries"]
+    W --> P["Parallel runs"]
+    W --> H["Human tasks"]
+    W --> L["Logs + Web UI"]
+
+    style C stroke:lightblue,stroke-width:1.6px,color:#333
+    style W stroke:orange,stroke-width:1.6px,color:#333
+    style S stroke:lime,stroke-width:1.6px,color:#333
+    style R stroke:lime,stroke-width:1.6px,color:#333
+    style P stroke:lime,stroke-width:1.6px,color:#333
+    style H stroke:lime,stroke-width:1.6px,color:#333
+    style L stroke:lime,stroke-width:1.6px,color:#333
+```
 
 <div class="overview-card-grid overview-strengths-grid">
   <div class="overview-card">
@@ -63,7 +83,50 @@ curl -fsSL https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/install
 
 The installers can add Dagu to your `PATH`, set up a background service, and create the first admin account. See [Installation](/getting-started/installation/) for Docker, Homebrew, npm, and manual options.
 
-Save this as `service-monitor.yaml`. The parent workflow fans out one child run per endpoint, with a concurrency limit and retries:
+Save this as `first-workflow.yaml`. Steps run after the steps they depend on; independent steps run in parallel:
+
+```yaml
+steps:
+  - id: checkout
+    run: echo "code checked out"
+
+  - id: test
+    depends: checkout
+    run: echo "tests passed"
+
+  - id: build
+    depends: checkout
+    run: echo "build ready"
+
+  - id: package
+    depends: [test, build]
+    run: echo "package created"
+```
+
+```mermaid
+flowchart TD
+    C[checkout] --> T[test]
+    C --> B[build]
+    T --> P[package]
+    B --> P
+
+    style C stroke:lightblue,stroke-width:1.6px,color:#333
+    style T stroke:green,stroke-width:1.6px,color:#333
+    style B stroke:green,stroke-width:1.6px,color:#333
+    style P stroke:lightblue,stroke-width:1.6px,color:#333
+```
+
+Start the scheduler and Web UI in the same directory:
+
+```bash
+dagu start-all --dags .
+```
+
+Open <http://localhost:8080> and start `first-workflow` from the UI. `test` and `build` run in parallel after `checkout`; `package` waits for both. The dependency graph, per-step logs, and full run history are all there. The [full quickstart](/getting-started/quickstart) covers command-line runs, Docker, parameters, retries, and other fundamentals.
+
+### A more realistic workflow
+
+A real job often fans out one step into many runs. This one checks three endpoints in parallel with retries, then reports the result:
 
 ```yaml
 schedule: "CRON_TZ=UTC 0 9 * * *" # Daily at 09:00 UTC
@@ -107,13 +170,23 @@ steps:
       interval_sec: 2
 ```
 
-Start the scheduler and Web UI in the same directory:
+```mermaid
+flowchart TD
+    P["check_services · dag.run"] --> A["endpoint 1"]
+    P --> B["endpoint 2"]
+    P --> C["endpoint 3"]
+    A --> S[summarize]
+    B --> S
+    C --> S
 
-```bash
-dagu start-all --dags .
+    style P stroke:lightblue,stroke-width:1.6px,color:#333
+    style A stroke:lime,stroke-width:1.6px,color:#333
+    style B stroke:lime,stroke-width:1.6px,color:#333
+    style C stroke:lime,stroke-width:1.6px,color:#333
+    style S stroke:green,stroke-width:1.6px,color:#333
 ```
 
-Open <http://localhost:8080> and start `service-monitor` from the UI. The `check_services` step starts three `check-endpoint` child runs in parallel, each with its own status, logs, and retry history. The `summarize` step waits for all three and reports the result. The dependency graph, per-step logs, and full run history are all there. The [full quickstart](/getting-started/quickstart) covers command-line runs, Docker, parameters, retries, and other fundamentals.
+The `check_services` step starts three `check-endpoint` child runs in parallel, each with its own status, logs, and retry history. The `summarize` step waits for all three and reports the result.
 
 ## See the Web UI
 
