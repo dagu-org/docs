@@ -10,18 +10,29 @@ To run CLI agents inside a container sandbox, see [Harness Sandboxed Execution](
 
 ## Supported Providers
 
-Dagu has built-in support for the following providers. CLI providers are pre-configured with the correct invocation pattern:
+Dagu has built-in support for the following providers. Each adapter is pre-configured with the provider's non-interactive invocation and supplementary-input behavior:
 
-| Provider | Page |
-|----------|------|
-| [Claude Code](./claude) | `claude` |
-| [Codex](./codex) | `codex` |
-| [Copilot](./copilot) | `copilot` |
-| [Hermes Agent](./hermes) | `hermes` |
-| [OpenCode](./opencode) | `opencode` |
-| [Pi](./pi) | `pi` |
+| Provider | Key | Base invocation | `with.stdin` |
+|----------|-----|-----------------|--------------|
+| [Claude Code](./claude) | `claude` | `claude -p "<prompt>" [flags]` | Piped to stdin |
+| [Codex](./codex) | `codex` | `codex exec "<prompt>" [flags]` | Piped to stdin |
+| [GitHub Copilot](./copilot) | `copilot` | `copilot -p "<prompt>" [flags]` | Piped to stdin |
+| [OpenCode](./opencode) | `opencode` | Managed session or `opencode run "<prompt>" [flags]` | Piped to stdin on the CLI path |
+| [Pi](./pi) | `pi` | `pi -p "<prompt>" [flags]` | Piped to stdin |
+| Gemini CLI | `gemini` | `gemini -p "<prompt>" [flags]` | Piped to stdin |
+| Cursor | `cursor` | `cursor-agent -p "<prompt>" [flags]` | Folded into the prompt |
+| Cline | `cline` | `cline [flags] "<prompt>"` | Piped to stdin |
+| Aider | `aider` | `aider --message "<prompt>" [flags]` | Folded into the prompt |
+| Qwen Code | `qwen` | `qwen -p "<prompt>" [flags]` | Piped to stdin |
+| Goose | `goose` | `goose run --text "<prompt>" [flags]` | Folded into the prompt |
+| Kiro CLI | `kiro` | `kiro-cli chat --no-interactive "<prompt>" [flags]` | Piped to stdin |
+| Droid | `droid` | `droid exec "<prompt>" [flags]` | Folded into the prompt |
+| Amp | `amp` | `amp -x "<prompt>" [flags]` | Piped to stdin |
+| DeepSeek Harness | `deepseek` | `dsh --profile headless [flags] "<prompt>"` | Folded into the prompt |
 
-You can also define [custom harness definitions](#custom-harness-definitions) for any CLI agent.
+Codex enables `skip_git_repo_check` by default, Cursor defaults to `output_format: text`, and Goose defaults to `quiet: true`. Explicit values under `with` override these defaults. The `deepseek` adapter targets the official DeepSeek Harness `dsh` CLI in its headless profile; it does not select DeepSeek as another harness's model backend.
+
+You can also define [custom harness definitions](#custom-harness-definitions) for any CLI agent. The [Hermes Agent guide](./hermes) is a complete custom-provider example.
 
 ## Step Contract
 
@@ -114,21 +125,11 @@ steps:
 
 On the first run, `implement` receives only the original prompt. If the reviewer pushes back with `FEEDBACK`, Dagu reruns the harness step and augments the prompt with the feedback, iteration number, and previous stdout log path.
 
-Built-in CLI providers have fixed prompt placement:
-
-| Provider | Binary | Base invocation |
-|----------|--------|-----------------|
-| `claude` | `claude` | `claude -p "<prompt>"` |
-| `codex` | `codex` | `codex exec "<prompt>"` |
-| `copilot` | `copilot` | `copilot -p "<prompt>"` |
-| `opencode` | `opencode` | Managed session when available; otherwise `opencode run "<prompt>"` |
-| `pi` | `pi` | `pi -p "<prompt>"` |
-
 For built-in CLI providers:
 
 - the prompt is always passed on the command line
 - additional `with` keys become CLI flags, with `snake_case` keys normalized to kebab-case
-- `with.stdin`, if present, is piped to stdin unchanged
+- `with.stdin`, if present, is piped or folded into the prompt as shown in the [provider table](#supported-providers)
 
 ## Custom Harness Definitions
 
@@ -136,9 +137,8 @@ Use top-level `harnesses:` to define named custom harness adapters.
 
 ```yaml
 harnesses:
-  gemini:
+  gemini-custom:
     binary: gemini
-    prefix_args: ["run"]
     prompt_mode: flag
     prompt_flag: --prompt
     option_flags:
@@ -150,7 +150,7 @@ steps:
     with:
       prompt: |
         Summarize the repository status
-      provider: gemini
+      provider: gemini-custom
       model: gemini-2.5-pro
 ```
 
@@ -168,7 +168,7 @@ Custom harness definition fields:
 
 Rules enforced by Dagu:
 
-- custom harness names cannot conflict with [built-in providers](#supported-providers)
+- a non-null custom definition shadows a [built-in provider](#supported-providers) with the same name; removing that definition exposes the built-in again
 - `prompt_flag` is valid only when `prompt_mode: flag`
 - unknown keys inside a harness definition are rejected
 
@@ -178,8 +178,8 @@ Rules enforced by Dagu:
 
 ```yaml
 harnesses:
-  aider:
-    binary: aider
+  reviewbot:
+    binary: my-review-agent
     prefix_args: ["exec"]
     prompt_mode: arg
     prompt_position: after_flags
@@ -190,23 +190,22 @@ steps:
     with:
       prompt: |
         Review the auth module
-      provider: aider
+      provider: reviewbot
       model: sonnet
 ```
 
 Generated argv:
 
 ```text
-aider exec -model sonnet "Review the auth module"
+my-review-agent exec -model sonnet "Review the auth module"
 ```
 
 `prompt_mode: flag`
 
 ```yaml
 harnesses:
-  gemini:
+  gemini-custom:
     binary: gemini
-    prefix_args: ["run"]
     prompt_mode: flag
     prompt_flag: --prompt
     option_flags:
@@ -217,14 +216,14 @@ steps:
     with:
       prompt: |
         Review the auth module
-      provider: gemini
+      provider: gemini-custom
       model: gemini-2.5-pro
 ```
 
 Generated argv:
 
 ```text
-gemini run --prompt "Review the auth module" --model gemini-2.5-pro
+gemini --prompt "Review the auth module" --model gemini-2.5-pro
 ```
 
 `prompt_mode: stdin`
@@ -294,7 +293,7 @@ Additional details:
 - built-in CLI providers normalize `snake_case` keys to kebab-case flag names, so `max_turns` becomes `--max-turns`
 - custom harness definitions keep keys as written unless `option_flags` overrides them
 - keys are emitted in lexicographic order for deterministic argv generation
-- reserved keys are `provider` and `fallback`
+- reserved keys are `prompt`, `stdin`, `provider`, `fallback`, and `managed`
 - Dagu does not validate provider-specific flag names or values
 
 ## DAG-Level Defaults
@@ -328,20 +327,13 @@ Merge rules:
 
 - DAG-level `harness:` is the base config for every harness step
 - step-level `with:` overrides primary keys from DAG-level `harness:`
-- step-level `fallback:` replaces the DAG-level fallback list; it is not merged
+- step-level `with.fallback` replaces the DAG-level fallback list; it is not merged
 
 ## Fallbacks
 
 `with.fallback` is an ordered list of alternative provider configs.
 
 ```yaml
-harnesses:
-  gemini:
-    binary: gemini
-    prefix_args: ["run"]
-    prompt_mode: flag
-    prompt_flag: --prompt
-
 steps:
   - name: implement
     action: harness.run

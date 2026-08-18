@@ -16,7 +16,7 @@ graph LR
 - **A model call inside a step**: `action: chat.completion` sends a prompt or message list; the response streams to stdout. This page.
 - **Workflows as functions**: a completion with `tools` can call your DAGs, with arguments derived from their `params`. See [Tool Calling](/features/chat/tool-calling).
 - **A model deciding what runs**: `type: agent` inverts control; steps become a catalog and the model picks one action per turn until the goals are met. See [Agent DAGs](/writing-workflows/agent) and the [Agent DAG examples](/writing-workflows/examples/agent).
-- **A coding agent as a step**: `harness.run` launches Claude Code, Codex, Copilot, or OpenCode inside a workflow. See [Harness](/step-types/harness/).
+- **A coding agent as a step**: `harness.run` launches supported coding-agent CLIs such as Claude Code, Codex, Gemini CLI, Cursor, or DeepSeek Harness inside a workflow. See [Harness](/step-types/harness/).
 - **AI operating Dagu**: the [MCP server](/mcp/) is the inverse relationship; an external AI client inspects workflows, starts runs, and reads results.
 
 The examples below run as-is with an `OPENROUTER_API_KEY` exported; swap the `llm` block for [any configured provider](/step-types/llm/providers).
