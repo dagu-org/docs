@@ -21,37 +21,25 @@ A workflow file defines one DAG. If `name` is omitted, Dagu uses the file name w
 ## Typical Workflow
 
 ```yaml
-description: Build a weekday report
+description: Publish the weekday sales report
 labels:
   env: prod
   team: analytics
 
-schedule:
-  start:
-    - "0 8 * * MON-FRI"
+schedule: "0 8 * * MON-FRI"
 catchup_window: 6h
-overlap_policy: latest
-
-max_active_steps: 4
+overlap_policy: skip
 timeout_sec: 3600
 
 params:
-  - name: region
+  - name: REGION
     type: string
     default: us-east-1
     enum: [us-east-1, us-west-2]
+    description: Sales region to report on
 
 env:
   REPORT_DIR: reports
-
-dotenv:
-  - .env.production
-
-tools:
-  - jqlang/jq@jq-1.7.1
-
-artifacts:
-  enabled: true
 
 defaults:
   retry_policy:
@@ -59,27 +47,29 @@ defaults:
     interval_sec: 30
 
 steps:
-  - id: fetch_data
-    run: |
-      printf 'raw_json={"count":3}\n' >> "$DAGU_OUTPUT_FILE"
-    outputs:
-      - name: raw_json
-        type: json
+  - id: export_sales
+    run: ./bin/export-sales --region "${REGION}" --out "${REPORT_DIR}/sales.json"
 
-  - id: summarize_data
+  - id: summarize
     action: jq.filter
+    depends: export_sales
     with:
-      raw: true
-      filter: .count
-      data: "${steps.fetch_data.outputs.raw_json}"
-    depends: fetch_data
+      input: ${REPORT_DIR}/sales.json
+      filter: "{orders: length, revenue: (map(.total) | add)}"
+    output: SUMMARY
+
+  - id: render
+    depends: summarize
+    run: ./bin/render-report --summary '${SUMMARY}'
+    stdout:
+      artifact: ${REPORT_DIR}/daily.md
 
 handler_on:
   failure:
     action: mail.send
     with:
       to: ops@example.com
-      subject: "daily_report failed"
+      subject: "sales-report failed"
       message: "See ${context.paths.log_file}"
 ```
 
