@@ -200,17 +200,11 @@ Most teams that land here are not looking for a workflow platform. Their scripts
 
 **Orchestration is not your main work.** A big platform brings its own database, worker fleet, upgrades, and alerts. You wanted to schedule some jobs. Now you operate a second system.
 
-**A workflow is configuration, not a program.** Order, retries, schedules, and human tasks are declared; there is no framework logic to write or dependency environment to maintain.
+**Workflow structure is not business logic.** The YAML declares order, retries, schedules, and human tasks. What each step actually does stays in the script or container you already have.
 
-**A script should not know its schedule.** The script that moves data does not need to know when it runs, where it runs, or how operator input is collected.
+**A script should not carry its own schedule.** No cron parsing, no retry loop, no check for whether the last run is still going. That belongs to whatever runs the script, not the script itself.
 
-Dagu keeps workflow structure in one YAML file next to the tools that do the work. Delete the YAML and the scripts still run. Keep it, and every run gets a dependency graph, retries, per-step logs, history, and a Web UI.
-
-## What Dagu is not
-
-- Dagu is not a durable-execution SDK. If you want workflow logic as typed code with replay guarantees inside your application, use Temporal; that is what it is built for.
-- It is not a Python data platform either. Teams that live inside Airflow operators and providers get real value from that ecosystem, and Dagu does not try to replace it.
-- It does not manage infrastructure. Dagu runs commands wherever you put the binary, and provisioning the machines stays your job.
+Dagu keeps workflow structure in one YAML file next to the tools that do the work. Nothing moves into a framework, so your scripts keep working with or without Dagu. The YAML is what adds a dependency graph, retries, per-step logs, history, and a Web UI to every run.
 
 ## Choose your next step
 
