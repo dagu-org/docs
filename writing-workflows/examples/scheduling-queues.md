@@ -35,6 +35,7 @@ skip_if_successful: true     # Skip if already succeeded
 steps:
   - id: extract
     run: echo "Extracting data"
+
   - id: transform
     run: echo "Transforming data"
     depends: extract

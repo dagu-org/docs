@@ -158,6 +158,7 @@ On first launch against an empty DAGs directory, Dagu creates five example workf
 steps:
   - id: extract
     run: ./extract.sh
+
   - id: transform_a
     run: ./transform_a.sh
     depends: extract

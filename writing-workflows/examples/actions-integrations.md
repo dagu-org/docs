@@ -64,6 +64,7 @@ container:
 steps:
   - id: install
     run: pip install -r requirements.txt
+
   - id: test
     run: pytest tests/
     depends: install

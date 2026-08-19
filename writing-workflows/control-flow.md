@@ -15,6 +15,7 @@ tools:
 steps:
   - id: download
     run: wget https://example.com/data.zip  # Download archive
+
   - id: extract
     run: unzip data.zip                     # Extract files
     depends: download

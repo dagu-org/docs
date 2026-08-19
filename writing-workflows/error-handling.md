@@ -151,10 +151,12 @@ max_clean_up_time_sec: 300  # 5 minutes
 
 steps:
   # Step with graceful shutdown
+
   - run: server.sh
     signal_on_stop: SIGTERM  # Default
 
   # Always cleanup
+
   - run: analyze.sh
     continue_on: failed
 

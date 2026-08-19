@@ -132,6 +132,7 @@ working_dir: /tmp
 steps:
   - id: show_default_dir
     run: pwd               # Outputs: /tmp
+
   - id: create_data_dir
     run: mkdir -p data
     depends: show_default_dir

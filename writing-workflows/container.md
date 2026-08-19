@@ -77,6 +77,7 @@ container:
 steps:
   - id: install
     run: npm install    # Install dependencies
+
   - id: build
     run: npm run build  # Build the application
     depends: install

@@ -139,6 +139,7 @@ Push-back is only available on steps with the `approval` field.
 steps:
   - id: prepare_report
     run: ./prepare-report.sh
+
   - id: draft_report
     run: ./draft-report.sh
     approval:

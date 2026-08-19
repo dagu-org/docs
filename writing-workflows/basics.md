@@ -132,6 +132,7 @@ tools:
 steps:
   - id: step_1
     run: echo "Hello World"
+
   - id: step_2
     run: ls -la
     depends: step_1

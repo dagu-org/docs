@@ -266,6 +266,7 @@ tools:
 steps:
   - id: fetch
     run: echo "Fetching data"
+
   - id: process
     run: uv run --python 3.13.9 python process.py
     depends: fetch
@@ -304,6 +305,7 @@ skip_if_successful: true    # Skip if already succeeded
 steps:
   - id: validate
     run: echo "Validating configuration"
+
   - id: process_batch_1
     run: echo "Processing batch 1"
     depends: validate
@@ -341,6 +343,7 @@ queue: compute-queue      # Assign to specific queue
 steps:
   - id: prepare
     run: echo "Preparing data"
+
   - id: compute
     run: echo "Running intensive computation"
     depends: prepare
