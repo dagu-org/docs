@@ -105,6 +105,7 @@ const fullSidebar = [
       { text: "Overview", link: "/overview/" },
       { text: "Quickstart", link: "/getting-started/quickstart" },
       { text: "Core Concepts", link: "/getting-started/concepts" },
+      { text: "Deployment Models", link: "/overview/deployment-models" },
       {
         text: "Installation",
         link: "/getting-started/installation/",
@@ -134,7 +135,6 @@ const fullSidebar = [
         collapsed: true,
         items: [
           { text: "Architecture", link: "/overview/architecture" },
-          { text: "Deployment Models", link: "/overview/deployment-models" },
           { text: "License Comparison", link: "/overview/self-host-license" },
           { text: "Contributing", link: "/overview/contributing" },
           { text: "Changelog", link: "/overview/changelog" },

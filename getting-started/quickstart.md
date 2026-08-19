@@ -262,7 +262,7 @@ steps:
 ## Next steps
 
 - [Core Concepts](/getting-started/concepts) — steps, dependencies, execution model
-- [Deployment Models](/overview/deployment-models) — local, self-hosted, managed, and hybrid options
+- [Deployment Models](/overview/deployment-models) - single server, temporary workers, and distributed workers
 - [Writing Workflows](/writing-workflows/) — full YAML surface
 - [Step Types](/step-types/shell) — built-in executors (docker, ssh, http, wait, sql, s3, sub-DAG, ...)
 - [Examples](/writing-workflows/examples) — ready-to-adapt patterns
