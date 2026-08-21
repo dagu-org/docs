@@ -798,6 +798,7 @@ Step `id` must be 40 characters or fewer, match `^[a-zA-Z][a-zA-Z0-9_]*$`, and c
 | `run` | string or array | Shell command or multi-line shell script. Array form is legacy compatibility. |
 | `action` | string | Built-in, custom, or remote action name. |
 | `with` | object | Inputs for `action`, or shell config for `run`. |
+| `dependencies` | string or array | DAG-relative files, directories, or glob patterns to transfer for distributed execution. |
 | `working_dir` | string | Step working directory. |
 | `env` | array or object | Step-specific environment variables. |
 | `stdout` | string or object | Redirect stdout to a file, artifact, or run outputs. |
@@ -812,6 +813,8 @@ Step `id` must be 40 characters or fewer, match `^[a-zA-Z][a-zA-Z0-9_]*$`, and c
 | `worker_selector` | object | Step-level distributed worker selector. |
 
 `run` and `action` are mutually exclusive.
+
+`dependencies` accepts literal paths relative to the authored DAG file. Each declaration must match at dispatch time. Exact files, directories, and glob patterns are supported. See [File Dependencies](/writing-workflows/file-dependencies) for transfer behavior, examples, validation rules, and bundle limits.
 
 Array-form `run` is accepted for legacy compatibility, but new workflows should use string `run`. Use `action: exec` when a command must run as direct argv without shell parsing.
 

@@ -125,6 +125,34 @@ flowchart LR
 
 <div class="example-card">
 
+### Distributed Script Files
+
+```yaml
+steps:
+  - id: generate_report
+    run: bash scripts/report.sh config/report.yaml
+    dependencies:
+      - scripts/report.sh
+      - config/report.yaml
+```
+
+Transfer a DAG-local script and its configuration when the workflow runs on a distributed worker.
+
+```mermaid
+flowchart LR
+    A["DAG directory<br/>script + config"] --> B["Coordinator<br/>workspace bundle"]
+    B --> C["Worker<br/>DAG_RUN_WORK_DIR"]
+    style A stroke:lightblue,stroke-width:1.6px,color:#333
+    style B stroke:orange,stroke-width:1.6px,color:#333
+    style C stroke:green,stroke-width:1.6px,color:#333
+```
+
+<a href="/writing-workflows/file-dependencies" class="learn-more">Learn more →</a>
+
+</div>
+
+<div class="example-card">
+
 ### Working Directory
 
 ```yaml

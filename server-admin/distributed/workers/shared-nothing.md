@@ -24,6 +24,10 @@ In shared nothing mode, workers operate without any shared filesystem access. Al
 
 ## How It Works
 
+### DAG-Local Files
+
+The DAG definition is sent with each dispatched task. If a step also needs files from the authored DAG directory, declare them with step-level [`dependencies`](/writing-workflows/file-dependencies). The coordinator snapshots the matching files, transfers the workspace bundle, and the worker materializes it as `DAG_RUN_WORK_DIR`. Only declared files are included; workers do not need access to the source filesystem.
+
 ### Static Discovery
 
 Workers connect directly to coordinators using explicit addresses:

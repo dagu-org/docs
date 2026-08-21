@@ -252,6 +252,7 @@ const fullSidebar = [
         collapsed: true,
         items: [
           { text: "Data Flow", link: "/writing-workflows/data-flow" },
+          { text: "File Dependencies", link: "/writing-workflows/file-dependencies" },
           { text: "Build Workflows", link: "/writing-workflows/incremental-workflows" },
           { text: "Outputs", link: "/writing-workflows/outputs" },
           { text: "Persistent State", link: "/writing-workflows/persistent-state" },

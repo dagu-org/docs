@@ -240,6 +240,7 @@ Other built-in actions cover [HTTP requests](/step-types/http), [SQL](/step-type
 |---|---|
 | Learn step fields, scripts, dependencies, and defaults | [Workflow Basics](/writing-workflows/basics) |
 | Pass parameters, outputs, and files between steps | [Data & Variables](/writing-workflows/data-variables) |
+| Send DAG-local scripts and configuration to distributed workers | [File Dependencies](/writing-workflows/file-dependencies) |
 | Reuse unchanged file-producing steps across runs | [Build Workflows](/writing-workflows/incremental-workflows) |
 | Add conditions, loops, parallel iteration, or sub-DAGs | [Control Flow](/writing-workflows/control-flow) |
 | Configure retries, timeouts, handlers, and failure behavior | [Durable Execution](/writing-workflows/durable-execution) and [Error Handling](/writing-workflows/error-handling) |

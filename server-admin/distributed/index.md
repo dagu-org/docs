@@ -33,7 +33,7 @@ Dagu supports two deployment modes for distributed workers:
 
 See [Workers](./workers/) for configuration reference and deployment details.
 
-DAG definitions do not need to be shared in either mode — they are transmitted to workers via gRPC when tasks are dispatched.
+DAG definitions do not need to be shared in either mode — they are transmitted to workers via gRPC when tasks are dispatched. When a step needs scripts, configuration, or other files stored beside its DAG, declare [file dependencies](/writing-workflows/file-dependencies). Dagu snapshots those files and materializes them in the worker's run directory.
 
 In shared-nothing mode, workers stream step and scheduler logs to the coordinator while a run is active, so they can be viewed before the run finishes. Small bursts are briefly batched to reduce gRPC traffic, and any remaining output is sent when execution completes.
 
@@ -152,6 +152,7 @@ tools:
 
 steps:
   - run: uv run --python 3.13.9 python train_model.py
+    dependencies: train_model.py
 ```
 
 Or at the step level for sub-DAG steps:
