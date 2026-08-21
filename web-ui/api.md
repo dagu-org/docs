@@ -991,6 +991,8 @@ Current queued condition reasons:
 
 Creates and starts a DAG-run directly from an inline YAML specification without writing a DAG file to disk.
 
+Inline specifications have no source directory, so they cannot supply [file dependencies](/writing-workflows/file-dependencies) for distributed execution. Save the workflow as a DAG file and start the saved DAG when a worker needs files stored beside it.
+
 **Query Parameters**:
 | Parameter | Type | Description | Default |
 |-----------|------|-------------|---------|
@@ -1057,6 +1059,8 @@ curl -X POST "http://localhost:8080/api/v1/dag-runs?remoteNode=local" \
 **Endpoint**: `POST /api/v1/dag-runs/enqueue`
 
 Queues a DAG-run from an inline YAML spec without persisting a DAG file. The run follows queue semantics (global queue concurrency limits, queue overrides) and is started by the scheduler.
+
+Inline specifications have no source directory, so they cannot supply [file dependencies](/writing-workflows/file-dependencies) for distributed execution. Save the workflow as a DAG file and enqueue the saved DAG when a worker needs files stored beside it.
 
 **Query Parameters**:
 | Parameter | Type | Description | Default |

@@ -110,6 +110,8 @@ Required shared directories:
 > [!NOTE]
 > DAG definitions (`dags/`) do **not** need to be shared. Workers receive DAG definitions via gRPC when tasks are dispatched.
 
+DAG-local scripts and configuration do not need to be placed on the shared mount either. Declare them as [file dependencies](/writing-workflows/file-dependencies), and Dagu sends the matching files with the task. A worker can access undeclared paths only when those paths are available on that worker, such as through the shared mount.
+
 When upgrading from a version that stored work directories inside DAG-run history, drain all execution processes that use the shared filesystem before starting the new version. Old and new versions must not execute the same run concurrently because they select different work-directory layouts.
 
 Packaged actions are also transferred as workspace bundles after the worker executing the action resolves the reference. Use pinned GitHub references such as `owner/repo@version` for third-party action packages across mixed worker pools. See [Third-Party Actions](/dagu-actions/third-party).

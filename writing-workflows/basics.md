@@ -235,6 +235,8 @@ steps:
 
 Details: [execution order](/writing-workflows/execution-control#execution-order).
 
+This section covers `depends`, which controls execution order between steps. The similarly named [`dependencies`](/writing-workflows/file-dependencies) field sends DAG-local files to distributed workers.
+
 ```yaml
 tools:
   - astral-sh/uv@0.11.14

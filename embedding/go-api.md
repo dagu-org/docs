@@ -213,6 +213,8 @@ engine, err := dagu.New(ctx, dagu.Options{
 
 `RunFile` and `RunYAML` load and validate the DAG in the caller process, then dispatch the loaded YAML definition to the coordinator. Shared-nothing workers receive the DAG definition from the coordinator and do not read the caller's DAG file path.
 
+Distributed [file dependencies](/writing-workflows/file-dependencies) require `RunFile`. `RunYAML` has no source directory for resolving dependency paths, so a distributed `RunYAML` call with `dependencies` is rejected before dispatch.
+
 An embedded worker can run in the same host process:
 
 ```go

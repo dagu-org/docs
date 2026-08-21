@@ -94,7 +94,7 @@ After an upgrade, an existing run continues using its previous nested work direc
 
 Do not let old and new Dagu versions execute the same run concurrently when they share a durable work root. Drain or stop those processes, upgrade them together, and then resume execution. Otherwise, the versions can select different work directories for the same run.
 
-**Shared-nothing (distributed) mode:** The directory is a temporary directory under the system temp dir (`/tmp/dagu_<dag-name>_<run-id>`). It is cleaned up when the worker process exits.
+**Shared-nothing (distributed) mode:** The directory is a temporary directory under the system temp dir (`/tmp/dagu_<dag-name>_<run-id>`). When the DAG declares [file dependencies](/writing-workflows/file-dependencies), the worker materializes the DAG and matching files in a task workspace here before execution, then removes that task workspace when execution finishes. Other shared-nothing work directories are cleaned up when the worker process exits.
 
 **Dry runs:** The variable is not set.
 

@@ -26,7 +26,7 @@ In shared nothing mode, workers operate without any shared filesystem access. Al
 
 ### DAG-Local Files
 
-The DAG definition is sent with each dispatched task. If a step also needs files from the authored DAG directory, declare them with step-level [`dependencies`](/writing-workflows/file-dependencies). The coordinator snapshots the matching files, transfers the workspace bundle, and the worker materializes it as `DAG_RUN_WORK_DIR`. Only declared files are included; workers do not need access to the source filesystem.
+The DAG definition is sent with each dispatched task. If a step also needs files from the authored DAG directory, declare them with step-level [`dependencies`](/writing-workflows/file-dependencies). The coordinator snapshots the DAG and matching files, transfers the workspace bundle, and the worker materializes it as `DAG_RUN_WORK_DIR`. Files beside the DAG are left out unless they match a declaration, so workers do not need access to the source filesystem.
 
 ### Static Discovery
 
@@ -365,11 +365,12 @@ When the scheduler dispatches queued DAGs to workers:
 
 ### Temporary File Cleanup
 
-Workers automatically clean up temporary files after each execution:
+Workers manage temporary execution files as follows:
 
 | File Type | Location | Cleaned After |
 |-----------|----------|---------------|
-| DAG files | `/tmp/dagu/worker-dags/` | Each execution |
+| DAG files without a dependency bundle | `/tmp/dagu/worker-dags/` | Each execution |
+| Materialized dependency workspace | `DAG_RUN_WORK_DIR` | Each execution |
 | Log directories | `/tmp/dagu/worker-logs/` | Each execution |
 
 Workers are safe to run on ephemeral nodes without risk of disk accumulation.

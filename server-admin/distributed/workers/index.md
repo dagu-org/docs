@@ -52,6 +52,7 @@ Workers support two deployment modes based on your infrastructure:
 | **Service Discovery** | File-based registry | Static coordinator list |
 | **Status Persistence** | Direct file writes | gRPC `ReportStatus` |
 | **Log Storage** | Direct file writes | gRPC `StreamLogs` |
+| **DAG-local files** | [`dependencies`](/writing-workflows/file-dependencies) workspace bundle | [`dependencies`](/writing-workflows/file-dependencies) workspace bundle |
 | **Zombie Detection** | File-based heartbeats | Coordinator-based |
 | **Use Cases** | Docker Compose, single-cluster | Kubernetes, multi-cloud |
 
