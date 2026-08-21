@@ -20,6 +20,8 @@ steps:
 | `headers` | Request headers | `Authorization: Bearer token` |
 | `query` | URL parameters | `page: "1"` |
 | `body` | Request body | `{"name": "value"}` |
+| `form` | Multipart text fields, keyed by field name | `description: report` |
+| `files` | Multipart file paths, keyed by field name | `document: ./report.pdf` |
 | `timeout` | Timeout in seconds | `30` |
 | `silent` | Return body only (suppress status/headers on success) | `true` |
 | `debug` | Enable debug mode (logs request/response details) | `true` |
@@ -56,6 +58,27 @@ steps:
       headers:
         Content-Type: application/json
 ```
+
+### Multipart File Upload
+
+Use `files` to attach local files and `form` for accompanying text fields:
+
+```yaml
+steps:
+  - id: upload_report
+    action: http.request
+    with:
+      method: POST
+      url: https://api.example.com/uploads
+      form:
+        description: nightly-report
+      files:
+        document: ./report.pdf
+```
+
+The map keys are the multipart field names expected by the server. Relative file paths resolve from the step working directory. Multiple files can be sent under different field names.
+
+Dagu generates the multipart `Content-Type` header and boundary. Do not set that header manually. A multipart request cannot also use `body`; put accompanying text values in `form` instead.
 
 ### Authentication
 
