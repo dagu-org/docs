@@ -14,17 +14,18 @@ Use `dagu_read` for current Dagu state.
 
 | Input | Values |
 |-------|--------|
-| `target` | `dags`, `dag`, `dag_spec`, `wiki`, `wiki_page`, `wiki_search`, `runs`, `run`, `run_logs`, `step_log`, or `reference` |
-| `name` | DAG name for DAG and run targets |
+| `target` | `references`, `reference`, `dags`, `dag`, `dag_spec`, `dag_search`, `wiki`, `wiki_page`, `wiki_search`, `runs`, `run`, `run_logs`, or `step_log` |
+| `name` | DAG name for DAG and run targets, or reference topic for `reference` |
 | `dagRunId` | DAG-run ID for run and log targets |
+| `subRunId` | Optional child DAG-run ID for `run` and `step_log`; `name` and `dagRunId` identify its root run |
 | `stepName` | Step name for the `step_log` target |
 | `query` | URL query string for list and log targets, such as `page=1&perPage=100` or `tail=100` |
-| `workspace` | `all`, `default`, or a workspace name for Wiki page targets. Required for `wiki_page`; optional for `wiki` and `wiki_search`. |
+| `workspace` | `all`, `default`, or a workspace name. Required for `wiki_page`; optional for `wiki`, `wiki_search`, and `dag_search`. |
 | `path` | Wiki page path without `.md`; required for `wiki_page` |
-| `search` | Search text; required for `wiki_search` |
+| `search` | Search text; required for `wiki_search` and `dag_search` |
 | `prefix` | Wiki page path prefix without `.md`; optional for `wiki` and `wiki_search` |
-| `cursor` | Opaque cursor from the preceding `wiki_search` result page |
-| `limit` | Maximum `wiki_search` results from 1 to 50; defaults to 20 |
+| `cursor` | Opaque cursor from the preceding `wiki_search` or `dag_search` result page |
+| `limit` | Maximum search results from 1 to 50; defaults to 20 |
 | `uri` | Direct resource URI, such as `dagu://reference/authoring` |
 
 Examples:
@@ -36,6 +37,19 @@ Examples:
 ```json
 { "target": "dag_spec", "name": "nightly-report" }
 ```
+
+Search DAG definitions across accessible workspaces:
+
+```json
+{
+  "target": "dag_search",
+  "workspace": "all",
+  "search": "warehouse_url",
+  "limit": 20
+}
+```
+
+Results contain matching line snippets and canonical DAG spec URIs. If `hasMore` is true, pass `nextCursor` as `cursor` in the next call and keep `search` and `workspace` unchanged.
 
 List Wiki pages in one workspace:
 
@@ -81,9 +95,25 @@ Read stdout and stderr for one step:
   "target": "step_log",
   "name": "nightly-report",
   "dagRunId": "20260522T010000",
-  "stepName": "generate-report"
+  "stepName": "generate-report",
+  "query": "stream=stderr&offset=101&limit=200"
 }
 ```
+
+`step_log` supports `tail`, `head`, `offset`, `limit`, and `stream=stdout|stderr`. Use at most one of `tail`, `head`, and `offset`; `limit` can be used alone or with `offset`, and by itself reads from the beginning. Without positioning parameters, the last 1000 lines are returned. Values for `tail`, `head`, and `limit` range from 1 to 10000.
+
+Read a child DAG run or one of its step logs by adding the child ID returned in a run step's `subRuns` list:
+
+```json
+{
+  "target": "run",
+  "name": "nightly-report",
+  "dagRunId": "20260522T010000",
+  "subRunId": "child-run-id"
+}
+```
+
+Successful reads return a stable envelope with `target`, normalized `data`, built-in `references`, and `uri` when the result has a canonical resource URI. DAG and run lists include canonical URIs; run summaries include numeric and human-readable statuses; run details include step statuses, errors, log URIs, and child-run references.
 
 ## `dagu_change`
 
@@ -193,19 +223,30 @@ Use `dagu_execute` for run control.
 |-------|--------|
 | `action` | `start`, `enqueue`, `retry`, or `stop` |
 | `targetType` | `dag`, `inline_spec`, or `run`; inferred when omitted |
-| `name` | DAG name or optional inline spec name |
+| `name` | Required DAG name, including the identity used for an inline spec run |
 | `spec` | Inline DAG YAML for `start` or `enqueue` with `targetType=inline_spec` |
 | `dagRunId` | Run ID override for start/enqueue, or target run for retry/stop |
-| `params` | Runtime parameters as a JSON string |
+| `params` | Runtime parameters as a JSON object or JSON-encoded string |
 | `queue` | Queue override for `enqueue` |
-| `singleton` | Prevent duplicate running or queued runs when supported |
-| `labels` | Labels as `key=value` or key-only strings |
+| `singleton` | Prevent duplicate running or queued runs for `start` and `enqueue` |
+| `noReuse` | Run eligible build steps instead of reusing prior materializations for `start` and `enqueue` |
+| `labels` | Labels as `key=value` or key-only strings for `start` and `enqueue` |
 | `stepName` | Optional step name for retry |
+| `includeDownstream` | With `stepName`, retry that step and every reachable descendant |
+| `wait` | Wait for the identified run to reach a terminal state |
+| `waitTimeoutSeconds` | Wait limit from 1 to 300 seconds; requires `wait` and defaults to 60 |
 
 Start a stored DAG:
 
 ```json
-{ "action": "start", "targetType": "dag", "name": "nightly-report" }
+{
+  "action": "start",
+  "targetType": "dag",
+  "name": "nightly-report",
+  "params": {"TARGET": "orders"},
+  "wait": true,
+  "waitTimeoutSeconds": 30
+}
 ```
 
 Enqueue a stored DAG:
@@ -217,7 +258,13 @@ Enqueue a stored DAG:
 Retry a run:
 
 ```json
-{ "action": "retry", "name": "nightly-report", "dagRunId": "20260522T010000" }
+{
+  "action": "retry",
+  "name": "nightly-report",
+  "dagRunId": "20260522T010000",
+  "stepName": "load",
+  "includeDownstream": true
+}
 ```
 
 Stop a run:
@@ -226,6 +273,8 @@ Stop a run:
 { "action": "stop", "name": "nightly-report", "dagRunId": "20260522T010000" }
 ```
 
-When a run can be identified, `dagu_execute` returns resource links for run details and logs. Clients that support subscriptions can subscribe to the returned run resource.
+When a run can be identified, `dagu_execute` returns canonical resource links for run details and logs. Without `wait`, it also returns subscription guidance. With `wait=true`, the result reports whether the run completed, its last observed status, and the normalized run and step summary after terminal completion. A wait timeout does not stop the run.
+
+Tool errors use structured codes such as `invalid_tool_input`, `resource_not_found`, `conflict`, and `resource_unavailable`. When a stored DAG name is close to an existing name, `resource_not_found` may include suggestions under `details.didYouMean`.
 
 `dagu_execute` can start or enqueue a root DAG containing human tasks, locally or on a distributed worker, but it cannot complete a waiting human task. Use the [Web UI](/writing-workflows/human-tasks#web-ui), [REST API](/web-ui/api#human-task-endpoints), or local [`dagu human-task complete`](/getting-started/cli#human-task-complete) command. Human-task completion is not available through MCP, including `dagu_execute` retry or stop actions.

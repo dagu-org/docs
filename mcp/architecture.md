@@ -29,9 +29,9 @@ The route honors the server base path. With `base_path: /dagu`, the route is `/d
 
 Dagu exposes a small tool surface by design:
 
-- `dagu_read` reads state, Markdown Wiki pages, and reference resources.
+- `dagu_read` reads and searches DAGs and Wiki pages, inspects root and child runs, and reads logs and reference resources.
 - `dagu_change` previews or applies DAG definition upserts, renames, and deletions, plus workspace-aware Wiki page changes.
-- `dagu_execute` starts, enqueues, retries, or stops DAG runs.
+- `dagu_execute` starts, enqueues, retries, or stops DAG runs and can wait for an identified run to finish.
 
 This keeps client instructions stable and avoids exposing every REST endpoint as a separate MCP tool.
 
@@ -45,12 +45,18 @@ The MCP server exposes resource templates for current Dagu state:
 
 | Resource | Backing operation |
 |----------|-------------------|
+| `dagu://reference` | Available built-in MCP references |
+| `dagu://dags` | DAG summaries visible to the caller |
 | `dagu://dags/{name}/spec` | Current DAG YAML from the DAG spec API |
 | `dagu://wiki` | Wiki page tree from the Wiki API across accessible workspaces |
 | `dagu://wiki/{workspace}` | Wiki page tree for one workspace |
 | `dagu://wiki/{workspace}/{path}` | Markdown content for one Wiki page |
+| `dagu://runs` | DAG-run summaries visible to the caller |
 | `dagu://runs/{name}/{dagRunId}` | DAG-run details from the run details API |
 | `dagu://runs/{name}/{dagRunId}/logs` | DAG-run logs from the logs API |
+| `dagu://runs/{name}/{dagRunId}/steps/{stepName}/logs` | Standard output and standard error for one root-run step |
+| `dagu://runs/{name}/{dagRunId}/sub/{subRunId}` | Child-run details addressed under the root run |
+| `dagu://runs/{name}/{dagRunId}/sub/{subRunId}/steps/{stepName}/logs` | Standard output and standard error for one child-run step |
 | `dagu://reference/{topic}` | Built-in MCP guidance bundled with the server |
 
 Run resources can be subscribed to. Dagu watches subscribed run resources and sends a resource update notification when a run reaches a terminal state. Wiki page resources are read on demand; successful Wiki page mutations continue to notify the Web UI through the existing Wiki API notifier.

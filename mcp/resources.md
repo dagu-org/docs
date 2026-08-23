@@ -6,16 +6,25 @@ Dagu exposes MCP resources for DAG specs, Markdown Wiki pages, DAG-run details, 
 
 | URI | MIME type | Description |
 |-----|-----------|-------------|
+| `dagu://reference` | `application/json` | Available built-in MCP reference resources. |
 | `dagu://reference/authoring` | `text/markdown` | Guidance for writing and editing Dagu DAG YAML through MCP. |
 | `dagu://reference/tools` | `text/markdown` | Compact tool reference for `dagu_read`, `dagu_change`, and `dagu_execute`. |
+| `dagu://reference/read-tool` | `text/markdown` | Detailed `dagu_read` input, output, and error contract. |
+| `dagu://reference/change-tool` | `text/markdown` | Detailed `dagu_change` preview and apply contract. |
+| `dagu://reference/execute-tool` | `text/markdown` | Detailed `dagu_execute` input, output, and error contract. |
+| `dagu://reference/apps` | `text/markdown` | Interactive run inspector behavior for MCP Apps hosts. |
 | `dagu://reference/notifications` | `text/markdown` | How run-completion notifications work over MCP resources. |
+| `dagu://dags` | `application/json` | DAG summaries visible to the caller. |
 | `dagu://dags/{name}/spec` | `application/yaml` | Current YAML spec for a DAG. |
 | `dagu://wiki` | `application/json` | Wiki page tree across accessible workspaces. |
 | `dagu://wiki/{workspace}` | `application/json` | Wiki page tree for `default` or one named workspace. |
 | `dagu://wiki/{workspace}/{path}` | `text/markdown` | Current Markdown content for one Wiki page. |
+| `dagu://runs` | `application/json` | DAG-run summaries visible to the caller. |
 | `dagu://runs/{name}/{dagRunId}` | `application/json` | Current DAG-run details. |
 | `dagu://runs/{name}/{dagRunId}/logs` | `application/json` | Scheduler log and step log metadata. |
 | `dagu://runs/{name}/{dagRunId}/steps/{stepName}/logs` | `application/json` | Standard output and standard error for one step. |
+| `dagu://runs/{name}/{dagRunId}/sub/{subRunId}` | `application/json` | Current details for a child DAG run addressed under its root run. |
+| `dagu://runs/{name}/{dagRunId}/sub/{subRunId}/steps/{stepName}/logs` | `application/json` | Standard output and standard error for one child-run step. |
 
 Use `dagu_read` with a `uri` to read any resource directly:
 
@@ -45,10 +54,22 @@ For example, this resource lists the newest individual Wiki pages below `runbook
 dagu://wiki/operations?prefix=runbooks&flat=true&sort=mtime&order=desc&perPage=20
 ```
 
-Log resources accept query parameters supported by Dagu's log readers, such as `tail=100`:
+Collection resources accept the same query parameters as their corresponding `dagu_read` list target. Log resources accept bounded query parameters supported by Dagu's log readers. Run logs support `tail` from 1 to 10000:
 
 ```text
 dagu://runs/nightly-report/20260522T010000/logs?tail=100
+```
+
+Step logs support `tail`, `head`, `offset`, `limit`, and `stream=stdout|stderr`. Use at most one of `tail`, `head`, and `offset`; `limit` can be used alone or with `offset`, and by itself reads from the beginning. Without positioning parameters, the last 1000 lines are returned.
+
+```text
+dagu://runs/nightly-report/20260522T010000/steps/generate-report/logs?stream=stderr&offset=101&limit=200
+```
+
+Child runs are addressed beneath the root run that created them:
+
+```text
+dagu://runs/nightly-report/20260522T010000/sub/child-run-id
 ```
 
 ## Run Subscriptions
