@@ -468,6 +468,7 @@ const fullSidebar = [
         collapsed: true,
         items: [
           { text: "Overview", link: "/server-admin/deployment/" },
+          { text: "Cloud", link: "/server-admin/deployment/cloud" },
           { text: "Multi-Environment", link: "/server-admin/deployment/multi-environment" },
           { text: "macOS Service", link: "/server-admin/deployment/macos" },
           { text: "Linux Systemd", link: "/server-admin/deployment/systemd" },

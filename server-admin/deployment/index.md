@@ -1,11 +1,14 @@
 # Deployment
 
-Choose your deployment method:
+Choose the simplest deployment that meets the workflow's execution needs.
 
-- [Multi-Environment Deployments](./multi-environment.md) - Isolate development, staging, and production while promoting workflows with Git Sync
-- [macOS](./macos.md) - Install as a macOS service
-- [Linux Systemd](./systemd.md) - Install as a systemd service
-- [Docker Images](./docker-images.md) - Choose the right container tag
-- [Docker](./docker.md) - Run with Docker
-- [Docker Compose](./docker-compose.md) - Deploy with Docker Compose
-- [Kubernetes (Helm)](./kubernetes.md) - Deploy to Kubernetes with the Helm chart
+| Requirement | Guide |
+| --- | --- |
+| Run one public server on exe.dev, GCP, AWS, Azure, DigitalOcean, Railway, Render, or Fly.io | [Cloud Deployment](./cloud) |
+| Run one container on a machine you control | [Docker](./docker) |
+| Keep configuration in a Compose file | [Docker Compose](./docker-compose) |
+| Deploy into an existing Kubernetes cluster | [Kubernetes (Helm)](./kubernetes) |
+| Install a native background service | [Linux systemd](./systemd) or [macOS](./macos) |
+| Isolate development, staging, and production | [Multi-Environment Deployments](./multi-environment) |
+
+For containers, review [Docker Images](./docker-images) before choosing a tag. For execution across multiple hosts, see [Distributed Execution](/server-admin/distributed/).
