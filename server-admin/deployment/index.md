@@ -4,7 +4,7 @@ Choose the simplest deployment that meets the workflow's execution needs.
 
 | Requirement | Guide |
 | --- | --- |
-| Run one public server on exe.dev, GCP, AWS, Azure, DigitalOcean, Railway, Render, or Fly.io | [Cloud Deployment](./cloud) |
+| Run one cloud-hosted server on exe.dev, GCP, AWS, Azure, DigitalOcean, Railway, Render, or Fly.io | [Cloud Deployment](./cloud/) |
 | Run one container on a machine you control | [Docker](./docker) |
 | Keep configuration in a Compose file | [Docker Compose](./docker-compose) |
 | Deploy into an existing Kubernetes cluster | [Kubernetes (Helm)](./kubernetes) |
