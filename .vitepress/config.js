@@ -169,17 +169,6 @@ const fullSidebar = [
     ],
   },
   {
-    text: "AI",
-    items: [
-      { text: "Overview", link: "/ai/" },
-      { text: "AI Quickstart", link: "/getting-started/quickstart-ai" },
-      { text: "LLM Steps", link: "/step-types/llm/" },
-      { text: "Agent DAGs", link: "/writing-workflows/agent" },
-      { text: "Harness", link: "/step-types/harness/" },
-      { text: "Skills", link: "/ai/skills" },
-    ],
-  },
-  {
     text: "Web UI",
     items: [
       { text: "Overview", link: "/overview/web-ui" },
@@ -520,6 +509,17 @@ const fullSidebar = [
           { text: "Self-Upgrade", link: "/server-admin/self-upgrade" },
         ],
       },
+    ],
+  },
+  {
+    text: "AI",
+    items: [
+      { text: "Overview", link: "/ai/" },
+      { text: "AI Quickstart", link: "/getting-started/quickstart-ai" },
+      { text: "LLM Steps", link: "/step-types/llm/" },
+      { text: "Agent DAGs", link: "/writing-workflows/agent" },
+      { text: "Harness", link: "/step-types/harness/" },
+      { text: "Skills", link: "/ai/skills" },
     ],
   },
   {
