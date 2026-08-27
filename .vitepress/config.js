@@ -136,6 +136,7 @@ const fullSidebar = [
           { text: "npm", link: "/getting-started/installation/npm" },
           { text: "Windows", link: "/getting-started/installation/windows" },
           { text: "Docker", link: "/getting-started/installation/docker" },
+          { text: "Cloud", link: "/server-admin/deployment/cloud" },
           { text: "Kubernetes", link: "/getting-started/installation/kubernetes" },
           { text: "Build from source", link: "/getting-started/installation/source" },
           { text: "Uninstall", link: "/getting-started/installation/uninstall" },
