@@ -124,6 +124,7 @@ const fullSidebar = [
       { text: "Overview", link: "/overview/" },
       { text: "Quickstart", link: "/getting-started/quickstart" },
       { text: "Core Concepts", link: "/getting-started/concepts" },
+      { text: "Architecture", link: "/overview/architecture" },
       { text: "Deployment Models", link: "/overview/deployment-models" },
       {
         text: "Deployment",
@@ -165,17 +166,17 @@ const fullSidebar = [
           { text: "From Cron", link: "/migration/from-cron" },
         ],
       },
-      {
-        text: "Project",
-        collapsed: true,
-        items: [
-          { text: "AI Overview", link: "/ai/" },
-          { text: "Architecture", link: "/overview/architecture" },
-          { text: "License Comparison", link: "/overview/self-host-license" },
-          { text: "Contributing", link: "/overview/contributing" },
-          { text: "Changelog", link: "/overview/changelog" },
-        ],
-      },
+    ],
+  },
+  {
+    text: "AI",
+    items: [
+      { text: "Overview", link: "/ai/" },
+      { text: "AI Quickstart", link: "/getting-started/quickstart-ai" },
+      { text: "LLM Steps", link: "/step-types/llm/" },
+      { text: "Agent DAGs", link: "/writing-workflows/agent" },
+      { text: "Harness", link: "/step-types/harness/" },
+      { text: "Skills", link: "/ai/skills" },
     ],
   },
   {
@@ -522,10 +523,23 @@ const fullSidebar = [
     ],
   },
   {
+    text: "Plans & Licensing",
+    items: [
+      { text: "Self-hosted Plan Comparison", link: "/overview/self-host-license" },
+    ],
+  },
+  {
     text: "Embedding",
     items: [
       { text: "Go API", link: "/embedding/go-api" },
       { text: "Licensing", link: "/embedding/licensing" },
+    ],
+  },
+  {
+    text: "Community",
+    items: [
+      { text: "Contributing", link: "/overview/contributing" },
+      { text: "Changelog", link: "/overview/changelog" },
     ],
   },
 ];
