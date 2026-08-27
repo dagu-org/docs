@@ -139,13 +139,26 @@ const fullSidebar = [
             items: [
               { text: "Overview", link: "/server-admin/deployment/cloud/" },
               { text: "exe.dev", link: "/server-admin/deployment/cloud/exe-dev" },
-              { text: "Google Cloud", link: "/server-admin/deployment/cloud/google-cloud" },
-              { text: "AWS", link: "/server-admin/deployment/cloud/aws" },
-              { text: "Azure", link: "/server-admin/deployment/cloud/azure" },
-              { text: "DigitalOcean", link: "/server-admin/deployment/cloud/digitalocean" },
-              { text: "Railway", link: "/server-admin/deployment/cloud/railway" },
-              { text: "Render", link: "/server-admin/deployment/cloud/render" },
-              { text: "Fly.io", link: "/server-admin/deployment/cloud/fly-io" },
+              {
+                text: "Virtual Machines",
+                collapsed: true,
+                items: [
+                  { text: "Private HTTPS", link: "/server-admin/deployment/cloud/tailscale-vm" },
+                  { text: "Google Cloud", link: "/server-admin/deployment/cloud/google-cloud" },
+                  { text: "AWS", link: "/server-admin/deployment/cloud/aws" },
+                  { text: "Azure", link: "/server-admin/deployment/cloud/azure" },
+                  { text: "DigitalOcean", link: "/server-admin/deployment/cloud/digitalocean" },
+                ],
+              },
+              {
+                text: "Managed Platforms",
+                collapsed: true,
+                items: [
+                  { text: "Railway", link: "/server-admin/deployment/cloud/railway" },
+                  { text: "Render", link: "/server-admin/deployment/cloud/render" },
+                  { text: "Fly.io", link: "/server-admin/deployment/cloud/fly-io" },
+                ],
+              },
             ],
           },
           { text: "Multi-Environment", link: "/server-admin/deployment/multi-environment" },

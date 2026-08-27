@@ -4,18 +4,18 @@ description: Choose the shortest persistent Dagu deployment for a major cloud pl
 
 # Cloud Deployment
 
-Choose a platform. Each guide creates one persistent Dagu server with authentication and HTTPS.
+Choose a platform. Each guide creates one persistent Dagu server with builtin authentication and HTTPS.
 
-| Platform | Best for | Setup |
+| Platform | Runtime | Access |
 | --- | --- | --- |
-| [exe.dev](./exe-dev) | Fastest VM setup | One command; HTTPS included |
-| [Railway](./railway) | Fastest dashboard setup | Container image and Volume |
-| [Render](./render) | Managed container | Web Service and Persistent Disk |
-| [Fly.io](./fly-io) | Managed VM close to users | `flyctl` and Fly Volume |
-| [Google Cloud](./google-cloud) | Existing GCP users | Startup script and Tailscale |
-| [AWS](./aws) | Existing AWS users | Launch script and Tailscale |
-| [Azure](./azure) | Existing Azure users | Custom data and Tailscale |
-| [DigitalOcean](./digitalocean) | Simple VPS | User data and Tailscale |
+| [exe.dev](./exe-dev) | Managed VM | Private platform HTTPS; public access is optional |
+| [Google Cloud](./google-cloud) | Compute Engine VM | Private Tailscale HTTPS |
+| [AWS](./aws) | Lightsail VM | Private Tailscale HTTPS |
+| [Azure](./azure) | Azure VM | Private Tailscale HTTPS |
+| [DigitalOcean](./digitalocean) | Droplet | Private Tailscale HTTPS |
+| [Railway](./railway) | Container and Volume | Public platform HTTPS |
+| [Render](./render) | Web Service and Persistent Disk | Public platform HTTPS |
+| [Fly.io](./fly-io) | Machine and Fly Volume | Public platform HTTPS |
 
 All guides use:
 
@@ -25,6 +25,6 @@ All guides use:
 - builtin authentication
 - platform HTTPS or private HTTPS through Tailscale Serve
 
-Pin a [versioned image](../docker-images) for production. Do not scale the server beyond one instance because its state is file-backed.
+`latest` is convenient for a first deployment. Pin a [versioned image](../docker-images) for production. These guides use one instance because Dagu stores its control-plane state in files.
 
-The VM guides use Tailscale for HTTPS and require a Tailscale account. Managed container platforms and exe.dev provide HTTPS directly.
+The Google Cloud, AWS, Azure, and DigitalOcean guides share one [private HTTPS setup](./tailscale-vm). exe.dev, Railway, Render, and Fly.io provide HTTPS directly.
