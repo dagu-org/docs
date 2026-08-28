@@ -61,7 +61,7 @@ Secrets are automatically masked in logs. Use `provider: file` for Kubernetes/Do
 ::: info Connection Pooling
 Connection pooling is **not configurable per-step**:
 - **Non-worker mode**: Uses fixed defaults (1 connection per step)
-- **Worker mode** (shared-nothing): Managed by global pool configuration at the worker level
+- **Worker mode**: Managed by global pool configuration at the worker level
 
 For distributed workers running multiple concurrent DAGs, configure PostgreSQL connection pooling via [`worker.postgres_pool`](/server-admin/distributed/workers/shared-nothing#postgresql-connection-pool-management) to prevent connection exhaustion.
 :::

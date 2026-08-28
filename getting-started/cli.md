@@ -40,10 +40,12 @@ Context-aware commands are:
 
 The built-in `local` context is always available. Remote contexts are stored under `paths.contexts_dir`, and their API keys are encrypted at rest.
 
+`--server` is the REST API base URL, not the Web UI URL. The default API path is `/api/v1`. If the server uses `base_path: /dagu`, use `https://example.com/dagu/api/v1`.
+
 ```bash
 # Add a remote server
 dagu context add staging \
-  --server https://staging.example.com \
+  --server https://staging.example.com/api/v1 \
   --api-key dagu_xxxxxxxxxxxxxxxxxxxx \
   --description "Staging Dagu server"
 
@@ -492,7 +494,7 @@ dagu context test <name|local>
 ```
 
 **Add / Update Flags:**
-- `--server` - Remote server base URL (`http://` or `https://`)
+- `--server` - Remote API base URL, including its API path
 - `--api-key` - Remote API key (`dagu_...`)
 - `--description` - Optional description shown in `dagu context list`
 - `--skip-tls-verify` - Skip TLS certificate verification
@@ -504,7 +506,7 @@ dagu context list
 
 # Add a context (if --api-key is omitted in a terminal, Dagu prompts for it)
 dagu context add prod \
-  --server https://dagu.example.com \
+  --server https://dagu.example.com/api/v1 \
   --api-key dagu_xxxxxxxxxxxxxxxxxxxx \
   --timeout 60
 
@@ -517,6 +519,8 @@ dagu context use local
 # Test connectivity
 dagu context test prod
 ```
+
+`context add` and `context use` only update local context settings. Run `context test` to verify the API URL, credentials, and network connection.
 
 ### `server`
 
@@ -1046,12 +1050,11 @@ dagu coordinator \
 ```
 
 The coordinator service enables distributed task execution by:
-- Automatically registering in the service registry system
 - Accepting task polling requests from workers
 - Matching tasks to workers based on labels
-- Tracking worker health via heartbeats (every 10 seconds)
+- Tracking worker health via heartbeats
 - Providing task distribution API with automatic failover
-- Managing worker lifecycle through file-based registry
+- Receiving run status, logs, artifacts, and state requests over gRPC
 
 When run directly, the coordinator also exposes `GET /health` on `--coordinator.health-port` for per-instance liveness checks. `dagu start-all` does not expose this dedicated coordinator health port.
 
@@ -1064,6 +1067,7 @@ dagu worker [options]
 ```
 
 **Options:**
+- `--worker.coordinators` - Required coordinator addresses (format: `host1:port1,host2:port2`)
 - `--worker.id` - Worker instance ID (default: `hostname@PID`)
 - `--worker.max-active-runs` - Maximum number of active runs (default: `100`)
 - `--worker.health-port` - HTTP health check port (default: `8092`, `0` disables)
@@ -1075,6 +1079,8 @@ dagu worker [options]
 - `--peer.skip-tls-verify` - Skip TLS certificate verification (insecure)
 
 ```bash
+export DAGU_WORKER_COORDINATORS=coordinator-1:50055
+
 # Basic usage
 dagu worker
 
@@ -1107,7 +1113,7 @@ dagu worker \
   --peer.skip-tls-verify
 ```
 
-Workers automatically register in the service registry system, send regular heartbeats, and poll the coordinator for tasks matching their labels to execute them locally.
+Workers connect to the configured coordinators, send regular heartbeats, and poll for tasks matching their labels. They report status, logs, artifacts, and state operations over gRPC.
 Each worker also exposes `GET /health` on `--worker.health-port` for per-instance liveness checks.
 
 ## Configuration

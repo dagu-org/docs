@@ -91,8 +91,7 @@ steps:
 Execution mode behavior:
 
 - Local execution writes directly into the final artifact directory.
-- Distributed execution with a shared filesystem also writes directly into the final artifact directory.
-- Distributed shared-nothing workers write into a worker-local staging directory first. Dagu uploads those files back to the coordinator before the run finishes.
+- Distributed workers write into a worker-local staging directory first. Dagu uploads those files back to the coordinator before the run finishes.
 
 ## Example: Markdown Report And Image Preview
 

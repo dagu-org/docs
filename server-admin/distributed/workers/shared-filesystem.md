@@ -1,261 +1,64 @@
-# Shared Filesystem Mode
+# Migrating Shared-Filesystem Workers
 
-In shared filesystem mode, workers share storage access with the coordinator. All nodes must have access to the same filesystem (NFS, EFS, Azure Files, etc.). For environments without shared storage, see [Shared Nothing Mode](./shared-nothing).
+Dagu 2.9 removed direct shared-filesystem access from daemon workers. Current `dagu worker` processes require coordinator addresses and exchange tasks, status, logs, artifacts, and persistent state over gRPC.
 
-## Overview
+This page remains at its old URL for upgrade guidance. For current setup instructions, see [Worker Deployment](./shared-nothing).
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                     Dagu Instance                           │
-│  (Scheduler + Web UI + Coordinator)                         │
-└─────────────────────────────────────────────────────────────┘
-         │                              │
-         │ File-based Service Registry  │ gRPC Task Dispatch
-         │                              │
-         ▼                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    Shared Storage                           │
-│  service-registry/  dag-runs/  dag-state/  logs/          │
-│  (discovery)        (status)   (state)     (logs)         │
-└─────────────────────────────────────────────────────────────┘
-         ▲                              ▲
-         │                              │
-         │  Direct File Access          │
-         │                              │
-┌────────┴───────────┐        ┌────────┴───────────┐
-│     Worker 1       │        │     Worker N       │
-└────────────────────┘        └────────────────────┘
-```
+## Current Worker Contract
 
-## How It Works
+- Set `worker.coordinators` or `DAGU_WORKER_COORDINATORS`.
+- Give every coordinator a stable address reachable from workers.
+- Keep server data, DAG definitions, logs, and artifacts off worker mounts.
+- Use worker-local or ephemeral storage for work directories and caches.
+- Declare DAG-local files with [`dependencies`](/writing-workflows/file-dependencies); Dagu transfers them with the task.
 
-### Service Registry
+Server-side processes may still share persistent storage when deployed separately. The Web UI/API server, scheduler, and coordinator need a consistent view of server-owned state.
 
-Workers automatically register themselves in a file-based service registry. Workers discover coordinators by scanning the registry directory — no manual coordinator address configuration is required.
+## Migration
 
-#### Registry Directory Structure
+1. Drain and stop existing workers.
+2. Bind the coordinator to a worker-reachable interface and set its advertise address:
 
-```
-{data}/service-registry/
-├── coordinator/
-│   └── coordinator-primary-host1-50055.json
-└── worker/
-    ├── worker-gpu-01-host2-1234.json
-    └── worker-cpu-02-host3-5678.json
-```
+   ```bash
+   dagu coordinator \
+     --coordinator.host=0.0.0.0 \
+     --coordinator.advertise=coordinator.internal \
+     --coordinator.port=50055
+   ```
 
-#### Registration Process
+3. Configure each worker with one or more coordinator addresses:
 
-1. **Worker starts**: creates a registry file containing its ID, host, port, PID, and timestamp.
-2. **Heartbeat updates**: workers update their registry files every 10 seconds with the current timestamp, health status, and active task count.
-3. **Coordinator monitoring**: the coordinator continuously scans registry files to track available workers, detect unhealthy workers, and remove stale entries (no heartbeat for 30+ seconds).
-4. **Cleanup**: registry files are removed when a worker shuts down gracefully or when the heartbeat timeout is exceeded.
+   ```bash
+   dagu worker \
+     --worker.coordinators=coordinator.internal:50055 \
+     --worker.labels=region=us-east-1
+   ```
 
-#### Configuring the Registry Directory
+4. Remove server data and DAG-directory mounts from worker containers or pods.
+5. Keep coordinator-owned state on persistent storage when it must survive coordinator replacement.
+6. Configure [peer TLS or mTLS](/server-admin/distributed/transport-security) when coordinator traffic crosses an untrusted network.
 
-The registry directory must be accessible by all nodes:
+## Docker Compose
+
+Workers on the same Compose network can use the coordinator service name:
 
 ```yaml
-# config.yaml
-paths:
-  service_registry_dir: "/nfs/shared/dagu/service-registry"
-```
-
-```bash
-export DAGU_SERVICE_REGISTRY_DIR=/nfs/shared/dagu/service-registry
-```
-
-### Status Persistence
-
-Workers write execution status directly to the shared filesystem:
-
-```
-{data}/dag-runs/
-└── my-workflow/
-    └── dag-runs/
-        └── 2024/03/15/
-            └── dag-run_20240315_120000Z_abc123/
-                └── attempt_20240315_120001_123Z_def456/
-                    └── status.jsonl
-```
-
-### Log Storage
-
-Workers write execution logs directly to the shared log directory:
-
-```
-{logs}/dags/
-└── my-workflow/
-    └── 20240315_120000_abc123/
-        ├── step1.stdout.log
-        ├── step1.stderr.log
-        └── status.yaml
-```
-
-### Persistent State
-
-`state.*` actions store small JSON values under `paths.dag_state_dir`. In shared filesystem mode, point this directory at shared persistent storage when multiple processes may read or write the same state keys. By default it is derived from `paths.data_dir` as `{data}/dag-state`.
-
-## Requirements
-
-Shared storage must be mounted at the same path on all nodes, or configured via `DAGU_HOME` to point to the shared location.
-
-Required shared directories:
-- `{data}/service-registry/` — worker registration and discovery
-- `{data}/dag-runs/` — execution status
-- `{data}/dag-run-work/` — per-run working directories, unless `paths.dag_run_work_dir` points elsewhere
-- `{data}/dag-state/` — persistent state for `state.*` actions, unless `paths.dag_state_dir` points elsewhere
-- `{logs}/` — execution logs (required for Web UI log display)
-
-> [!NOTE]
-> DAG definitions (`dags/`) do **not** need to be shared. Workers receive DAG definitions via gRPC when tasks are dispatched.
-
-DAG-local scripts and configuration do not need to be placed on the shared mount either. Declare them as [file dependencies](/writing-workflows/file-dependencies), and Dagu sends the matching files with the task. A worker can access undeclared paths only when those paths are available on that worker, such as through the shared mount.
-
-When upgrading from a version that stored work directories inside DAG-run history, drain all execution processes that use the shared filesystem before starting the new version. Old and new versions must not execute the same run concurrently because they select different work-directory layouts.
-
-Packaged actions are also transferred as workspace bundles after the worker executing the action resolves the reference. Use pinned GitHub references such as `owner/repo@version` for third-party action packages across mixed worker pools. See [Third-Party Actions](/dagu-actions/third-party).
-
-## Configuration
-
-### Coordinator
-
-```bash
-# Start coordinator on the main server
-dagu start-all --coordinator.host=0.0.0.0 --port=8080
-
-# Or start coordinator separately
-dagu coordinator --coordinator.host=0.0.0.0 --coordinator.port=50055
-```
-
-### Workers
-
-```bash
-# Workers auto-discover coordinators via service registry
-dagu worker --worker.labels gpu=true,memory=64G
-```
-
-### Configuration File
-
-```yaml
-# config.yaml (same on all nodes)
-paths:
-  data_dir: "/shared/dagu/data"        # Must be shared
-  log_dir: "/shared/dagu/logs"         # Must be shared
-  service_registry_dir: "/shared/dagu/service-registry"  # Must be shared
-  dag_state_dir: "/shared/dagu/data/dag-state"           # Must be shared for persistent state
-
-worker:
-  id: "worker-gpu-01"
-  labels:
-    gpu: "true"
-    memory: "64G"
-
-coordinator:
-  host: 0.0.0.0
-  port: 50055
-```
-
-## Docker Compose Example
-
-```yaml
-version: '3.8'
-
 services:
-  dagu-main:
-    image: dagu:latest
-    command: ["dagu", "start-all", "--host=0.0.0.0", "--coordinator.host=0.0.0.0"]
-    ports:
-      - "8080:8080"
-      - "50055:50055"
-    volumes:
-      - ./dags:/etc/dagu/dags           # DAG definitions (only main instance)
-      - shared-data:/var/lib/dagu       # Shared: data + logs + service registry
+  dagu-coordinator:
+    image: ghcr.io/dagucloud/dagu:latest
+    command: ["dagu", "coordinator"]
+    environment:
+      - DAGU_COORDINATOR_HOST=0.0.0.0
+      - DAGU_COORDINATOR_ADVERTISE=dagu-coordinator
+      - DAGU_COORDINATOR_PORT=50055
 
-  worker-gpu:
-    image: dagu:latest
-    command: ["dagu", "worker", "--worker.labels=gpu=true,cuda=11.8"]
-    volumes:
-      - shared-data:/var/lib/dagu       # Shared storage (no dags needed)
-    deploy:
-      replicas: 2
-      resources:
-        reservations:
-          devices:
-            - capabilities: [gpu]
-
-  worker-cpu:
-    image: dagu:latest
-    command: ["dagu", "worker", "--worker.labels=cpu-only=true"]
-    volumes:
-      - shared-data:/var/lib/dagu       # Shared storage (no dags needed)
-    deploy:
-      replicas: 5
-
-volumes:
-  shared-data:
-    driver: local
+  dagu-worker:
+    image: ghcr.io/dagucloud/dagu:latest
+    command: ["dagu", "worker"]
+    environment:
+      - DAGU_WORKER_COORDINATORS=dagu-coordinator:50055
+    depends_on:
+      - dagu-coordinator
 ```
 
-## Kubernetes with NFS
-
-```yaml
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: dagu-shared
-spec:
-  accessModes:
-    - ReadWriteMany
-  storageClassName: nfs
-  resources:
-    requests:
-      storage: 10Gi
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: dagu-main
-spec:
-  replicas: 1
-  template:
-    spec:
-      containers:
-        - name: dagu
-          image: dagu:latest
-          args: ["dagu", "start-all", "--host=0.0.0.0", "--coordinator.host=0.0.0.0"]
-          volumeMounts:
-            - name: shared
-              mountPath: /var/lib/dagu
-            - name: dags
-              mountPath: /etc/dagu/dags
-      volumes:
-        - name: shared
-          persistentVolumeClaim:
-            claimName: dagu-shared
-        - name: dags
-          configMap:
-            name: dagu-dags
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: dagu-worker
-spec:
-  replicas: 3
-  template:
-    spec:
-      containers:
-        - name: worker
-          image: dagu:latest
-          args: ["dagu", "worker", "--worker.labels=region=us-east-1"]
-          volumeMounts:
-            - name: shared
-              mountPath: /var/lib/dagu
-      volumes:
-        - name: shared
-          persistentVolumeClaim:
-            claimName: dagu-shared
-```
-
-The official Helm chart uses shared-nothing workers with ephemeral local storage; only its UI server, scheduler, and coordinator share the RWX PVC. The manifests above are for a custom shared-filesystem worker deployment. For the supported chart topology, see [Kubernetes (Helm)](/server-admin/deployment/kubernetes#distributed-mode).
+No worker volume is required. External workers also require publishing port `50055` and an advertise address they can resolve.

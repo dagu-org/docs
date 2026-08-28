@@ -510,8 +510,7 @@ const fullSidebar = [
             collapsed: true,
             items: [
               { text: "Overview", link: "/server-admin/distributed/workers/" },
-              { text: "Shared Filesystem", link: "/server-admin/distributed/workers/shared-filesystem" },
-              { text: "Shared Nothing", link: "/server-admin/distributed/workers/shared-nothing" },
+              { text: "Deployment", link: "/server-admin/distributed/workers/shared-nothing" },
             ],
           },
           { text: "Worker Labels", link: "/server-admin/distributed/worker-labels" },

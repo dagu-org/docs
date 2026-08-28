@@ -274,9 +274,9 @@ Equivalent environment variable:
 export DAGU_DAG_STATE_DIR=/var/lib/dagu/data/dag-state
 ```
 
-In shared-filesystem distributed deployments, point `paths.dag_state_dir` at shared persistent storage when multiple processes can access the same state files. In shared-nothing deployments, workers use coordinator RPCs and the coordinator stores state under its own `paths.dag_state_dir`.
+Distributed workers use coordinator RPCs for persistent state. The coordinator stores state under its own `paths.dag_state_dir`. Use persistent or shared server-side storage when coordinator replacement must preserve it.
 
-See [Persistent State](/writing-workflows/persistent-state) for workflow usage and [Shared Nothing Workers](/server-admin/distributed/workers/shared-nothing#persistent-state) for distributed behavior.
+See [Persistent State](/writing-workflows/persistent-state) for workflow usage and [Worker Deployment](/server-admin/distributed/workers/shared-nothing#persistent-state) for distributed behavior.
 
 ## Config File vs Base Config
 

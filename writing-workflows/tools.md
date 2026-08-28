@@ -200,7 +200,7 @@ The cache layout is:
 
 `tools-dir` defaults to `{paths.data_dir}/tools` and can be changed with `paths.tools_dir` or `DAGU_TOOLS_DIR`.
 
-In distributed shared-nothing mode, each worker uses its own local tools directory. A worker installs the toolset the first time it runs a DAG requiring it, then reuses the cache for later runs with the same platform and toolset hash.
+In distributed mode, each worker uses its own local tools directory. A worker installs the toolset the first time it runs a DAG requiring it, then reuses the cache for later runs with the same platform and toolset hash.
 
 Cache hits reuse the manifest and command shims without taking an install lock. When a toolset must be prepared, Dagu uses worker-local locks for the toolset environment, missing registry cache entries, cold aqua-proxy bootstrap, and overlapping package/version/platform installs. Independent toolsets with disjoint packages can prepare in parallel on the same worker.
 
@@ -232,7 +232,7 @@ This rule also applies to inline sub-DAGs in the same YAML file. Each YAML docum
 
 Packaged actions follow the same rule. If an official or third-party action uses external CLIs, put top-level `tools` in the action workflow file, not in `dagu-action.yaml`. The caller DAG's `tools` are not inherited across the action boundary, and the action manifest accepts only `apiVersion`, `name`, `dag`, `inputs`, and `outputs`.
 
-In distributed shared-nothing mode, the worker that executes the child DAG prepares the child DAG's tools in that worker's local data directory. Different workers maintain independent caches, and later runs on the same worker reuse the local cache.
+In distributed mode, the worker that executes the child DAG prepares the child DAG's tools in that worker's local data directory. Different workers maintain independent caches, and later runs on the same worker reuse the local cache.
 
 ## Current Limitations
 

@@ -2,6 +2,12 @@
 
 Worker labels are key-value pairs that describe worker capabilities. The coordinator uses labels to match tasks to workers via the `worker_selector` field in DAG definitions.
 
+Every worker also needs `worker.coordinators`. The examples below assume:
+
+```bash
+export DAGU_WORKER_COORDINATORS=coordinator-1:50055
+```
+
 ## Setting Labels
 
 ### CLI Flag
@@ -17,6 +23,8 @@ Labels are comma-separated `key=value` pairs. Keys and values are trimmed of whi
 ```yaml
 # config.yaml
 worker:
+  coordinators:
+    - coordinator-1:50055
   labels:
     gpu: "true"
     memory: "64G"
@@ -27,6 +35,7 @@ worker:
 
 ```bash
 export DAGU_WORKER_LABELS="gpu=true,memory=64G,region=us-east-1"
+export DAGU_WORKER_COORDINATORS=coordinator-1:50055
 dagu worker
 ```
 

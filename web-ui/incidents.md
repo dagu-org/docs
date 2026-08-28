@@ -78,7 +78,7 @@ Dagu opens incidents only after the DAG run is finally failed. If DAG-level auto
 
 When a later run of the same DAG succeeds, Dagu resolves the saved open incident. Recovery resolution still runs even if the current route has been turned off, so disabling a route does not leave already-open incidents stranded.
 
-Incident delivery is handled by the Dagu server-side event monitor, not by a workflow step. It works for local runs and distributed workers, including shared-nothing workers, as long as the server receives DAG-run events.
+Incident delivery is handled by the Dagu server-side event monitor, not by a workflow step. It works for local runs and distributed workers as long as the server receives DAG-run events.
 
 ## Deduplication
 

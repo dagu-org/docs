@@ -209,6 +209,6 @@ For self-signed or private CA certificates, prefer setting `peer.client_ca_file`
 ## See Also
 
 - [Distributed Networking](/server-admin/distributed/networking) - Coordinator and worker reachability
-- [Shared Nothing Workers](/server-admin/distributed/workers/shared-nothing) - Distributed workers without shared storage
+- [Worker Deployment](/server-admin/distributed/workers/shared-nothing) - Distributed worker setup
 - [TLS/HTTPS Configuration](/server-admin/authentication/tls) - Web UI/API HTTPS
 - [Configuration Reference](/server-admin/reference) - Full `peer` configuration reference

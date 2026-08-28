@@ -5,37 +5,27 @@ Run workflow tasks across multiple worker nodes.
 ## Architecture
 
 ```
-Main Instance (Scheduler + UI + Coordinator)
-         │                    │
-         │ Service Registry   │ gRPC + Heartbeat
-         │ (File-based)       │ (includes DAG definitions)
-         │                    │
-    ┌────┴──────────┬─────────┴─────────────┐
-    │               │                       │
-Worker 1        Worker 2                Worker 3
-(gpu=true)   (region=eu-west)        (cpu-optimized)
-    │               │                       │
-    └───────────────┴───────────────────────┘
-                    │
-            Shared Storage
-          (logs, execution state)
-
+Server-side services
+┌───────────┬───────────┬─────────────┐
+│ Scheduler │ Web UI/API│ Coordinator │── Persistent server data
+└───────────┴───────────┴──────┬──────┘
+                               │ gRPC
+              ┌────────────────┼────────────────┐
+              │                │                │
+          Worker 1         Worker 2         Worker 3
+          (gpu=true)    (region=eu-west)  (cpu-optimized)
+          local work      local work        local work
 ```
 
-### Storage Modes
+### Worker Data Flow
 
-Dagu supports two deployment modes for distributed workers:
+Workers require explicit coordinator addresses. The coordinator dispatches DAG definitions and receives status, logs, artifacts, heartbeats, and persistent-state requests over gRPC. Workers do not mount server data or the server DAG directory.
 
-| Mode | Description |
-|------|-------------|
-| [Shared Filesystem](./workers/shared-filesystem) | Workers share storage with coordinator via NFS/shared volumes |
-| [Shared Nothing](./workers/shared-nothing) | Workers communicate status and logs via gRPC (no shared storage) |
+DAG definitions are transmitted with dispatched tasks. When a step needs scripts, configuration, or other files stored beside its DAG, declare [file dependencies](/writing-workflows/file-dependencies). Dagu snapshots those files and materializes them in the worker's run directory.
 
-See [Workers](./workers/) for configuration reference and deployment details.
+Workers stream step and scheduler logs while a run is active, so the Web UI can display them before completion. Small bursts are briefly batched to reduce gRPC traffic, and any remaining output is sent when execution completes.
 
-DAG definitions do not need to be shared in either mode — they are transmitted to workers via gRPC when tasks are dispatched. When a step needs scripts, configuration, or other files stored beside its DAG, declare [file dependencies](/writing-workflows/file-dependencies). Dagu snapshots those files and materializes them in the worker's run directory.
-
-In shared-nothing mode, workers stream step and scheduler logs to the coordinator while a run is active, so they can be viewed before the run finishes. Small bursts are briefly batched to reduce gRPC traffic, and any remaining output is sent when execution completes.
+See [Workers](./workers/) for configuration and [Worker Deployment](./workers/shared-nothing) for deployment examples. Existing shared-filesystem worker installations should follow the [migration guide](./workers/shared-filesystem).
 
 ## How Dispatch Decisions Work
 
@@ -89,20 +79,26 @@ For peer certificates and mTLS setup, see [Distributed Transport Security](/serv
 
 ### Step 1: Start the Coordinator
 
-The coordinator service can be started with `dagu start-all` (requires `--coordinator.host` set to a non-localhost address):
+The coordinator service is enabled by default in `dagu start-all`:
 
 ```bash
-# Start all services including coordinator (distributed mode)
-dagu start-all --coordinator.host=0.0.0.0 --port=8080
+# Expose the coordinator to remote workers
+dagu start-all \
+  --coordinator.host=0.0.0.0 \
+  --coordinator.advertise=<coordinator-address> \
+  --port=8080
 
-# Single instance mode (coordinator disabled, default)
-dagu start-all
+# Disable the coordinator when distributed execution is not needed
+DAGU_COORDINATOR_ENABLED=false dagu start-all
 
 # Or start coordinator separately
-dagu coordinator --coordinator.host=0.0.0.0 --coordinator.port=50055
+dagu coordinator \
+  --coordinator.host=0.0.0.0 \
+  --coordinator.advertise=<coordinator-address> \
+  --coordinator.port=50055
 ```
 
-The coordinator is only started by `start-all` when `--coordinator.host` is set to a non-localhost address (not `127.0.0.1` or `localhost`). This allows running in single instance mode by default.
+By default, the coordinator binds to `127.0.0.1`. Set a reachable bind and advertise address before connecting workers from another host or container.
 
 For containerized environments (Docker, Kubernetes), configure both the bind address and advertise address:
 
@@ -128,11 +124,13 @@ Start workers on your compute nodes with appropriate labels:
 ```bash
 # GPU-enabled worker
 dagu worker \
+  --worker.coordinators=<coordinator-address>:50055 \
   --worker.labels gpu=true,cuda=11.8,memory=64G \
   --worker.health-port=8092
 
 # CPU-optimized worker
 dagu worker \
+  --worker.coordinators=<coordinator-address>:50055 \
   --worker.labels cpu-arch=amd64,cpu-cores=32,region=us-east-1 \
   --worker.health-port=8092
 ```

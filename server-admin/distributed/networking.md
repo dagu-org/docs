@@ -80,7 +80,7 @@ On workers, configure:
 
 - `worker.coordinators`: explicit coordinator addresses in `host:port` form.
 
-When `worker.coordinators` is set, workers use static coordinator discovery. This is the usual choice for shared-nothing workers because it does not require the worker to share the coordinator's file-backed service registry.
+`worker.coordinators` is required. Workers use these addresses for coordinator discovery and do not access the coordinator's file-backed service registry.
 
 The examples below use `dagu coordinator` when showing only the coordinator gRPC listener. If the coordinator runs inside `dagu start-all`, pass the same `--coordinator.host`, `--coordinator.advertise`, `--coordinator.port`, and `--peer.*` flags to `dagu start-all`.
 
@@ -206,7 +206,7 @@ dagu worker \
   --worker.coordinators=127.0.0.1:50055
 ```
 
-Use the same local port as the coordinator port. Dagu includes the coordinator owner host and port in tasks, and shared-nothing workers use that owner address for follow-up RPCs such as task acknowledgment, status updates, log streams, and artifact uploads.
+Use the same local port as the coordinator port. Dagu includes the coordinator owner host and port in tasks, and workers use that owner address for follow-up RPCs such as task acknowledgment, status updates, log streams, and artifact uploads.
 
 This pattern is intended for deployments where every remote worker reaches the coordinator through its own local SSH forward. Do not mix it with workers that need to reach the coordinator directly unless they have a route for the same advertised address.
 
@@ -235,7 +235,7 @@ Then verify:
 
 ### Worker Connects But Follow-Up RPCs Fail
 
-Check `coordinator.advertise`. The coordinator stores this value in tasks as the owner address. Shared-nothing workers use the owner address for follow-up RPCs after a task is claimed.
+Check `coordinator.advertise`. The coordinator stores this value in tasks as the owner address. Workers use the owner address for follow-up RPCs after a task is claimed.
 
 For direct network access, advertise the address workers can reach:
 
@@ -263,7 +263,7 @@ HTTP and HTTPS Serve modes are for HTTP services. They do not turn Dagu coordina
 
 - [Distributed Execution](/server-admin/distributed/) - Coordinator and worker setup
 - [Distributed Transport Security](/server-admin/distributed/transport-security) - TLS and mTLS for coordinator gRPC
-- [Shared Nothing Workers](/server-admin/distributed/workers/shared-nothing) - Worker mode without shared storage
+- [Worker Deployment](/server-admin/distributed/workers/shared-nothing) - Distributed worker setup
 - [Install on Kubernetes](/getting-started/installation/kubernetes) - Official Helm chart
 - [Tunnel (Tailscale)](/server-admin/tunnel) - Web UI/API access through Dagu's embedded Tailscale node
 - [Tailscale Serve command](https://tailscale.com/docs/reference/tailscale-cli/serve) - Official Tailscale Serve TCP forwarding syntax

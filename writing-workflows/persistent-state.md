@@ -362,9 +362,7 @@ The file-backed store is safe for concurrent local processes on the same filesys
 
 In distributed worker execution, workers access persistent state through the coordinator state RPCs. This keeps workers from creating separate local copies of the same logical state.
 
-For shared filesystem deployments, make `paths.dag_state_dir` point at shared persistent storage if workers or coordinators can access state files directly.
-
-For shared-nothing deployments, state is stored by the coordinator under its `paths.dag_state_dir`. State RPCs are routed deterministically by `scope` and `namespace`, so every worker uses the same coordinator for the same state keyspace. If you run multiple coordinators and need state to survive coordinator replacement, give each coordinator persistent storage for `paths.dag_state_dir` or use shared storage for that directory.
+State is stored by the coordinator under its `paths.dag_state_dir`. State RPCs are routed deterministically by `scope` and `namespace`, so every worker uses the same coordinator for the same state keyspace. If you run multiple coordinators and need state to survive coordinator replacement, give each coordinator persistent storage for `paths.dag_state_dir` or use shared server-side storage for that directory.
 
 ## Choosing Keys
 

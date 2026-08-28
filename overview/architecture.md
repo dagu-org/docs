@@ -123,7 +123,7 @@ Dagu follows the XDG Base Directory specification for file organization:
 
 ## Distributed Execution Architecture
 
-Dagu supports distributed execution through a coordinator-worker model. DAG definitions are transmitted to workers via gRPC. Shared-nothing workers also return status and logs over gRPC, while shared-filesystem workers write that data directly to common storage.
+Dagu supports distributed execution through a coordinator-worker model. DAG definitions are transmitted to workers via gRPC. Workers return status, logs, artifacts, and persistent-state operations through the coordinator.
 
 ### Overview
 
@@ -154,16 +154,16 @@ Dagu supports distributed execution through a coordinator-worker model. DAG defi
 - gRPC Server: Listens on configurable port (default: 50055)
 - Task Distribution: Routes tasks to appropriate workers based on labels
 - Long Polling: Workers poll for tasks using efficient long-polling mechanism
-- Health Monitoring: Tracks worker heartbeats (10s intervals) and health status
-- Automatic Failover: Redistributes tasks from unhealthy workers
+- Health Monitoring: Tracks worker heartbeats and health status
+- Failure Detection: Marks tasks failed when workers become unresponsive
 - Authentication: Supports signing keys and mutual TLS
 
 #### 2. Worker Service
-- Auto-Registration: Workers automatically register in registry system
+- Coordinator Discovery: Workers connect to configured coordinator addresses
 - Task Polling: Multiple concurrent pollers per worker
 - Label-Based Routing: Workers advertise capabilities via labels
 - Task Execution: Runs DAGs using the same execution engine
-- Heartbeat: Regular health updates every 10 seconds
+- Heartbeat: Regular health updates every second
 - Graceful Shutdown: Completes running tasks before terminating
 
 #### 3. Task Routing
@@ -184,8 +184,7 @@ steps:
 ### Communication Protocol
 
 1. Worker Registration
-   - Workers register in file-based registry system
-   - Connect to coordinator via gRPC
+   - Workers connect to configured coordinators via gRPC
    - Send regular heartbeats with status updates
    - Advertise labels for capability matching
 
@@ -205,16 +204,7 @@ Worker health is determined by heartbeat recency:
 - `Healthy`: Last heartbeat < 5 seconds ago (green)
 - `Warning`: Last heartbeat 5-15 seconds ago (yellow)
 - `Unhealthy`: Last heartbeat > 15 seconds ago (red)
-- `Offline`: No heartbeat for > 30 seconds (removed from registry)
-
-### Service Registry
-
-The file-based service registry system enables:
-- Automatic Registration: Services register on startup
-- Dynamic Discovery: Coordinators find workers automatically
-- Heartbeat Tracking: Regular updates maintain service health
-- Shared Storage: Registry files stored in configurable directory
-- Graceful Cleanup: Stale entries removed automatically
+- `Offline`: No heartbeat for > 30 seconds
 
 ### Security Features
 
@@ -235,18 +225,16 @@ The file-based service registry system enables:
 #### Single Coordinator, Multiple Workers
 ```bash
 # Start coordinator on main server
-dagu coordinator --coordinator.host=0.0.0.0
+dagu coordinator --coordinator.host=0.0.0.0 --coordinator.advertise=coordinator.internal
 
 # Start workers on compute nodes
-dagu worker --worker.labels gpu=true --worker.coordinator-host=coordinator.internal
-dagu worker --worker.labels region=us-east-1 --worker.coordinator-host=coordinator.internal
+dagu worker --worker.coordinators=coordinator.internal:50055 --worker.labels gpu=true
+dagu worker --worker.coordinators=coordinator.internal:50055 --worker.labels region=us-east-1
 ```
 
 ### Requirements
 
 - **DAG Definitions**: Workers receive DAG definitions via gRPC when tasks are dispatched. Workers do **not** need access to the `dags/` directory.
-- **Storage**: Workers can operate in two modes:
-  - **Shared Filesystem**: Workers write status and logs directly to shared storage (NFS, EFS, Azure Files)
-  - **Shared Nothing**: Workers send status and logs to the coordinator via gRPC (no shared storage required)
+- **Storage**: Workers use local execution storage and send control-plane data to the coordinator. Do not mount server data or DAG directories on workers.
 
 See [Workers](/server-admin/distributed/workers/) for detailed deployment documentation.

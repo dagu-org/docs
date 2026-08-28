@@ -261,7 +261,7 @@ The DAG definition, selected files, and selected directories all count toward th
 ## Related Pages
 
 - [Distributed Execution](/server-admin/distributed/) — coordinator and worker setup
-- [Shared Nothing Workers](/server-admin/distributed/workers/shared-nothing) — execution without shared storage
+- [Worker Deployment](/server-admin/distributed/workers/shared-nothing) — distributed worker setup
 - [Runtime Context and Variables](/writing-workflows/runtime-variables) — work-directory variables
 - [Sub-DAGs](/writing-workflows/sub-dags) — inline and separately stored child workflows
 - [Embedded Go API](/embedding/go-api#distributed-execution) — choosing `RunFile` instead of `RunYAML`

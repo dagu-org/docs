@@ -439,7 +439,7 @@ When executing DAGs directly, each step creates its own connection with defaults
 - Max retries: 3 (configurable via `max_retries`)
 - Command timeout: 30 seconds (configurable via `timeout`)
 
-### Worker Mode (Shared-Nothing)
+### Worker Mode
 
 When running distributed workers, Redis connections use a **global connection pool** managed at the worker level. This prevents connection exhaustion when multiple DAGs run concurrently.
 

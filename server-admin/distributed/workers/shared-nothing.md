@@ -1,6 +1,6 @@
-# Shared Nothing Mode
+# Worker Deployment
 
-In shared nothing mode, workers operate without any shared filesystem access. All status updates and logs are transmitted to the coordinator via gRPC. No shared storage is required, but status and logs depend on network connectivity to the coordinator.
+Workers operate without access to server-side storage. They receive tasks and send status, logs, artifacts, heartbeats, and persistent-state requests through the coordinator gRPC service. Coordinator connectivity is therefore required throughout execution.
 
 ## Overview
 
@@ -28,7 +28,7 @@ In shared nothing mode, workers operate without any shared filesystem access. Al
 
 The DAG definition is sent with each dispatched task. If a step also needs files from the authored DAG directory, declare them with step-level [`dependencies`](/writing-workflows/file-dependencies). The coordinator snapshots the DAG and matching files, transfers the workspace bundle, and the worker materializes it as `DAG_RUN_WORK_DIR`. Files beside the DAG are left out unless they match a declaration, so workers do not need access to the source filesystem.
 
-### Static Discovery
+### Coordinator Addresses
 
 Workers connect directly to coordinators using explicit addresses:
 
@@ -36,7 +36,7 @@ Workers connect directly to coordinators using explicit addresses:
 dagu worker --worker.coordinators=coordinator-1:50055,coordinator-2:50055
 ```
 
-No service registry or shared storage is required.
+Workers require no service-registry or server-data mount.
 
 For Kubernetes, private network, VPN, overlay network, and SSH forwarding examples, see [Distributed Networking](/server-admin/distributed/networking).
 
@@ -69,17 +69,17 @@ When multiple coordinators are configured, state requests are routed determinist
 
 ### Packaged Actions
 
-Packaged actions are supported in shared-nothing mode. The worker executing the action step resolves the action reference, validates the `dagu-action.yaml` manifest, and packages the resolved action workspace. When the action sub-DAG is dispatched, the workspace bundle is transferred through the coordinator and materialized on the worker that runs the child DAG.
+Packaged actions are supported on workers. The worker executing the action step resolves the action reference, validates the `dagu-action.yaml` manifest, and packages the resolved action workspace. When the action sub-DAG is dispatched, the workspace bundle is transferred through the coordinator and materialized on the worker that runs the child DAG.
 
 The workspace bundle contains the action DAG, manifest, scripts, and helper files. It does not contain external binaries from the caller's environment. If the action DAG needs portable CLIs, declare them with top-level `tools` in the action DAG file; the worker running the child action DAG prepares those tools in its own local cache.
 
-Use pinned GitHub references for portable shared-nothing deployments:
+Use pinned GitHub references for portable worker deployments:
 
 ```yaml
 steps:
   - action: acme/dagu-action-notify@v1.2.0
     with:
-      text: "shared-nothing worker run"
+      text: "distributed worker run"
 ```
 
 See [Third-Party Actions](/dagu-actions/third-party) for non-official package references and packaging rules.
@@ -176,7 +176,7 @@ export DAGU_WORKER_POSTGRES_POOL_CONN_MAX_IDLE_TIME=60
 
 ## PostgreSQL Connection Pool Management
 
-In shared-nothing mode, multiple DAGs run concurrently within a single worker process. Without global connection pool management, each DAG's PostgreSQL steps could create unlimited connections, leading to connection exhaustion.
+Multiple DAGs run concurrently within a single worker process. Without global connection pool management, each DAG's PostgreSQL steps could create unlimited connections, leading to connection exhaustion.
 
 ### How It Works
 

@@ -66,9 +66,9 @@ Values are refreshed for each step, so `DAG_RUN_STEP_NAME`, `DAG_RUN_STEP_STDOUT
 | `DAG_RUN_STATUS` | Lifecycle handlers only | Canonical status: `running` (init handler), `succeeded`, `partially_succeeded`, `failed`, `rejected`, `aborted`, or `waiting` (wait handler). | `failed` |
 | `DAG_WAITING_STEPS` | Wait handler only | Comma-separated list of step names currently waiting for human-task completion or approval. | `release_review,security_review` |
 | `PWD` | Current step only | Working directory for the step. Uses an explicit step or DAG `working_dir`; otherwise, it defaults to `DAG_RUN_WORK_DIR`. | `/data/dagu/dag-run-work/daily-backup/mtbry4u4rcyn6/root` |
-| `DAG_RUN_WORK_DIR` | All steps & handlers | Absolute path to the per-DAG-run working directory. Each run gets its own isolated directory. In local mode, it is stored below `paths.dag_run_work_dir`. In shared-nothing distributed mode, it is temporary worker-local storage. Not set during dry runs. | `/data/dagu/dag-run-work/daily-backup/mtbry4u4rcyn6/root` |
+| `DAG_RUN_WORK_DIR` | All steps & handlers | Absolute path to the per-DAG-run working directory. Each run gets its own isolated directory. In local mode, it is stored below `paths.dag_run_work_dir`. On distributed workers, it is temporary worker-local storage. Not set during dry runs. | `/data/dagu/dag-run-work/daily-backup/mtbry4u4rcyn6/root` |
 | `DAG_WIKI_DIR` | All steps & handlers | Absolute path to the current DAG's Wiki page directory. Named-workspace DAGs include the workspace directory. | `/opt/dagu/dags/wiki/platform/daily-backup` |
-| `DAG_RUN_ARTIFACTS_DIR` | All steps & handlers when artifact storage is active | Absolute path to the per-DAG-run artifact directory, or a worker-local staging directory in shared-nothing mode. Artifact storage is active when enabled explicitly or auto-enabled by `${context.paths.artifacts_dir}` references, artifact actions, or artifact stream outputs. | `/data/dagu/artifacts/daily-backup/dag-run_20241012_040000Z_c1f4b2` |
+| `DAG_RUN_ARTIFACTS_DIR` | All steps & handlers when artifact storage is active | Absolute path to the per-DAG-run artifact directory, or a worker-local staging directory during distributed execution. Artifact storage is active when enabled explicitly or auto-enabled by `${context.paths.artifacts_dir}` references, artifact actions, or artifact stream outputs. | `/data/dagu/artifacts/daily-backup/dag-run_20241012_040000Z_c1f4b2` |
 | `DAG_PARAMS_JSON` | All steps & handlers | JSON string containing the resolved parameter map. Resolved DAG params are serialized as strings; if the run was started with raw JSON parameters, the original payload is preserved. Not set when the DAG has no resolved parameters. | `{"ENVIRONMENT":"prod","batchSize":"1000"}` |
 | `DAG_PUSHBACK` | Steps re-executed after approval push-back only | JSON string containing the current push-back iteration, latest inputs, authenticated actor, server timestamp, and chronological history. Not set on the initial execution. | `{"iteration":2,"by":"reviewer","at":"2026-04-26T06:18:43Z","inputs":{"FEEDBACK":"Tighten summary"},"history":[...]}` |
 | `DAG_PUSHBACK_ITERATION` | Steps re-executed after approval push-back only | Current push-back iteration as a plain integer string. Not set on the initial execution. | `2` |
@@ -94,7 +94,7 @@ After an upgrade, an existing run continues using its previous nested work direc
 
 Do not let old and new Dagu versions execute the same run concurrently when they share a durable work root. Drain or stop those processes, upgrade them together, and then resume execution. Otherwise, the versions can select different work directories for the same run.
 
-**Shared-nothing (distributed) mode:** The directory is a temporary directory under the system temp dir (`/tmp/dagu_<dag-name>_<run-id>`). When the DAG declares [file dependencies](/writing-workflows/file-dependencies), the worker materializes the DAG and matching files in a task workspace here before execution, then removes that task workspace when execution finishes. Other shared-nothing work directories are cleaned up when the worker process exits.
+**Distributed workers:** The directory is a temporary directory under the system temp dir (`/tmp/dagu_<dag-name>_<run-id>`). When the DAG declares [file dependencies](/writing-workflows/file-dependencies), the worker materializes the DAG and matching files in a task workspace here before execution, then removes that task workspace when execution finishes. Other worker work directories are cleaned up when the worker process exits.
 
 **Dry runs:** The variable is not set.
 
@@ -186,8 +186,8 @@ Base directory resolution:
 
 Execution mode behavior:
 
-- **Local** and **shared-filesystem distributed** execution use the final artifact directory directly.
-- **Shared-nothing distributed** workers receive a temporary worker-local artifact directory. Dagu uploads its contents to the coordinator when the attempt finishes.
+- **Local execution** uses the final artifact directory directly.
+- **Distributed workers** receive a temporary worker-local artifact directory. Dagu uploads its contents to the coordinator when the attempt finishes.
 
 Example:
 

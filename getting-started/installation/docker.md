@@ -52,6 +52,17 @@ Start with `docker compose up -d`.
 
 The image defaults `DAGU_HOME` to `/var/lib/dagu`, matching the volume mount. If `DAGU_HOME` is customized, mount the persistent volume at the same path and ensure it is writable by `PUID`/`PGID`.
 
+Remote CLI contexts use the HTTP API exposed on port `8080`. Include the API path in the context URL:
+
+```bash
+dagu context add docker \
+  --server http://docker-host:8080/api/v1 \
+  --api-key dagu_xxxxxxxxxxxxxxxxxxxx
+dagu context test docker
+```
+
+Coordinator port `50055` is unrelated to remote CLI contexts. Publish it only when `dagu worker` processes outside the Compose network need to connect.
+
 ## Giving DAGs access to the host Docker daemon
 
 Use this layout when workflows run `container:`, `docker.run`, or

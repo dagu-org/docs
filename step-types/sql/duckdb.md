@@ -60,7 +60,7 @@ steps:
         SELECT * FROM read_csv_auto('events.csv') LIMIT 10;
 ```
 
-The database file must exist on the worker that runs the action. In distributed shared-nothing mode, use a shared mount, object storage, or an absolute path available on that worker. Omitting `database` creates a transient in-memory database for that one action invocation, so it cannot share state with later steps.
+The database file must exist on the worker that runs the action. In distributed mode, use an application-data mount, object storage, or an absolute path available on that worker. Omitting `database` creates a transient in-memory database for that one action invocation, so it cannot share state with later steps.
 
 Use `readonly: true` when a step should only inspect an existing database:
 
@@ -242,7 +242,7 @@ steps:
     depends: export_parquet
 ```
 
-In distributed shared-nothing mode, an artifact path may be worker-local while the run is still executing. For cross-worker data handoff, use a shared mounted path, object storage, or keep the transfer inside one DuckDB statement with `ATTACH` and `INSERT INTO ... SELECT`.
+In distributed mode, an artifact path may be worker-local while the run is still executing. For cross-worker data handoff, use an application-data mount, object storage, or keep the transfer inside one DuckDB statement with `ATTACH` and `INSERT INTO ... SELECT`.
 
 ## Stdout Artifacts
 

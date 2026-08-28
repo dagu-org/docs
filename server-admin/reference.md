@@ -212,14 +212,14 @@ coordinator:
 # Worker (for distributed execution)
 worker:
   id: ""                  # Worker ID (default: hostname@PID)
-  coordinators: []          # Explicit coordinator addresses for shared-nothing mode
+  coordinators: []         # Required by dagu worker (host:port)
   max_active_runs: 100      # Max parallel task executions
   health_port: 8092         # HTTP health check port (0 to disable)
   labels:                 # Worker capabilities
     gpu: "false"
     memory: "16G"
     region: "us-east-1"
-  postgres_pool:           # PostgreSQL connection pool (shared-nothing mode only)
+  postgres_pool:           # PostgreSQL connection pool for worker processes
     max_open_conns: 25      # Total connections across ALL PostgreSQL DSNs (default: 25)
     max_idle_conns: 5       # Idle connections per DSN (default: 5)
     conn_max_lifetime: 300  # Connection lifetime in seconds (default: 300)
@@ -463,7 +463,7 @@ grants. Set `DAGU_AUTH_PROXY_REQUIRE_MAPPING=true` to reject them.
 - `DAGU_WORKER_MAX_ACTIVE_RUNS` - Max concurrent task executions (default: `100`)
 - `DAGU_WORKER_HEALTH_PORT` - Worker HTTP health check port (default: `8092`, `0` to disable)
 - `DAGU_WORKER_LABELS` - Worker labels (format: `key1=value1,key2=value2`)
-- `DAGU_WORKER_COORDINATORS` - Explicit coordinator addresses for shared-nothing mode
+- `DAGU_WORKER_COORDINATORS` - Coordinator addresses required by `dagu worker` (`host:port,...`)
 - `DAGU_WORKER_POSTGRES_POOL_MAX_OPEN_CONNS` - PostgreSQL max open connections across all DSNs (default: `25`)
 - `DAGU_WORKER_POSTGRES_POOL_MAX_IDLE_CONNS` - PostgreSQL max idle connections per DSN (default: `5`)
 - `DAGU_WORKER_POSTGRES_POOL_CONN_MAX_LIFETIME` - PostgreSQL connection max lifetime in seconds (default: `300`)

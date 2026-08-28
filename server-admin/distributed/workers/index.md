@@ -39,30 +39,22 @@ Workers connect to a coordinator service and poll for tasks via gRPC long-pollin
 Workers are identified by a unique ID that defaults to `hostname@PID`. This can be customized:
 
 ```bash
-dagu worker --worker.id=gpu-worker-01
+dagu worker \
+  --worker.coordinators=coordinator.internal:50055 \
+  --worker.id=gpu-worker-01
 ```
 
-## Deployment Modes
+## Transport and Storage
 
-Workers support two deployment modes based on your infrastructure:
+All workers use coordinator gRPC for control-plane data:
 
-| Feature | Shared Filesystem | Shared Nothing |
-|---------|-------------------|----------------|
-| **Storage Requirement** | NFS/shared volume | None |
-| **Service Discovery** | File-based registry | Static coordinator list |
-| **Status Persistence** | Direct file writes | gRPC `ReportStatus` |
-| **Log Storage** | Direct file writes | gRPC `StreamLogs` |
-| **DAG-local files** | [`dependencies`](/writing-workflows/file-dependencies) workspace bundle | [`dependencies`](/writing-workflows/file-dependencies) workspace bundle |
-| **Zombie Detection** | File-based heartbeats | Coordinator-based |
-| **Use Cases** | Docker Compose, single-cluster | Kubernetes, multi-cloud |
+- Workers connect to explicit `worker.coordinators` addresses.
+- The coordinator dispatches tasks and receives status, logs, artifacts, and persistent-state requests.
+- Workers use local or ephemeral storage for execution work and caches.
+- [`dependencies`](/writing-workflows/file-dependencies) transfer required DAG-local files with each task.
+- Server data and DAG-directory mounts belong only on server-side services.
 
-### [Shared Filesystem Mode](./shared-filesystem)
-
-Workers share filesystem access with the coordinator. Workers write status and logs directly to shared storage.
-
-### [Shared Nothing Mode](./shared-nothing)
-
-Workers operate without any shared storage. All communication happens via gRPC to the coordinator.
+See [Worker Deployment](./shared-nothing) for deployment examples. Existing shared-filesystem worker installations should follow the [migration guide](./shared-filesystem).
 
 ## Monitoring
 
@@ -126,7 +118,9 @@ Response:
 # config.yaml
 worker:
   id: "worker-gpu-01"        # Defaults to hostname@PID
-  max_active_runs: 100         # Number of concurrent pollers
+  coordinators:
+    - "coordinator.internal:50055"
+  max_active_runs: 100        # Number of concurrent pollers
   labels:
     gpu: "true"
     memory: "64G"
@@ -134,7 +128,7 @@ worker:
 
 ### PostgreSQL Connection Pool
 
-In shared-nothing mode (when `worker.coordinators` is configured), workers use a global PostgreSQL connection pool to prevent connection exhaustion when running multiple concurrent DAGs.
+Workers use a global PostgreSQL connection pool to prevent connection exhaustion when running multiple concurrent DAGs.
 
 ```yaml
 # config.yaml
@@ -148,18 +142,19 @@ worker:
     conn_max_idle_time: 60    # Idle connection timeout in seconds
 ```
 
-This applies only in shared-nothing mode and only to PostgreSQL. SQLite always uses 1 connection per step.
+This applies only to PostgreSQL. SQLite always uses 1 connection per step.
 
-See [Shared Nothing Mode — PostgreSQL Connection Pool Management](/server-admin/distributed/workers/shared-nothing#postgresql-connection-pool-management) for detailed configuration guidance.
+See [Worker Deployment — PostgreSQL Connection Pool Management](/server-admin/distributed/workers/shared-nothing#postgresql-connection-pool-management) for detailed configuration guidance.
 
 ### Environment Variables
 
 ```bash
 export DAGU_WORKER_ID=worker-01
+export DAGU_WORKER_COORDINATORS=coordinator.internal:50055
 export DAGU_WORKER_LABELS="gpu=true,region=us-east-1"
 export DAGU_WORKER_MAX_ACTIVE_RUNS=50
 
-# PostgreSQL connection pool (shared-nothing mode only)
+# PostgreSQL connection pool
 export DAGU_WORKER_POSTGRES_POOL_MAX_OPEN_CONNS=25
 export DAGU_WORKER_POSTGRES_POOL_MAX_IDLE_CONNS=5
 export DAGU_WORKER_POSTGRES_POOL_CONN_MAX_LIFETIME=300

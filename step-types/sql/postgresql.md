@@ -69,9 +69,9 @@ When executing DAGs directly (not via distributed workers), each PostgreSQL step
 
 This is optimal for isolated step execution where each step gets its own dedicated connection.
 
-### Worker Mode (Shared-Nothing)
+### Worker Mode
 
-When running distributed workers in shared-nothing mode (with `worker.coordinators` configured), PostgreSQL steps use a **global connection pool** managed at the worker level.
+When running distributed workers, PostgreSQL steps use a **global connection pool** managed at the worker level.
 
 This prevents connection exhaustion when multiple DAGs run concurrently in the same worker process. All PostgreSQL connections across all DAG executions share the pool.
 

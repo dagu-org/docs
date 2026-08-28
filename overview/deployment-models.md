@@ -54,7 +54,7 @@ Because a worker exists only while its run is in flight, execution capacity fall
 
 Use this model when execution should sit on hosts you keep running and pick by label. The server dispatches tasks into a coordinator; workers connect outbound over gRPC, poll for tasks matching their labels, and report status, logs, and artifacts back. Nothing is pushed to a worker, so workers need no inbound port.
 
-The coordinator is not a relay. It writes what it receives to the same Dagu data as the rest of the server side: run status through the DAG-run repository, plus streamed logs and artifacts under `paths.log_dir` and `paths.artifact_dir`. That write path is how a shared-nothing worker's output reaches the Web UI at all. Workers with direct access to the storage write to it themselves instead.
+The coordinator writes worker output to the same Dagu data as the rest of the server side: run status through the DAG-run repository, plus streamed logs and artifacts under `paths.log_dir` and `paths.artifact_dir`. Workers do not access that server storage directly.
 
 Unlike temporary workers, these stay up between runs, which is what buys label routing, warm toolchains, and a fixed place for private-network access. Workers are useful for:
 

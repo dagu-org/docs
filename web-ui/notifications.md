@@ -290,7 +290,7 @@ Use HMAC signing when the receiving service needs to verify that Dagu sent the w
 
 ## Delivery Behavior
 
-Notifications are sent by the Dagu server-side event monitor, not by a workflow step. This means notification delivery works for local runs and distributed workers, including shared-nothing workers, as long as the server receives DAG-run events.
+Notifications are sent by the Dagu server-side event monitor, not by a workflow step. This means notification delivery works for local runs and distributed workers as long as the server receives DAG-run events.
 
 The monitor remembers delivered events so a server restart does not replay old notifications. Use the channel **Test** action when validating credentials and destination access.
 
