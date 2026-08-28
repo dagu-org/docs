@@ -178,6 +178,14 @@ When a DAG run starts, Dagu:
 
 If any secret fails to resolve, run initialization fails and steps do not execute. `dagu dry` also resolves secrets. `dagu validate` checks YAML shape and DAG structure, but it does not contact providers and does not verify that a secret exists.
 
+## Distributed Runs
+
+For distributed runs, the coordinator that owns the task resolves Dagu-managed registry refs for the active worker. Nested child DAGs resolve refs against each child's workspace. Workers do not need the server secret store or data volume.
+
+Direct provider refs resolve where the DAG executes. A distributed worker therefore needs the provider configuration, credentials, files, identity, and network access used by those refs. For example, a `file` provider path must exist on that worker.
+
+Managed secret values travel over coordinator gRPC. Configure [peer TLS or mTLS](/server-admin/distributed/transport-security) outside an isolated trusted network.
+
 ## Variable Precedence
 
 During step execution, the environment scope is layered so later layers override earlier layers:
@@ -239,6 +247,7 @@ Masking is not a process sandbox. The step process receives the raw secret in it
 ## Provider Pages
 
 - [Runtime Profiles](/writing-workflows/runtime-profiles)
+- [Worker Deployment](/server-admin/distributed/workers/shared-nothing)
 - [Web UI DAG Secret Refs](/web-ui/secrets)
 - [Dotenv Loading](/writing-workflows/secrets/dotenv)
 - [`env` Provider](/writing-workflows/secrets/env-provider)

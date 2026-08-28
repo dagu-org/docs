@@ -154,6 +154,12 @@ Secret entry plaintext is write-only. API and UI responses show secret entry met
 
 Default profile entries are fallback values. A selected profile overrides default layers for matching keys. Step-level `env:` can still override variables for a single step. Profile secrets are treated as secrets, so they participate in secret masking. Avoid reusing the same key across DAG `env:`, DAG `secrets:`, default layers, and selected profiles unless the override behavior is intentional.
 
+### Distributed Runs
+
+For a distributed run, the coordinator that owns the task resolves the profile layers and sends the values to the active worker. Workers do not need a copy of the profile or Dagu-managed secret stores. Child DAGs inherit the selected profile while resolving defaults against each child's workspace, including nested children started from a worker.
+
+Profile secrets travel over coordinator gRPC. Configure [peer TLS or mTLS](/server-admin/distributed/transport-security) outside an isolated trusted network.
+
 ## Retries
 
 Retries inherit the original run's profile name. Profile selection is immutable across retry paths, including CLI, API, queue, scheduler, worker, and sub-DAG retry flows.
@@ -264,5 +270,6 @@ Secret values are write-only. Profile responses include the secret entry key, ki
 - [Environment Variables](/writing-workflows/environment-variables)
 - [Workflow Secrets](/writing-workflows/secrets)
 - [Runtime Context and Variables](/writing-workflows/runtime-variables)
+- [Worker Deployment](/server-admin/distributed/workers/shared-nothing)
 - [Web UI Profiles](/web-ui/profiles)
 - [Multi-Environment Deployments](/server-admin/deployment/multi-environment)

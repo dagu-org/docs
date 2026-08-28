@@ -1,6 +1,6 @@
 # Migrating Shared-Filesystem Workers
 
-Dagu 2.9 removed direct shared-filesystem access from daemon workers. Current `dagu worker` processes require coordinator addresses and exchange tasks, status, logs, artifacts, and persistent state over gRPC.
+Current `dagu worker` processes require coordinator addresses and exchange tasks, profiles, Dagu-managed secrets, status, logs, artifacts, and persistent state over gRPC.
 
 This page remains at its old URL for upgrade guidance. For current setup instructions, see [Worker Deployment](./shared-nothing).
 
@@ -8,7 +8,7 @@ This page remains at its old URL for upgrade guidance. For current setup instruc
 
 - Set `worker.coordinators` or `DAGU_WORKER_COORDINATORS`.
 - Give every coordinator a stable address reachable from workers.
-- Keep server data, DAG definitions, logs, and artifacts off worker mounts.
+- Keep server data, DAG definitions, profiles, Dagu-managed secrets, logs, and artifacts off worker mounts.
 - Use worker-local or ephemeral storage for work directories and caches.
 - Declare DAG-local files with [`dependencies`](/writing-workflows/file-dependencies); Dagu transfers them with the task.
 
@@ -16,7 +16,7 @@ Server-side processes may still share persistent storage when deployed separatel
 
 ## Migration
 
-1. Drain and stop existing workers.
+1. Keep existing worker mounts while upgrading every coordinator to a version that supports coordinator-side profile and managed-secret resolution.
 2. Bind the coordinator to a worker-reachable interface and set its advertise address:
 
    ```bash
@@ -26,7 +26,8 @@ Server-side processes may still share persistent storage when deployed separatel
      --coordinator.port=50055
    ```
 
-3. Configure each worker with one or more coordinator addresses:
+3. Drain and stop existing workers.
+4. Configure each worker with one or more coordinator addresses:
 
    ```bash
    dagu worker \
@@ -34,9 +35,9 @@ Server-side processes may still share persistent storage when deployed separatel
      --worker.labels=region=us-east-1
    ```
 
-4. Remove server data and DAG-directory mounts from worker containers or pods.
-5. Keep coordinator-owned state on persistent storage when it must survive coordinator replacement.
-6. Configure [peer TLS or mTLS](/server-admin/distributed/transport-security) when coordinator traffic crosses an untrusted network.
+5. Remove server data and DAG-directory mounts from worker containers or pods.
+6. Keep coordinator-owned state on persistent storage when it must survive coordinator replacement.
+7. Configure [peer TLS or mTLS](/server-admin/distributed/transport-security) when coordinator traffic crosses an untrusted network.
 
 ## Docker Compose
 

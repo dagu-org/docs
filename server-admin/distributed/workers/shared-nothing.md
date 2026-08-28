@@ -28,6 +28,14 @@ Workers operate without access to server-side storage. They receive tasks and se
 
 The DAG definition is sent with each dispatched task. If a step also needs files from the authored DAG directory, declare them with step-level [`dependencies`](/writing-workflows/file-dependencies). The coordinator snapshots the DAG and matching files, transfers the workspace bundle, and the worker materializes it as `DAG_RUN_WORK_DIR`. Files beside the DAG are left out unless they match a declaration, so workers do not need access to the source filesystem.
 
+### Runtime Profiles and Secrets
+
+The coordinator that owns a task resolves Global, workspace, and selected [runtime profile](/writing-workflows/runtime-profiles) layers. It also resolves Dagu-managed [`secrets[].ref`](/writing-workflows/secrets#registry-refs) values. Workers do not need server profile or secret stores. Child DAGs inherit the selected profile and resolve defaults and managed secret refs against the child's workspace.
+
+Direct secret providers resolve where the DAG executes. Give workers the provider configuration, credentials, files, and network access required by those providers. These workflow resources are separate from the Dagu server data volume.
+
+Resolved profile and managed-secret values travel over coordinator gRPC. Configure [peer TLS or mTLS](/server-admin/distributed/transport-security) outside an isolated trusted network.
+
 ### Coordinator Addresses
 
 Workers connect directly to coordinators using explicit addresses:
@@ -274,7 +282,7 @@ spec:
             - "worker"
             - "--worker.coordinators=dagu-coordinator.default.svc.cluster.local:50055"
             - "--worker.labels=region=us-east-1"
-          # No volume mounts needed - all state via gRPC
+          # No Dagu server volume: control-plane state uses gRPC
 ```
 
 For Helm-based Kubernetes deployment, see [Kubernetes (Helm)](/server-admin/deployment/kubernetes).

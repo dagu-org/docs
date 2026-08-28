@@ -69,6 +69,8 @@ Rotating a secret entry writes a new secret value. New runs and new retry attemp
 
 When starting or enqueueing a DAG from the Web UI, select a profile from the **Profile** field in the start dialog. If no profile is selected, the run still receives any matching Global or workspace default entries, plus the environment, parameters, and secrets defined by the DAG and server configuration.
 
+The same selection applies to distributed runs. Profiles remain coordinator-managed and require no per-worker profile configuration or server data mount.
+
 ![Start DAG dialog showing the runtime profile selector](/runtime-profile-start-dialog.png)
 
 Run history and run details show the selected profile name when a profile was used.
@@ -94,6 +96,7 @@ This also applies to profile default layers. Default-layer secret entries should
 - [Runtime Profiles](/writing-workflows/runtime-profiles)
 - [DAG Secret Refs](/web-ui/secrets)
 - [Workflow Secrets](/writing-workflows/secrets)
+- [Worker Deployment](/server-admin/distributed/workers/shared-nothing)
 - [Workspaces](/web-ui/workspaces)
 - [User Management](/server-admin/authentication/user-management)
 - [Multi-Environment Deployments](/server-admin/deployment/multi-environment)
