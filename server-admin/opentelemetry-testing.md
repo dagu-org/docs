@@ -186,7 +186,7 @@ dagu start parent-workflow.yaml
 In Jaeger, you should see:
 - One trace containing all DAG executions
 - Parent-child relationships preserved
-- `dag.parent_run_id` attribute on sub DAGs
+- `dag.parent_run_id` attribute on sub-DAGs
 
 ## Production-Like Testing
 

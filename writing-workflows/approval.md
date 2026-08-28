@@ -36,7 +36,7 @@ The `deploy_staging` step runs `./deploy.sh staging`, then enters `Waiting` stat
 | `required` | string[] | Parameters that must be provided (subset of `input`) |
 | `rewind_to` | string | Optional step name or ID to restart from on push-back |
 
-All fields are optional. A bare `approval: {}` is valid — no prompt, no inputs, just a pause.
+All fields are optional. A bare `approval: {}` is valid: no prompt, no inputs, just a pause.
 
 Validation: every entry in `required` must also appear in `input`. The build fails otherwise.
 If `rewind_to` is set, it must reference the current step or one of its upstream dependencies.
@@ -49,9 +49,9 @@ Push-back input names are not special-cased. `FEEDBACK` is common, but any key c
 3. The DAG status becomes `Waiting`
 4. Dependent steps remain `Not Started`
 5. A human reviews the step output and chooses one of:
-   - **Approve** — step succeeds, dependents execute
-   - **Push back** — step resets to `Not Started` and re-executes (see [Push-back](#push-back))
-   - **Reject** — step enters `Rejected` status, DAG becomes `Rejected`, dependents are aborted
+   - **Approve**: step succeeds, dependents execute
+   - **Push back**: step resets to `Not Started` and re-executes (see [Push-back](#push-back))
+   - **Reject**: step enters `Rejected` status, DAG becomes `Rejected`, dependents are aborted
 
 ## Examples
 
@@ -76,7 +76,7 @@ steps:
 
 ### Gating a Sub-DAG
 
-Use `call` with `approval` to gate a multi-step workflow behind a single approval point. The sub-DAG runs to completion first, then the step waits for review:
+Use `action: dag.run` with `approval` to gate a multi-step workflow behind a single approval point. The sub-DAG runs to completion first, then the step waits for review:
 
 ```yaml
 steps:
@@ -93,11 +93,11 @@ steps:
 
 The `integration-test-suite` DAG (which may contain many steps internally) executes fully. Once finished, `run_integration_tests` enters `Waiting`. The approver reviews the sub-DAG's results before `deploy` proceeds.
 
-This pattern is useful when you want human review over a complex operation that involves multiple internal steps — tests, builds, migrations — without adding approval to each individual sub-step.
+This pattern is useful when you want human review over a complex operation that involves multiple internal steps (tests, builds, migrations) without adding approval to each individual sub-step.
 
 ### Approval Before a Sub-DAG
 
-The reverse pattern: approve first, then trigger multi-step execution. Place approval on the step *before* a `call`:
+The reverse pattern: approve first, then trigger multi-step execution. Place approval on the step *before* running the child DAG:
 
 ```yaml
 steps:
@@ -131,7 +131,7 @@ Push-back is only available on steps with the `approval` field.
 4. All transitive downstream dependents of that restart point also reset to `Not Started`
 5. Every step that is reset by the push-back receives push-back context when it executes again
 6. The `approvalIteration` counter increments (starts at 0, becomes 1 after first push-back)
-7. The step enters `Waiting` again — the approver can approve, push back again, or reject
+7. The step enters `Waiting` again: the approver can approve, push back again, or reject
 
 ### Example: Rewind to an Earlier Step
 
@@ -413,6 +413,6 @@ The following information is recorded:
 
 ## See Also
 
-- [Lifecycle Handlers](/writing-workflows/lifecycle-handlers) — Execute handlers on wait status
-- [Email Notifications](/writing-workflows/email-notifications) — Configure wait status emails
-- [Step Types](/step-types/shell) — Built-in execution types
+- [Lifecycle Handlers](/writing-workflows/lifecycle-handlers): Execute handlers on wait status
+- [Email Notifications](/writing-workflows/email-notifications): Configure wait status emails
+- [Step Types](/step-types/shell): Built-in execution types

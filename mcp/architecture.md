@@ -59,7 +59,7 @@ The MCP server exposes resource templates for current Dagu state:
 | `dagu://runs/{name}/{dagRunId}/sub/{subRunId}/steps/{stepName}/logs` | Standard output and standard error for one child-run step |
 | `dagu://reference/{topic}` | Built-in MCP guidance bundled with the server |
 
-Run resources can be subscribed to. Dagu watches subscribed run resources and sends a resource update notification when a run reaches a terminal state. Wiki page resources are read on demand; successful Wiki page mutations continue to notify the Web UI through the existing Wiki API notifier.
+Clients can subscribe to run resources. Dagu watches subscribed runs and sends a resource update notification when a run reaches a terminal state. Wiki page resources are read on demand; successful Wiki page mutations continue to notify the Web UI through the existing Wiki API notifier.
 
 The `dagu://docs` resource family remains registered as a deprecated alias for older clients.
 
@@ -73,4 +73,4 @@ The MCP route seeds an audit context before authentication. That context records
 - request and correlation IDs
 - optional requested workspace from the `workspace` query parameter
 
-After authentication, Dagu adds credential and subject attribution. Tool calls and downstream API actions share the same correlation ID, so an MCP attempt can be connected with the DAG, run, or API-key events it caused.
+After authentication, Dagu adds credential and subject attribution. Tool calls and downstream API actions share the same correlation ID, so an MCP attempt can be linked to the DAG, run, or API-key events it caused.

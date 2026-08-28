@@ -45,17 +45,17 @@ CI builds Dagu from the current main branch before running this check.
 
 ## Directory overview
 
-- `index.md` — landing page for the documentation.
-- `overview/` — high-level concepts, CLI, API, and project references.
-- `getting-started/` — onboarding material for new Dagu users.
-- `features/` — feature-focused guides.
-- `writing-workflows/` — authoring workflows and best practices.
-- `step-types/` — built-in step type references.
-- `web-ui/` — Cockpit, workspace, operational pages, and REST API guides.
-- `server-admin/` — server configuration, operations, authentication, and deployment guides.
-- `embedding/` — embedded Dagu API and licensing notes.
-- `migration/` — migration guides from other schedulers.
-- `public/` — static assets served by VitePress.
+- `index.md`: landing page for the documentation.
+- `overview/`: high-level concepts, CLI, API, and project references.
+- `getting-started/`: onboarding material for new Dagu users.
+- `features/`: feature-focused guides.
+- `writing-workflows/`: authoring workflows and best practices.
+- `step-types/`: built-in step type references.
+- `web-ui/`: Cockpit, workspace, operational pages, and REST API guides.
+- `server-admin/`: server configuration, operations, authentication, and deployment guides.
+- `embedding/`: embedded Dagu API and licensing notes.
+- `migration/`: migration guides from other schedulers.
+- `public/`: static assets served by VitePress.
 
 Mermaid diagrams are supported via `vitepress-plugin-mermaid`; author diagrams by using fenced code blocks with the `mermaid` language tag.
 

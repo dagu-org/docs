@@ -1,6 +1,6 @@
 # Tunnel (Tailscale)
 
-Remote access to Dagu via embedded Tailscale node. No port forwarding, firewall rules, or VPN setup required.
+Access Dagu remotely through an embedded Tailscale node without configuring port forwarding, firewall rules, or VPNs.
 
 ::: tip
 This page covers `dagu server --tunnel` for Web UI and REST API access. Distributed coordinator and worker traffic uses the coordinator gRPC port, not this HTTP tunnel. For coordinator and worker networking patterns, see [Distributed Networking](/server-admin/distributed/networking).

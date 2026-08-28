@@ -13,7 +13,7 @@ machinery up from a first runnable Agent DAG to driving a coding agent.
 [Agent DAG Examples](/writing-workflows/examples/agent) drills complete
 scenarios the same way, and
 [Agent DAG Internals](/writing-workflows/agent-internals) covers the
-runtime mechanics — cost, limits, recovery — behind all of it.
+runtime mechanics (cost, limits, recovery) behind all of it.
 
 Every example runs as-is with an `OPENROUTER_API_KEY` exported; swap the `llm`
 block for [any configured provider](/step-types/llm/providers).
@@ -53,8 +53,8 @@ Save it as `hello-agent.yaml` in your DAGs directory and run it:
 dagu start hello-agent
 ```
 
-The model is offered both steps as tools, runs each once — in whichever order
-it prefers — and settles the task. The run page shows the decisions as a
+The model is offered both steps as tools, runs each once, in whichever order
+it prefers, and settles the task. The run page shows the decisions as a
 timeline:
 
 ```text
@@ -103,7 +103,7 @@ for the complete decision-call behavior.
 ## The loop
 
 Every declared step becomes one tool the model can call, named after the step
-and described by its `description` — which is the only thing the model reads
+and described by its `description`, which is the only thing the model reads
 when deciding what to run. Without one, a `dag.run` action falls back to the
 target workflow's own description. Two built-in tools are always present:
 `set_task_status` settles a task with a reason, and `ask_user` puts a question
@@ -148,13 +148,13 @@ Every task starts open, and the agent settles it with one call:
 
 | Status | When | Run outcome |
 |---|---|---|
-| `completed` | the criteria are met | — |
+| `completed` | the criteria are met | - |
 | `skipped` | it turned out there was nothing to do | still succeeds |
 | `failed` | it cannot be achieved | run fails, naming the task |
 | `open` | undo a decision later work invalidated | back into the loop |
 
-`skipped` matters more than it looks. Without it, a task that is moot — signing
-a Windows build for a project that has none — leaves the agent with no
+`skipped` matters more than it looks. Without it, a task that is moot (like signing
+a Windows build for a project that has none) leaves the agent with no
 honest move: it either burns turns pretending to work, or stalls out and fails
 a run that was fine. Here it is in action:
 
@@ -187,7 +187,7 @@ tasks:
 
 On a machine with no scratch directory, the check reports nothing to do, the
 agent settles `cleaned` as skipped without ever running `clean_scratch`,
-and the run succeeds — with the agent's reason recorded on the task.
+and the run succeeds, with the agent's reason recorded on the task.
 
 ## Parameterising the instructions
 
@@ -387,7 +387,7 @@ agent completed every task anyway, the run is **partially succeeded**.
 The
 [service-recovery example](/writing-workflows/examples/agent#failure-is-an-observation)
 plays this out as a full cycle: check fails, remedy runs, check re-runs and
-passes — with no error-handling wiring anywhere in the file.
+passes, with no error-handling wiring anywhere in the file.
 
 ## Waiting for a person
 
@@ -467,7 +467,7 @@ No configuration is needed: every agent can ask. Three things keep it from
 pestering anyone. The answers so far are restated to the agent every turn,
 an exact repeat is refused with the answer it already got, and a run may ask at
 most 5 questions. An agent running as somebody's child cannot ask at all,
-since nobody is watching a sub-workflow — which is what keeps agents
+since nobody is watching a sub-workflow, which is what keeps agents
 composable as sub-workflows. The
 [asking example](/writing-workflows/examples/agent#asking-a-person) runs
 the whole cycle, wait and resume included.
@@ -611,9 +611,9 @@ model. The run fails if no model remains.
 If the model answers without choosing an action while tasks remain open, it gets
 one reminder. A second silent turn fails the run.
 
-These are the caps an author sets. For the full runtime picture — every limit
+These are the caps an author sets. For the full runtime picture (every limit
 in one table, context-window behavior, retry layers, and what survives a
-suspension or a retry — see
+suspension or retry), see
 [Agent DAG Internals](/writing-workflows/agent-internals).
 
 ## When to reach for an Agent DAG
@@ -625,6 +625,6 @@ produced, or on how many times something has already been tried.
 If you can draw the graph, draw the graph. `type: graph` is cheaper, faster, and
 reproducible.
 
-For concrete shapes this fits — runbook automation, self-healing operations,
-dispatch over a workflow library, human-in-the-loop — see
+For concrete shapes this fits (runbook automation, self-healing operations,
+dispatch over a workflow library, human-in-the-loop), see
 [when to reach for an Agent DAG](/writing-workflows/examples/agent#when-to-reach-for-an-agent-dag).

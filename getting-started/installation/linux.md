@@ -51,7 +51,7 @@ curl -fsSL https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/install
 
 ### Service PATH capture
 
-When the installer registers a service, it snapshots the `PATH` from your current shell into the unit file. CLI tools on that `PATH` — `python`, `node`, `docker`, custom binaries — become available to workflow steps running under the service. Rerun the installer or edit the unit file if you add tools later.
+When the installer registers a service, it snapshots the `PATH` from your current shell into the unit file. CLI tools on that `PATH` (such as `python`, `node`, `docker`, or custom binaries) become available to workflow steps running under the service. Rerun the installer or edit the unit file if you add tools later.
 
 ## Manual binary
 

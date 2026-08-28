@@ -1,6 +1,6 @@
 # Archive
 
-Work with archive files directly from a DAG step without relying on shell utilities. The executor is built on top of [`github.com/mholt/archives`](https://github.com/mholt/archives) and streams data for efficiency.
+Work with archive files directly from a DAG step without relying on shell utilities. The executor uses [`github.com/mholt/archives`](https://github.com/mholt/archives) and streams data for efficiency.
 
 ## Supported Formats
 
@@ -154,7 +154,7 @@ steps:
 
 ## Security Features
 
-The executor implements security protections against malicious archives:
+The executor protects against malicious archives:
 
 - **Path traversal prevention** - Rejects archives with entries escaping the destination directory
 - **Symlink validation** - Blocks symlinks with absolute targets or paths escaping the destination

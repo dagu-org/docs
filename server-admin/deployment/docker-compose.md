@@ -29,7 +29,7 @@ services:
       - DAGU_DEBUG=true # More verbose logs during dev
       # Paths
       - DAGU_DAGS_DIR=/var/lib/dagu/dags
-      # Builtin authentication (RBAC) — default auth mode
+      # Builtin authentication (RBAC): default auth mode
       - DAGU_AUTH_MODE=builtin
       # Token secret: auto-generated if not set (persisted to {dataDir}/auth/token_secret)
       # - DAGU_AUTH_TOKEN_SECRET=your-secure-random-secret

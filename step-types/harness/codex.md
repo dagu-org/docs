@@ -98,8 +98,8 @@ steps:
 
 ## See Also
 
-- [Codex CLI Reference](https://developers.openai.com/codex/cli/reference) — Complete command and flag reference
-- [Non-interactive Mode](https://developers.openai.com/codex/noninteractive) — Running Codex in CI/scripts
-- [Config Basics](https://developers.openai.com/codex/config-basic) — `config.toml` and precedence
-- [Sandboxing](https://developers.openai.com/codex/concepts/sandboxing) — How the sandbox works
-- [Models](https://developers.openai.com/codex/models) — Available model aliases and overrides
+- [Codex CLI Reference](https://developers.openai.com/codex/cli/reference): Complete command and flag reference
+- [Non-interactive Mode](https://developers.openai.com/codex/noninteractive): Running Codex in CI and scripts
+- [Config Basics](https://developers.openai.com/codex/config-basic): `config.toml` and precedence
+- [Sandboxing](https://developers.openai.com/codex/concepts/sandboxing): How the sandbox works
+- [Models](https://developers.openai.com/codex/models): Available model aliases and overrides

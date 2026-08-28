@@ -108,7 +108,7 @@ params: "query max_results=10 include_images=false temperature=0.7"
 Tools are discovered in this order:
 
 1. **Local DAGs**: DAGs defined in the same file using `---` separator
-2. **Database**: DAGs from the configured DAG directory
+2. **DAGs Directory**: DAGs from the configured DAG directory
 
 ```yaml
 # Main DAG
@@ -119,7 +119,7 @@ steps:
       model: deepseek/deepseek-v4-flash
       tools:
         - local_tool      # Found in local DAGs
-        - database_tool   # Loaded from DAG directory
+        - deployed_tool   # Loaded from DAG directory
       messages:
         - role: user
           content: |
@@ -335,5 +335,5 @@ The LLM orchestrates the multi-step data pipeline by calling tools in sequence.
 
 ## See Also
 
-- [LLM Completion](/step-types/llm/) - Completion configuration and sessions
-- [Chat Overview](/features/chat/) - All chat capabilities and providers
+- [LLM Completion](/step-types/llm/): Completion configuration and sessions
+- [Chat Overview](/features/chat/): All chat capabilities and providers

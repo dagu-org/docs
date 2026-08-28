@@ -1,6 +1,6 @@
 # OpenTelemetry Tracing
 
-Dagu supports OpenTelemetry (OTel) distributed tracing to provide deep visibility into workflow execution. This allows you to monitor performance, debug issues, and understand the flow of complex DAGs across your observability platform.
+Dagu supports OpenTelemetry (OTel) distributed tracing for workflow execution. You can monitor performance, debug issues, and track the flow of DAGs in your observability platform.
 
 ## Overview
 
@@ -109,15 +109,15 @@ steps:
       params: "PARAM1=value1"
 ```
 
-The sub DAG's root span will be linked to the parent step span, creating a complete trace across all execution levels.
+The sub-DAG root span links to the parent step span, creating a complete trace across execution levels.
 
 ### Trace Context Propagation
 
-Dagu uses the W3C Trace Context standard for propagating trace information between parent and sub DAGs:
+Dagu uses the W3C Trace Context standard for propagating trace information between parent and sub-DAGs:
 
-- **Automatic propagation**: Trace context is automatically passed to sub DAGs via environment variables
+- **Automatic propagation**: Trace context passes to sub-DAGs automatically through environment variables
 - **W3C format**: Uses standard `TRACEPARENT` and `TRACESTATE` environment variables
-- **Cross-process tracing**: Enables distributed tracing across separate processes
+- **Cross-process tracing**: Supports distributed tracing across separate processes
 
 Example trace hierarchy:
 ```

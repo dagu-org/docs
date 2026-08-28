@@ -45,10 +45,10 @@ Webhook payloads, webhook headers, and parameter JSON payloads are object-valued
 
 ## Availability
 
-- **Step execution** – Every step receives the run-level variables plus a step-specific name and log file paths while it executes.
-- **Push-back re-executions** – Steps re-executed because of approval push-back also receive `DAG_PUSHBACK`, `DAG_PUSHBACK_ITERATION`, and the provided push-back inputs as individual environment variables. If the step had stdout before it was rewound, Dagu also provides `DAG_PUSHBACK_PREVIOUS_STDOUT_FILE`.
-- **Lifecycle handlers** – `onInit`, `onExit`, `onSuccess`, `onFailure`, `onAbort`, and `onWait` handlers inherit the same variables. They additionally receive the `DAG_RUN_STATUS` so that post-run automation can branch on success or failure. The `onWait` handler receives `DAG_WAITING_STEPS` with step names waiting for human input.
-- **Nested contexts** – When a step launches a sub DAG through the `dagu` CLI, the sub run gets its own identifiers and log locations; the parent identifiers remain accessible in the parent process for chaining or notifications.
+- **Step execution**: Every step receives the run-level variables plus a step-specific name and log file paths while it executes.
+- **Push-back re-executions**: Steps re-executed because of approval push-back also receive `DAG_PUSHBACK`, `DAG_PUSHBACK_ITERATION`, and the provided push-back inputs as individual environment variables. If the step had stdout before it was rewound, Dagu also provides `DAG_PUSHBACK_PREVIOUS_STDOUT_FILE`.
+- **Lifecycle handlers**: `onInit`, `onExit`, `onSuccess`, `onFailure`, `onAbort`, and `onWait` handlers inherit the same variables. They additionally receive the `DAG_RUN_STATUS` so that post-run automation can branch on success or failure. The `onWait` handler receives `DAG_WAITING_STEPS` with step names waiting for human input.
+- **Nested contexts**: When a step launches a sub DAG through the `dagu` CLI, the sub run gets its own identifiers and log locations; the parent identifiers remain accessible in the parent process for chaining or notifications.
 
 Values are refreshed for each step, so `DAG_RUN_STEP_NAME`, `DAG_RUN_STEP_STDOUT_FILE`, `DAG_RUN_STEP_STDERR_FILE`, and their matching `${context.paths.*}` references always point at whichever step or handler is currently running.
 
@@ -109,7 +109,7 @@ When a DAG does **not** have an explicit `working_dir` in its YAML or base confi
 When `working_dir` **is** explicitly set (in the DAG YAML, base config, or via `DefaultWorkingDir` option), the explicit value is used as the process working directory. `DAG_RUN_WORK_DIR` is still available as an environment variable.
 
 ```yaml
-# No working_dir set — steps run in DAG_RUN_WORK_DIR by default
+# No working_dir set: steps run in DAG_RUN_WORK_DIR by default
 steps:
   - id: write_scratch_file
     run: |
@@ -117,13 +117,13 @@ steps:
       echo "intermediate data" > scratch.txt
 
   - id: read_scratch_file
-    run: cat scratch.txt   # finds the file — same PWD
+    run: cat scratch.txt   # finds the file in the same PWD
     depends:
       - write_scratch_file
 ```
 
 ```yaml
-# Explicit working_dir — PWD uses /app/project, but DAG_RUN_WORK_DIR is still available
+# Explicit working_dir: PWD uses /app/project, but DAG_RUN_WORK_DIR is still available
 working_dir: /app/project
 
 steps:

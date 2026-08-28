@@ -92,8 +92,8 @@ On push-back, the prompt is augmented with reviewer feedback and the previous st
 
 ## See Also
 
-- [Claude Code CLI Reference](https://code.claude.com/docs/en/cli-reference.md) — Complete flag reference
-- [Permission Modes](https://code.claude.com/docs/en/permission-modes.md) — How approval and YOLO mode work
-- [Environment Variables](https://code.claude.com/docs/en/env-vars.md) — `CLAUDE_CODE_*` env vars
-- [Common Workflows](https://code.claude.com/docs/en/common-workflows.md) — Example prompts and patterns
-- [Settings](https://code.claude.com/docs/en/settings.md) — Global and project-level configuration
+- [Claude Code CLI Reference](https://code.claude.com/docs/en/cli-reference.md): Complete flag reference
+- [Permission Modes](https://code.claude.com/docs/en/permission-modes.md): How approval and YOLO mode work
+- [Environment Variables](https://code.claude.com/docs/en/env-vars.md): `CLAUDE_CODE_*` environment variables
+- [Common Workflows](https://code.claude.com/docs/en/common-workflows.md): Example prompts and patterns
+- [Settings](https://code.claude.com/docs/en/settings.md): Global and project-level configuration

@@ -403,6 +403,6 @@ handler_on:
 
 ## See Also
 
-- [Writing Workflows](/writing-workflows/) - Create your own workflows
-- [Examples](/writing-workflows/examples) - Ready-to-use patterns
-- [CLI Reference](/getting-started/cli) - Command-line usage
+- [Writing Workflows](/writing-workflows/): Create your own workflows
+- [Examples](/writing-workflows/examples): Ready-to-use patterns
+- [CLI Reference](/getting-started/cli): Command-line usage

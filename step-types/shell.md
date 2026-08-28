@@ -94,5 +94,5 @@ Run system commands and scripts with the default action.
 
 ## Platform-Specific Guides
 
-- [macOS / Linux details](./shell-unix.md) — POSIX shells, nix-shell, direct mode
-- [Windows details](./shell-windows.md) — PowerShell/pwsh, cmd.exe, direct mode
+- [macOS / Linux details](./shell-unix.md): POSIX shells, nix-shell, direct mode
+- [Windows details](./shell-windows.md): PowerShell/pwsh, cmd.exe, direct mode

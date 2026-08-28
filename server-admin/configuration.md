@@ -63,7 +63,7 @@ paths:
   dag_run_work_dir: /var/lib/dagu/data/dag-run-work
 ```
 
-`dag_run_work_dir` holds the per-run working directory each dag-run gets, which is where steps run when a DAG sets no `working_dir`. Point it at fast local storage when steps write large intermediate files. Each directory is removed with its dag-run, so it is bounded by the DAG-run retention policy rather than growing indefinitely. See [Per-Run Work Directory](/writing-workflows/runtime-variables#per-run-work-directory-dag-run-work-dir).
+`dag_run_work_dir` specifies the root directory for per-run working directories. Steps run here when a DAG does not define a `working_dir`. Point it at fast local storage when steps write large intermediate files. Each directory is removed along with its DAG run, keeping storage bounded by the retention policy rather than growing indefinitely. See [Per-Run Work Directory](/writing-workflows/runtime-variables#per-run-work-directory-dag-run-work-dir).
 
 ## Environment Variables
 

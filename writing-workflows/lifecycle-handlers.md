@@ -57,7 +57,7 @@ Each handler is a normal step definition. You can use `run`, `script`, `action` 
 
 ## Sub-DAG Handler Isolation
 
-**Important**: Sub-DAGs (workflows invoked via `call`) do **not** inherit `handler_on` configuration from the base DAG configuration. This design prevents unintended behavior such as:
+**Important**: Sub-DAGs (workflows invoked via `dag.run` or `dag.enqueue`) do **not** inherit `handler_on` configuration from the base DAG configuration. This design prevents unintended behavior such as:
 
 - **Double notifications**: If a parent DAG has a failure handler that sends alerts, sub-DAGs would also trigger alerts, causing duplicate notifications.
 - **Unintended cleanup**: Init, exit, or abort handlers meant for the root workflow would also run for every nested sub-DAG.

@@ -22,7 +22,7 @@ steps:
 
 ## SMTP Configuration
 
-Configure SMTP at DAG-level for all mail steps. For global configuration, see [Email Notifications](/writing-workflows/email-notifications#smtp-configuration).
+Configure SMTP at the DAG level for all mail steps. For global configuration, see [Email Notifications](/writing-workflows/email-notifications#smtp-configuration).
 
 ### Password Authentication
 

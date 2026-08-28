@@ -45,7 +45,7 @@ Authentication and subscription behavior is also auditable:
 
 ## Correlating With DAG Events
 
-MCP tools call the same internal API service used by the Web UI and REST API. When `dagu_change` applies a DAG or Wiki page update, or `dagu_execute` starts, enqueues, retries, or stops a run, the downstream domain audit event keeps the MCP source context. Wiki page mutations therefore produce both the MCP tool lifecycle events and the normal `doc_create`, `doc_update`, `doc_rename`, or `doc_delete` event without recording Markdown content.
+MCP tools call the same internal API service used by the Web UI and REST API. When `dagu_change` applies a DAG or Wiki page update, or `dagu_execute` starts, enqueues, retries, or stops a run, the downstream domain audit event keeps the MCP source context. Wiki page mutations therefore produce both the MCP tool lifecycle events and the corresponding `doc_create`, `doc_update`, `doc_rename`, or `doc_delete` event without recording Markdown content.
 
 Filter audit logs by:
 

@@ -4,7 +4,7 @@
 This page explains how one runs: what the model is actually sent
 each turn, where every limit sits, which failures end a run, and what survives
 a crash or a retry. It is the page to read before putting an Agent DAG into
-production, because the conversation *is* the run — its size
+production, because the conversation *is* the run: its size
 sets the cost, and its persistence sets the recovery story.
 
 ## The conversation
@@ -25,7 +25,7 @@ Each turn, the agent makes one completion request built from two parts:
 Until aging starts, requests grow with every turn: an observation added on turn
 10 of a 40-turn run may be resent 30 times. That is why
 [keeping reports small](/writing-workflows/agent#what-the-agent-sees)
-is the main cost lever — a line saved in an observation is saved once per
+is the main cost lever: a line saved in an observation is saved once per
 remaining turn. Aging reduces the older part of the transcript, but the latest
 observations stay complete so the model can reason about recent work.
 
@@ -80,8 +80,8 @@ The safeguards reduce risk, but input size still matters:
 - Publish selectively from children with `outputs.write`, so internal
   variables never enter the transcript.
 - Keep `llm.system` and task descriptions tight; they are resent every turn.
-- Lower `llm.max_tool_iterations` for runs that should be short — the turn cap
-  also caps how large the conversation can grow.
+- Lower `llm.max_tool_iterations` for runs that should be short (the turn cap
+  also caps how large the conversation can grow).
 - Set `max_context_tokens` below the provider's hard window so the next decision
   and response have room to spare.
 
@@ -150,12 +150,12 @@ provider and model. Entry-level `temperature`, `max_tokens`, `top_p`,
 Transient failures are retried in two layers before a decision fails:
 
 1. **Transport retries.** The HTTP client retries rate limits (`429`), server
-   errors (`500`–`504`), and network failures up to 3 times, backing off
+   errors (`500` to `504`), and network failures up to 3 times, backing off
    exponentially from 1 second up to 30 seconds, with a 5-minute timeout per
    request.
 2. **Logical retries.** Above that, the whole request is re-attempted, up to 3
    attempts in total, backing off from 1 second to 2 seconds. This catches
-   interrupted responses — a decode failure, a connection dropped mid-body —
+   interrupted responses (such as a decode failure or a connection dropped mid-body)
    and transient failures that outlived the transport retries.
 
 Authentication failures, invalid requests, and unknown models are not retried
@@ -164,7 +164,7 @@ overflow is handled separately: when observation aging is enabled, Dagu
 compacts the transcript and retries the current model once before advancing.
 After every entry in a fallback chain fails, the run error identifies each
 exhausted model and preserves the underlying errors. There is no step-level
-`retry_policy` for decisions — the agent is not a step you configure.
+`retry_policy` for decisions; the agent is not a step you configure.
 `dagu retry` resumes the saved conversation rather than starting over.
 
 ## Durability and recovery
@@ -173,7 +173,7 @@ After every decision, the agent persists its state on the run: task
 statuses and reasons, the decision timeline, per-action run counts, the turn
 count, collected answers, whether observation aging is active, and the action
 currently in flight. The conversation, including any compacted observations,
-is stored as the run's chat transcript — the same data the **Chat** tab renders.
+is stored as the run's chat transcript, which is the same data the **Chat** tab renders.
 
 The selected fallback is process-local rather than persisted. A process
 created by suspension recovery or `dagu retry` starts from the configured
@@ -186,11 +186,11 @@ That persistence is what makes three things work:
   restores the state, reports what became of the pending action as the next
   observation, and asks for the next decision.
 - **Retry as resume.** `dagu retry` on a failed run restores the same state
-  and transcript. The agent continues from where it failed — it does not
+  and transcript. The agent continues from where it failed; it does not
   replay decisions or re-run actions that already succeeded.
 - **A pinned definition.** Retry and resume replay the DAG recorded with the
   run, not the current source file. Editing the YAML between attempts changes
-  future runs, never a run already underway — the model configuration, prompt,
+  future runs, never a run already underway. The model configuration, prompt,
   and catalog a run started with are the ones it finishes with.
 
 ## Cost observability
@@ -208,10 +208,10 @@ the older part of the transcript.
 ## Secrets in the transcript
 
 Values resolved from the run scope can include secrets, and they appear in
-prompts and observations. The copy sent to the provider is masked — the values
+prompts and observations. The copy sent to the provider is masked: the values
 of declared `secrets` are replaced before the request leaves. The transcript
 the run stores is not: it keeps the resolved values readable, so the **Chat**
 tab and the run's data on disk contain them. Two consequences: treat access to
 agent run data as access to the secrets the run resolved, and declare
-sensitive values as `secrets` rather than plain `env` entries — masking covers
+sensitive values as `secrets` rather than plain `env` entries, because masking covers
 only what is declared.

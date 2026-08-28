@@ -3695,7 +3695,7 @@ curl -X POST "http://localhost:8080/api/v1/sync/items/my-dag/publish" \
   "remoteCommit": "abc123",
   "remoteAuthor": "alice",
   "remoteMessage": "Remote update",
-  "message": "conflict: \"my-dag\" — remote has been updated"
+  "message": "conflict: \"my-dag\": remote has been updated"
 }
 ```
 
@@ -3945,7 +3945,7 @@ Retrieves a single workspace by ID. Requires authentication.
 
 **Endpoint**: `PATCH /api/v1/workspaces/{workspaceId}`
 
-Updates a workspace. Requires **developer** role or above. PATCH semantics — only provided fields are updated.
+Updates a workspace. Requires **developer** role or above. Uses PATCH semantics: only provided fields are updated.
 
 **Path Parameters**:
 | Parameter | Type | Description |

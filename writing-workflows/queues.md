@@ -1,6 +1,6 @@
 # Queue Assignment
 
-Assign a DAG to a named queue to control how many instances of DAGs in that queue can run concurrently. Queues themselves are defined in `config.yaml` — see [Queue Configuration](/server-admin/queues).
+Assign a DAG to a named queue to control how many instances of DAGs in that queue can run concurrently. Queues themselves are defined in `config.yaml`; see [Queue Configuration](/server-admin/queues).
 
 ## Assigning a DAG to a Queue
 
@@ -34,7 +34,7 @@ See [Base Configuration](/server-admin/base-config) for how base config merging 
 
 ## Behavior Without a Queue
 
-When a DAG does not set `queue` (and no base config default exists), it runs in a local queue named after the DAG itself. Local queues have a fixed concurrency of 1 — only one instance of that DAG runs at a time.
+When a DAG does not set `queue` (and no base config default exists), it runs in a local queue named after the DAG itself. Local queues have a fixed concurrency of 1, meaning only one instance of that DAG runs at a time.
 
 ## Overriding at Enqueue Time
 

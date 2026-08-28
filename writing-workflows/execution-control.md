@@ -126,7 +126,7 @@ steps:
 
 ### Step Timeout (timeout_sec)
 
-Apply a per‑step cap that overrides the workflow timeout for that specific step:
+Apply a per-step cap that overrides the workflow timeout for that specific step:
 
 ```yaml
 timeout_sec: 1800  # Overall DAG timeout (30m)
@@ -152,7 +152,7 @@ Behavior:
 - On step timeout the process tree is terminated and the step is marked `failed` with exit code `124` (standard timeout code).
 - Dependent steps are skipped unless `continue_on` allows the timed-out step to be treated as non-blocking.
 - Omit or set `timeout_sec: 0` on a step to rely solely on the DAG timeout.
-- Use step timeouts for external calls (network, APIs, third‑party CLIs) to fail fast while letting other steps proceed.
+- Use step timeouts for external calls (network, APIs, third-party CLIs) to fail fast while letting other steps proceed.
 
 Validation:
 - `timeout_sec` must be `>= 0`; negative values are rejected during spec validation.

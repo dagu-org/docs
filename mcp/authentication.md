@@ -58,4 +58,4 @@ Use this path when you need:
 - identity-provider policy enforcement for MCP access
 - enterprise audit requirements around who used which AI tool to read, edit, or run Dagu workflows
 
-OIDC/SSO-backed MCP access needs to match your identity provider, MCP clients, role mapping, and audit requirements. If this is your requirement, please [contact the Dagu team](https://dagu.sh/contact) to discuss the right setup.
+OIDC/SSO-backed MCP access needs to match your identity provider, MCP clients, role mapping, and audit requirements. [Contact the Dagu team](https://dagu.sh/contact) to discuss the right setup for your organization.

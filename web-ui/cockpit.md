@@ -1,6 +1,6 @@
 # Cockpit
 
-Cockpit is a kanban-style view for monitoring workflow runs across days. It is the default Web UI landing page and is useful when you want a quick answer to "what is queued, running, waiting for review, done, or failed?"
+Cockpit is a kanban-style view for monitoring workflow runs across days. It is the default Web UI landing page and provides a quick overview of what is queued, running, waiting for review, done, or failed.
 
 ![Cockpit](/web-ui-cockpit-demo.png)
 
@@ -18,7 +18,7 @@ The page follows the global workspace selector:
 | **Default** | Runs from workflows without a workspace label. |
 | **Named workspace** | Runs from that workspace only. |
 
-Switching workspace refreshes the board so you can focus on one team, environment, or project.
+Switching workspaces refreshes the board so you can focus on one team, environment, or project.
 
 ## Board Layout
 

@@ -51,7 +51,7 @@ dagu start-all
 export DAGU_MCP_URL=http://localhost:8080/mcp
 ```
 
-From there you just talk to it. Ask for a workflow and it writes one, checks it against the server before saving, and says what is wrong if it does not build. Ask for a change and it reads the current spec first. Ask it to run, and it starts the run, reads the logs, and explains a failure.
+From there, describe what you want. The agent writes the workflow definition, checks it against the server before saving, and reports any errors if it does not build. When requesting changes, it reads the current specification first. When asked to run, it starts execution, inspects logs, and explains any failures.
 
 Nothing is installed on the client side. The server supplies the authoring reference itself, so the agent already knows the field names and which action to reach for.
 
@@ -136,7 +136,7 @@ flowchart LR
 
 ### Supported providers
 
-Eight providers ship built in. Set `llm.provider` to the key and the endpoint and credential variable follow from it, both overridable with `base_url` and `api_key_name`.
+Eight providers are built in. Set `llm.provider`, and the default endpoint and credential variable are configured automatically. Both can be overridden with `base_url` and `api_key_name`.
 
 | Provider | `provider:` | Models | API key |
 |---|---|---|---|
@@ -254,11 +254,11 @@ flowchart LR
     style T stroke:green,stroke-width:1.6px,color:#333
 ```
 
-No step declares `depends`, and none may: ordering belongs to the agent. The run page records the order actually chosen as a decision timeline, and the **Chat** tab holds the transcript. [Agent DAGs](/writing-workflows/agent) covers the semantics; [Agent DAG Internals](/writing-workflows/agent-internals) covers cost, limits, and what survives a crash.
+No step declares `depends`, as execution ordering is determined dynamically by the agent. The run page records the order actually chosen as a decision timeline, and the **Chat** tab holds the transcript. [Agent DAGs](/writing-workflows/agent) covers the semantics; [Agent DAG Internals](/writing-workflows/agent-internals) covers cost, limits, and what survives a crash.
 
 ## Operate Dagu from an AI client
 
-The inverse relationship. Dagu's HTTP server exposes a built-in Model Context Protocol endpoint at `/mcp`, so an MCP client can inspect workflows, read run state, maintain Wiki pages, apply scoped edits, and control runs through the same authenticated boundary as the REST API. There is no separate package to install.
+In the reverse direction, Dagu's HTTP server exposes a built-in Model Context Protocol endpoint at `/mcp`, so an MCP client can inspect workflows, read run state, maintain Wiki pages, apply scoped edits, and control runs through the same authenticated boundary as the REST API. There is no separate package to install.
 
 ```text
 http://localhost:8080/mcp

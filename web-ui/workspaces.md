@@ -91,7 +91,7 @@ The [Wiki](/web-ui/wiki) page uses the same workspace selector as workflows and 
 
 Workspace access filters the Wiki page tree, content search, and global search results. **All workspaces** combines the Wiki pages the current account can access for browsing and search. Select **Default** or one named workspace before creating, renaming, moving, or deleting a Wiki page.
 
-Wiki cannot be dragged across workspace boundaries. Renaming a workspace moves its Wiki page directory to the new name. Deletion is blocked while the workspace still contains Wiki pages, which prevents them from losing their workspace ownership.
+Wiki pages cannot be dragged across workspace boundaries. Renaming a workspace moves its Wiki page directory to the new name. Deletion is blocked while the workspace still contains Wiki pages, which prevents them from losing their workspace ownership.
 
 ## Secrets in Workspaces
 

@@ -46,7 +46,7 @@ In high-availability deployments, every scheduler process exposes `/health`, inc
 
 ### Zombie Detection
 
-The scheduler detects and cleans up "zombie" DAG runs — processes whose status file says "running" but whose process is no longer alive (e.g., after `kill -9`, system crash, or OOM kill).
+The scheduler detects and cleans up "zombie" DAG runs: processes whose status file says "running" but whose process is no longer alive (e.g., after `kill -9`, system crash, or OOM kill).
 
 #### How it works
 
@@ -283,11 +283,11 @@ If `queues.enabled` is `false`, the scheduler logs a warning per DAG that has `c
 Catchup runs are dispatched through the queue system, not started directly. For each missed interval, the scheduler:
 
 1. Generates a deterministic run ID from the DAG name and scheduled time
-2. Checks if a run with that ID already exists (`FindAttempt`) — if so, skips it
+2. Checks if a run with that ID already exists (`FindAttempt`): if so, skips it
 3. Creates a run record with status `Queued`
 4. Adds the item to the queue store
 
-The queue processor then picks up the item and executes it. This works for both local and distributed execution modes — the queue processor calls `ExecuteDAG()` which routes to the coordinator for distributed DAGs.
+The queue processor then picks up the item and executes it. This works for both local and distributed execution modes: the queue processor calls `ExecuteDAG()`, which routes to the coordinator for distributed DAGs.
 
 If enqueueing fails after the run record is created, the record is rolled back (`RemoveDAGRun`) and the watermark is not advanced, so the interval is retried on the next scheduler tick or restart.
 
@@ -299,9 +299,9 @@ Catchup run IDs follow the format:
 catchup-{name}-{hash}-{timestamp}
 ```
 
-- `{name}` — DAG name with dots replaced by underscores, truncated to 31 characters if needed
-- `{hash}` — first 8 hex characters of the SHA-256 hash of the original DAG name
-- `{timestamp}` — scheduled time in UTC as `20060102T150405`
+- `{name}`: DAG name with dots replaced by underscores, truncated to 31 characters if needed
+- `{hash}`: first 8 hex characters of the SHA-256 hash of the original DAG name
+- `{timestamp}`: scheduled time in UTC as `20060102T150405`
 
 Example: a DAG named `etl-pipeline` with a missed run at 2026-03-12 14:00 UTC produces:
 

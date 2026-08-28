@@ -6,13 +6,13 @@ description: Choose the supported Dagu installation method for macOS, Linux, Win
 
 Pick the guide for your platform.
 
-- [**macOS**](/getting-started/installation/macos) — Homebrew or the guided script installer (LaunchAgent service)
-- [**Linux**](/getting-started/installation/linux) — Guided script installer with systemd service, or a manual binary
-- [**npm**](/getting-started/installation/npm) — Global package that downloads the Dagu binary during postinstall
-- [**Windows**](/getting-started/installation/windows) — PowerShell script installer with optional Windows service
-- [**Docker**](/getting-started/installation/docker) — `docker run`, Compose, and mounting the host Docker socket
-- [**Kubernetes**](/getting-started/installation/kubernetes) — Official Helm chart
-- [**Build from source**](/getting-started/installation/source) — Go + Node toolchain
+- [**macOS**](/getting-started/installation/macos): Homebrew or the guided script installer (LaunchAgent service)
+- [**Linux**](/getting-started/installation/linux): Guided script installer with systemd service, or a manual binary
+- [**npm**](/getting-started/installation/npm): Global package that downloads the Dagu binary during postinstall
+- [**Windows**](/getting-started/installation/windows): PowerShell script installer with optional Windows service
+- [**Docker**](/getting-started/installation/docker): `docker run`, Compose, and mounting the host Docker socket
+- [**Kubernetes**](/getting-started/installation/kubernetes): Official Helm chart
+- [**Build from source**](/getting-started/installation/source): Go + Node toolchain
 
 ## Which one should I use?
 

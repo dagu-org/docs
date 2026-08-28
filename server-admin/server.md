@@ -377,7 +377,7 @@ auth:
     token:
       secret: "${AUTH_TOKEN_SECRET}"  # auto-generated if not set
       ttl: "24h"
-    initial_admin:                    # optional — auto-create admin on first startup
+    initial_admin:                    # optional: auto-create admin on first startup
       username: admin
       password: "${ADMIN_PASSWORD}"
 ```
@@ -387,7 +387,7 @@ auth:
 export DAGU_AUTH_MODE=builtin
 # Token secret auto-generated if not set
 
-# Optional — auto-create admin on first startup (both required together)
+# Optional: auto-create admin on first startup (both required together)
 export DAGU_AUTH_BUILTIN_INITIAL_ADMIN_USERNAME=admin
 export DAGU_AUTH_BUILTIN_INITIAL_ADMIN_PASSWORD=your-secure-password
 ```
@@ -639,7 +639,7 @@ See [Prometheus Metrics](/server-admin/prometheus-metrics#cache-metrics) for mor
 
 ## Terminal
 
-The web-based terminal allows executing shell commands directly from the Dagu UI. This feature is **disabled by default** for security reasons.
+The web-based terminal allows executing shell commands directly from the Dagu UI. This feature is disabled by default.
 
 ### Configuration
 
@@ -669,7 +669,7 @@ export DAGU_TERMINAL_MAX_SESSIONS=5
 Audit logging requires an active self-host license. See the [pricing page](https://dagu.sh/pricing) for current availability.
 :::
 
-Dagu maintains audit logs for security-sensitive operations. Audit logging is **enabled by default**.
+Dagu maintains audit logs for security-sensitive operations. Audit logging is enabled by default.
 
 ### Configuration
 

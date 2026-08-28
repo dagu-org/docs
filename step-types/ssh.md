@@ -109,7 +109,7 @@ Without `shell`, commands are executed directly without shell interpretation. Us
 
 ### Variable Expansion Behavior
 
-Dagu expands only **DAG-scoped variables** (env, params, secrets, step outputs) before sending commands to the remote host. OS-only variables (e.g., `$HOME`, `$USER`, `$PATH`) are **not** expanded locally — they pass through unchanged, letting the remote shell resolve them. This applies regardless of whether `shell` is configured.
+Dagu expands only **DAG-scoped variables** (env, params, secrets, step outputs) before sending commands to the remote host. OS-only variables (e.g., `$HOME`, `$USER`, `$PATH`) are **not** expanded locally; they pass through unchanged, letting the remote shell resolve them. This applies regardless of whether `shell` is configured.
 
 ```yaml
 ssh:
@@ -121,8 +121,8 @@ env:
 
 steps:
   - run: |
-      cd $HOME/app              # $HOME NOT expanded — remote shell resolves it
-      git checkout ${env.DEPLOY_BRANCH}  # Expanded by Dagu — defined in DAG env
+      cd $HOME/app              # $HOME NOT expanded; remote shell resolves it
+      git checkout ${env.DEPLOY_BRANCH}  # Expanded by Dagu (defined in DAG env)
 ```
 
 This allows you to write shell scripts that use remote variables without Dagu replacing them:
@@ -169,7 +169,7 @@ ssh:
   key: ${env.HOME_DIR}/.ssh/deploy_key
 ```
 
-The `shell` field controls whether POSIX shell expansion features (default values, parameter substitution like `${VAR:-default}`) are available — it does not affect whether OS variables are expanded.
+The `shell` field controls whether POSIX shell expansion features (default values, parameter substitution such as `${VAR:-default}`) are available; it does not affect whether OS variables are expanded.
 
 ### SSH Key Auto-Detection
 

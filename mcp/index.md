@@ -35,7 +35,7 @@ If the Dagu server uses a base path, place `/mcp` under that base path. For exam
 | Use `dagu://` resources or run-completion subscriptions | [Resources](/mcp/resources) |
 | Review what appears in audit logs | [Auditability](/mcp/auditability) |
 
-## Skill Vs MCP
+## Skill vs MCP
 
 The Dagu skill and the Dagu MCP server solve related but different problems.
 

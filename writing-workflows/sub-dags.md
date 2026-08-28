@@ -176,7 +176,7 @@ steps:
         image: ${IMAGE}      # -> ${CHILD.outputValues.image}
 ```
 
-Declared step outputs (`outputs:` with `name:`) are scoped to the DAG document that defines them. They are not visible to the parent — republish them with `outputs.write` or `stdout.outputs` when a parent needs them.
+Declared step outputs (`outputs:` with `name:`) are scoped to the DAG document that defines them. They are not visible to the parent; republish them with `outputs.write` or `stdout.outputs` when a parent needs them.
 
 Keep returned values small. Use [Artifacts](/writing-workflows/artifacts) for files, reports, and large payloads.
 
@@ -233,7 +233,7 @@ The captured aggregate is JSON:
     run: echo "${RESULTS.summary.succeeded} of ${RESULTS.summary.total} succeeded"
 ```
 
-`outputs` contains only the successful child runs, so its indexes do not line up with the item list. Do not infer item identity from array position — include the item in each child's own output instead.
+`outputs` contains only the successful child runs, so its indexes do not line up with the item list. Do not infer item identity from array position; include the item in each child's own output instead.
 
 Discovering work at runtime uses the same shape:
 
@@ -285,7 +285,7 @@ See [Queue Assignment](/writing-workflows/queues).
 
 ### Working Directory
 
-Every child run gets its own work directory, exposed as `DAG_RUN_WORK_DIR` and `${context.paths.work_dir}`. A child that does not declare `working_dir` runs there — not in the parent's working directory. Parallel children each get a distinct directory, so relative file writes cannot collide.
+Every child run gets its own work directory, exposed as `DAG_RUN_WORK_DIR` and `${context.paths.work_dir}`. A child that does not declare `working_dir` runs there, not in the parent's working directory. Parallel children each get a distinct directory, so relative file writes cannot collide.
 
 To pin a child to a specific directory, declare it in the child:
 
@@ -369,7 +369,7 @@ dagu retry --run-id=<root-run-id> my-workflow
 dagu retry --run-id=<root-run-id> --sub-run-id=<child-run-id> --step=build my-workflow
 ```
 
-`--sub-run-id` requires `--step`. Retry targets the root run — a child run cannot be retried as if it were a top-level run. See [Durable Execution](/writing-workflows/durable-execution).
+`--sub-run-id` requires `--step`. Retry targets the root run: a child run cannot be retried as if it were a top-level run. See [Durable Execution](/writing-workflows/durable-execution).
 
 The REST API exposes child runs under the root run:
 
@@ -406,8 +406,8 @@ See [Distributed Execution](/server-admin/distributed/).
 
 ## Related
 
-- [Control Flow](/writing-workflows/control-flow) — dependencies, iteration, and routing
-- [Parameters](/writing-workflows/parameters) — declaring and overriding child inputs
-- [Outputs](/writing-workflows/outputs) — publishing values from steps
-- [Queue Assignment](/writing-workflows/queues) — where enqueued children run
-- [YAML Specification](/writing-workflows/yaml-specification#child-dag-actions) — field reference
+- [Control Flow](/writing-workflows/control-flow): dependencies, iteration, and routing
+- [Parameters](/writing-workflows/parameters): declaring and overriding child inputs
+- [Outputs](/writing-workflows/outputs): publishing values from steps
+- [Queue Assignment](/writing-workflows/queues): where enqueued children run
+- [YAML Specification](/writing-workflows/yaml-specification#child-dag-actions): field reference

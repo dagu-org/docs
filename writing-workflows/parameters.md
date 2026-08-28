@@ -376,7 +376,7 @@ Compatibility notes:
 - Boolean schema mode becomes active only when `values:` is present.
 - A string `schema:` value without `values:` is treated as schema mode only when it looks like a file path or URL.
 
-When the resolved schema is simple enough for direct form rendering, `GET /api/v1/dags/{fileName}` also includes `paramSchema`. In `v2.6.2`, that renderable subset is:
+When the resolved schema is simple enough for direct form rendering, `GET /api/v1/dags/{fileName}` also includes `paramSchema`. The renderable subset is:
 
 - a root object schema with top-level `properties`
 - scalar properties of type `string`, `integer`, `number`, or `boolean`

@@ -67,7 +67,7 @@ Rules:
 
 ## Route Dependencies
 
-Router target steps implicitly depend on the router step. You normally do not need to repeat `depends: router`.
+Router target steps implicitly depend on the router step, so you do not need to repeat `depends: router`.
 
 ```yaml
 steps:

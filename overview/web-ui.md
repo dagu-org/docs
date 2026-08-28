@@ -53,7 +53,7 @@ Cockpit is the quickest way to watch what is happening right now.
 
 Use it when you want to:
 
-- scan today’s runs by status
+- scan today's runs by status
 - spot failures or stuck work quickly
 - open run details without leaving the board
 - start or enqueue workflows from the template picker

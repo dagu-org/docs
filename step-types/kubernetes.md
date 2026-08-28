@@ -134,7 +134,7 @@ steps:
 
 ## Logging and Cleanup
 
-- Kubernetes exposes a merged container log stream, so stdout and stderr are streamed as a single log stream for this executor.
+- Kubernetes provides a merged container log stream, so stdout and stderr appear together in the step log.
 - `cleanup_policy` defaults to `delete`, which removes the Job after completion.
 - `cleanup_policy: keep` keeps the Job after normal completion or job-reported failure.
 - `cleanup_policy: keep` also keeps the Job when pod scheduling fails before the workload starts.
@@ -550,7 +550,7 @@ The current executor does not expose:
 - Windows-specific security options
 - SELinux, AppArmor, or `proc_mount` settings
 
-If a field is not listed on this page, assume it is not currently supported by the executor.
+If a field is not listed on this page, the executor does not currently support it.
 
 ## See Also
 

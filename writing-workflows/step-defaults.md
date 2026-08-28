@@ -36,7 +36,7 @@ See [YAML Specification - Step Defaults](/writing-workflows/yaml-specification#s
 | `preconditions` | Default entries prepended before step entries |
 | `agent` | Step `agent.<field>` value replaces the matching default subfield |
 
-**Override fields** (`retry_policy`, `continue_on`, `repeat_policy`, `timeout_sec`, `mail_on_error`, `signal_on_stop`): The default is applied only when the step does not set its own value. When a step defines the field, the step's value is used entirely — there is no field-level merging within the object.
+**Override fields** (`retry_policy`, `continue_on`, `repeat_policy`, `timeout_sec`, `mail_on_error`, `signal_on_stop`): The default is applied only when the step does not set its own value. When a step defines the field, the step's value is used entirely; there is no field-level merging within the object.
 
 **Agent fields** (`agent`): Defaults are applied per subfield rather than as a whole-object replacement. Supported default subfields are `model`, `tools`, `soul`, `memory`, `prompt`, `max_iterations`, and `safe_mode`.
 
@@ -201,7 +201,7 @@ steps:
 
   - id: generate_report
     run: ./report.sh
-    # Overrides retry_policy — this step must not retry
+    # Overrides retry_policy: this step must not retry
     retry_policy:
       limit: 0
       interval_sec: 0
@@ -213,10 +213,10 @@ steps:
 
 ## Interaction with Base Configuration
 
-The `defaults` field is a DAG-level field. When set in [base configuration](/server-admin/base-config), it is inherited by all DAGs. A DAG-level `defaults` overrides the base configuration's `defaults` (standard merge behavior — the DAG value wins).
+The `defaults` field is a DAG-level field. When set in [base configuration](/server-admin/base-config), it is inherited by all DAGs. A DAG-level `defaults` overrides the base configuration's `defaults` (standard merge behavior, where the DAG value wins).
 
 ## See Also
 
-- [YAML Specification - Step Defaults](/writing-workflows/yaml-specification#step-defaults) — Field reference
-- [Error Handling](/writing-workflows/error-handling) — `retry_policy`, `continue_on` usage
-- [Base Configuration](/server-admin/base-config) — Shared defaults across all DAGs
+- [YAML Specification - Step Defaults](/writing-workflows/yaml-specification#step-defaults): Field reference
+- [Error Handling](/writing-workflows/error-handling): `retry_policy`, `continue_on` usage
+- [Base Configuration](/server-admin/base-config): Shared defaults across all DAGs

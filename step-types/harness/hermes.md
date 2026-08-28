@@ -18,7 +18,7 @@ Hermes is invoked in its scripted one-shot mode (`-z`), designed for programmati
 hermes -z "<prompt>"
 ```
 
-This produces **single prompt in, final response text out** — no banner, no spinner, no tool previews.
+This produces **single prompt in, final response text out**, with no banner, spinner, or tool previews.
 
 ## Common Flags
 
@@ -126,8 +126,8 @@ steps:
 
 ## See Also
 
-- [CLI Commands Reference](https://hermes-agent.nousresearch.com/docs/reference/cli-commands) — All `hermes` subcommands and flags
-- [Configuration Guide](https://hermes-agent.nousresearch.com/docs/user-guide/configuration) — `config.yaml`, providers, models
-- [Quickstart](https://hermes-agent.nousresearch.com/docs/getting-started/quickstart) — Install, setup, first conversation
-- [Toolsets](https://hermes-agent.nousresearch.com/docs/user-guide/features/tools) — Built-in tools and toolset system
-- [Skills System](https://hermes-agent.nousresearch.com/docs/user-guide/features/skills) — Creating and managing skills
+- [CLI Commands Reference](https://hermes-agent.nousresearch.com/docs/reference/cli-commands): All `hermes` subcommands and flags
+- [Configuration Guide](https://hermes-agent.nousresearch.com/docs/user-guide/configuration): `config.yaml`, providers, models
+- [Quickstart](https://hermes-agent.nousresearch.com/docs/getting-started/quickstart): Install, setup, first conversation
+- [Toolsets](https://hermes-agent.nousresearch.com/docs/user-guide/features/tools): Built-in tools and toolset system
+- [Skills System](https://hermes-agent.nousresearch.com/docs/user-guide/features/skills): Creating and managing skills

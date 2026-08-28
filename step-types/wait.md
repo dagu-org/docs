@@ -91,7 +91,7 @@ steps:
       body: '{"index":"customers"}'
 ```
 
-Network errors, connection refusals, and non-matching statuses are treated as “not ready” and retried until the step context is canceled or the DAG step times out.
+Network errors, connection refusals, and non-matching statuses are treated as "not ready" and retried until the step context is canceled or the DAG step times out.
 
 ## Configuration
 

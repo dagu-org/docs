@@ -54,7 +54,7 @@ with:
 
 Containers, non-default output formats, unsupported OpenCode flags, standalone scheduler launches, embedded-engine runs, and direct Dagu CLI execution use the CLI path automatically. Set `managed: true` when falling back would be undesirable; Dagu then reports a configuration or host-availability error. Automatic fallback occurs only before a managed session is created.
 
-“Allow for this Dagu session” applies only OpenCode's proposed wildcard scope to the current Dagu session generation. Dagu answers matching later requests once and never stores an OpenCode process-wide `always` grant.
+"Allow for this Dagu session" applies only OpenCode's proposed wildcard scope to the current Dagu session generation. Dagu answers matching later requests once and never stores an OpenCode process-wide `always` grant.
 
 Dagu-created and forked OpenCode sessions belong to the DAG run, not to one attempt. They remain available after success, failure, abort, and retry. Manual DAG-run deletion and history retention enqueue their removal; Dagu completes that cleanup when the owning server or worker is available. Sessions supplied with `session:` are externally owned and are never deleted by Dagu.
 

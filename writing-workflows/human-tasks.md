@@ -422,9 +422,9 @@ Human-task completion is available through the Web UI, REST API, and local CLI. 
 
 ## See Also
 
-- [REST API](/web-ui/api#human-task-endpoints) — Completion and queue-recovery endpoints
-- [CLI Reference](/getting-started/cli#human-task-complete) — Local completion command
-- [Outputs](/writing-workflows/outputs) — Referencing values in later steps
-- [Approval](/writing-workflows/approval) — Reviewing executable step output with approve, reject, and push-back
-- [Lifecycle Handlers](/writing-workflows/lifecycle-handlers) — Notifications when a DAG enters `Waiting`
-- [YAML Specification](/writing-workflows/yaml-specification#human-task) — Concise field reference
+- [REST API](/web-ui/api#human-task-endpoints): Completion and queue-recovery endpoints
+- [CLI Reference](/getting-started/cli#human-task-complete): Local completion command
+- [Outputs](/writing-workflows/outputs): Referencing values in later steps
+- [Approval](/writing-workflows/approval): Reviewing executable step output with approve, reject, and push-back
+- [Lifecycle Handlers](/writing-workflows/lifecycle-handlers): Notifications when a DAG enters `Waiting`
+- [YAML Specification](/writing-workflows/yaml-specification#human-task): Concise field reference

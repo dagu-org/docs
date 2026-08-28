@@ -1,6 +1,6 @@
 # Queue Configuration
 
-Define named queues in `config.yaml` to control how many DAG runs can execute concurrently within each queue. DAGs are assigned to queues using the `queue` field — see [Queue Assignment](/writing-workflows/queues).
+Define named queues in `config.yaml` to control how many DAG runs can execute concurrently within each queue. DAGs are assigned to queues using the `queue` field. See [Queue Assignment](/writing-workflows/queues).
 
 ## Defining Queues
 
@@ -19,7 +19,7 @@ queues:
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `enabled` | bool | Enable the queue system. Default: `true`. Env: `DAGU_QUEUE_ENABLED`. Required for catchup — see [Catchup](/writing-workflows/scheduling#catchup-missed-run-replay). |
+| `enabled` | bool | Enable the queue system. Default: `true`. Env: `DAGU_QUEUE_ENABLED`. Required for catchup. See [Catchup](/writing-workflows/scheduling#catchup-missed-run-replay). |
 | `config[].name` | string | Queue name. DAGs reference this via `queue: "name"`. |
 | `config[].max_concurrency` | int | Maximum concurrent DAG runs in this queue. |
 
@@ -35,10 +35,10 @@ The scheduler periodically checks each queue. For each queue it calculates:
 free_slots = max_concurrency - local_running_count - distributed_running_count - inflight_count - outstanding_dispatch_count
 ```
 
-- **local_running_count** — runs with at least one non-stale proc heartbeat in the proc store; stale proc files are pruned during these checks so leaked heartbeats do not keep queue capacity artificially full
-- **distributed_running_count** — distributed runs with a fresh DAG-run lease
-- **inflight_count** — items currently being dispatched
-- **outstanding_dispatch_count** — distributed dispatch reservations that have been created but are not yet observed as running. When the dispatcher uses the dispatch admission store, reservation capacity is checked by that store instead of this count.
+- **local_running_count**: runs with at least one non-stale proc heartbeat in the proc store; stale proc files are pruned during these checks so leaked heartbeats do not keep queue capacity artificially full
+- **distributed_running_count**: distributed runs with a fresh DAG-run lease
+- **inflight_count**: items currently being dispatched
+- **outstanding_dispatch_count**: distributed dispatch reservations that have been created but are not yet observed as running. When the dispatcher uses the dispatch admission store, reservation capacity is checked by that store instead of this count.
 
 If `free_slots` is zero or negative, no new items are dequeued. Otherwise, up to `free_slots` items are dequeued and started.
 
@@ -84,7 +84,7 @@ See [Catchup](/writing-workflows/scheduling#catchup-missed-run-replay) for the f
 
 ## Queues for DAGs Without a `queue` Field
 
-When a DAG does not set `queue`, it uses a local queue named after the DAG itself. Local queues always have `max_concurrency=1` — only one instance of that DAG runs at a time.
+When a DAG does not set `queue`, it uses a local queue named after the DAG itself. Local queues always have `max_concurrency=1`, so only one instance of that DAG runs at a time.
 
 If a queue name appears in enqueued items but is not defined in `config.yaml`, it is treated as a non-global queue with `max_concurrency=1`.
 

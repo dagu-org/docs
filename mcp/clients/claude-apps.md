@@ -1,6 +1,6 @@
 # Claude Desktop And claude.ai
 
-Claude Desktop, claude.ai, Cowork, and the mobile apps add remote MCP servers as **custom connectors**. Custom connectors are available on Free, which allows one, and on Pro, Max, Team, and Enterprise plans.
+Claude Desktop, claude.ai, Cowork, and mobile apps add remote MCP servers as **custom connectors**. Custom connectors are available on the Free plan (limited to one connector) as well as Pro, Max, Team, and Enterprise plans.
 
 Custom connectors support OAuth-based and unauthenticated remote servers. There is no field for a custom `Authorization` header, which shapes both setups below.
 
@@ -27,7 +27,7 @@ Dagu accepts a `token` query parameter on the MCP endpoint and converts it into 
 https://dagu.example.com/mcp?token=dagu_...
 ```
 
-A token in a URL is weaker than a header. Query strings are commonly written to web server access logs, proxy logs, and browser or client history, so treat the token as exposed to anything on that path. If you use this form, create a dedicated API key limited to the `mcp` surface with the narrowest role that fits the work, and rotate it on a schedule. Where a client can send headers, prefer that.
+A token in a URL is weaker than a header. Query strings are commonly written to web server access logs, proxy logs, and browser or client history, so treat the token as exposed to anything on that path. If you use this form, create a dedicated API key limited to the `mcp` surface with the narrowest role that fits the work, and rotate it on a schedule. Prefer sending headers when the client supports them.
 
 A `token` parameter is ignored when the request already carries an `Authorization` header.
 

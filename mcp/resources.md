@@ -94,7 +94,7 @@ Clients without resource subscription support should poll `dagu_read` with `targ
 
 ## MCP App Run Inspector
 
-Hosts that support MCP Apps can render run-related `dagu_read` and `dagu_execute` results in an interactive inspector. It provides run and step status, scheduler and per-step logs, refresh, stop, and retry.
+Hosts that support MCP Apps can render run-related `dagu_read` and `dagu_execute` results in an interactive inspector that shows run and step status, scheduler and per-step logs, and refresh, stop, and retry controls.
 
 ## Built-in Prompts
 

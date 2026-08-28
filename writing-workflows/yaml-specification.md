@@ -167,8 +167,6 @@ steps:
     run: compiler "${inputs.source}" -o "${outputs.artifact}"
 ```
 
-`type: agent` is reserved and is rejected by the current parser.
-
 ### Scheduling
 
 | Field | Type | Description | Default |

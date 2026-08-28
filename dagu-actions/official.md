@@ -10,7 +10,7 @@ Dagu resolves that form to `dagucloud/name`. For example, `python-script@v1` res
 
 Versions are required. Pin production workflows to a version tag or commit SHA; a commit SHA is the strongest reproducibility boundary.
 
-Contributions are welcome. Each action repository is public, so improvements, bug reports, and pull requests can go directly to the action repository.
+Contributions are welcome. Each action repository is public, so submit improvements, bug reports, and pull requests directly to the respective action repository.
 
 ## Available Actions
 

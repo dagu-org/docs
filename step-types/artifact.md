@@ -6,7 +6,7 @@ Using an `artifact.*` action, artifact stream output, or `${context.paths.artifa
 
 ## Command Stream Output
 
-When a command produces large report, JSON, Markdown, or log content, attach stdout or stderr directly to an artifact instead of capturing it with `output:` or redirecting through shell:
+When a command produces a large report, JSON payload, Markdown document, or log stream, attach stdout or stderr directly to an artifact instead of capturing it with `output:` or redirecting through a shell:
 
 ```yaml
 steps:
@@ -97,4 +97,4 @@ steps:
 | `include_dirs` | list | boolean | `false` | Include directories in the JSON entries. |
 | `pattern` | list | string | - | Glob pattern matched against artifact-relative paths. |
 
-Use `file.*` when you need to operate on arbitrary local paths. Use `artifact.*` when the file is part of the DAG-run output that users should inspect or download from Dagu.
+Use `file.*` to operate on arbitrary local paths. Use `artifact.*` when the file is part of the DAG-run output that users should inspect or download from Dagu.

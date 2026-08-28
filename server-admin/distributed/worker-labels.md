@@ -43,9 +43,9 @@ dagu worker
 
 The coordinator's `matchesSelector()` function evaluates whether a worker is eligible for a task:
 
-1. **Empty selector matches any worker** — a task without `worker_selector` (or with an empty map) can run on any available worker.
-2. **All selector key-value pairs must match exactly** — every key in the selector must exist in the worker's labels with an identical value. Matching is case-sensitive.
-3. **Workers can have extra labels** — a worker with `gpu=true,memory=64G,region=us-east-1` matches a selector of `gpu: "true"` because the worker satisfies all required keys. The extra `memory` and `region` labels are ignored.
+1. **Empty selector matches any worker**: a task without `worker_selector` (or with an empty map) can run on any available worker.
+2. **All selector key-value pairs must match exactly**: every key in the selector must exist in the worker's labels with an identical value. Matching is case-sensitive.
+3. **Workers can have extra labels**: a worker with `gpu=true,memory=64G,region=us-east-1` matches a selector of `gpu: "true"` because the worker satisfies all required keys. The extra `memory` and `region` labels are ignored.
 
 ## DAG-Level `worker_selector`
 
@@ -89,7 +89,7 @@ Step-level `worker_selector` is only valid on actions that launch sub-DAGs:
 |--------|----------------------------|
 | `dag.run` | Yes |
 | `dag.enqueue` | Yes |
-| All other actions (`http.request`, `docker.run`, etc.) and inline `run:` steps | No — validation error |
+| All other actions (`http.request`, `docker.run`, etc.) and inline `run:` steps | No (validation error) |
 
 Setting `worker_selector` on an unsupported action produces a validation error.
 
@@ -121,7 +121,7 @@ dagu worker --worker.labels cpu-optimized=true,cores=64
 DAG with both DAG-level and step-level selectors:
 
 ```yaml
-# Parent DAG — runs on any worker (or locally)
+# Parent DAG: runs on any worker (or locally)
 steps:
   # Dispatched to a GPU worker
   - action: dag.run
@@ -156,4 +156,4 @@ steps:
   - run: uv run --python 3.13.9 python aggregate.py
 ```
 
-The parent DAG's dispatch decision and each child's dispatch decision are evaluated independently. See [Distributed Execution — Sub-DAG Dispatch](/server-admin/distributed/#sub-dag-dispatch) for details.
+The parent DAG's dispatch decision and each child's dispatch decision are evaluated independently. See [Distributed Execution - Sub-DAG Dispatch](/server-admin/distributed/#sub-dag-dispatch) for details.

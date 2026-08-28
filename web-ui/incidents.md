@@ -21,7 +21,7 @@ Dagu uses the most specific configured scope:
 DAG override -> workspace override -> Global default
 ```
 
-If a scope inherits, Dagu keeps looking at the next broader scope. If a scope is configured, it replaces the parent scope. A configured scope set to **Off** intentionally opens no new incidents from that scope.
+When a scope is set to inherit, Dagu checks the next broader scope. When a scope is configured, it overrides the parent scope. Setting a scope to **Off** suppresses incident creation for that scope.
 
 ## Notifications vs Incidents
 
@@ -45,7 +45,7 @@ Do not add chat tools as incident connections unless they manage an incident lif
 5. Open **Incidents > Routing**.
 6. Configure the **Global** default route for all DAGs.
 7. Select a named workspace in the sidebar when a team or environment needs a workspace override.
-8. Use the DAG detail **Incidents** tab only for per-DAG exceptions.
+8. Use the DAG details **Incidents** tab only for per-DAG exceptions.
 
 Keep most DAGs inherited. Global and workspace routes are easier to audit than one-off DAG settings.
 

@@ -4,7 +4,7 @@ description: How to contribute to Dagu in a few clear steps.
 outline: [2, 3]
 ---
 
-Thank you for considering to help improve Dagu! We welcome contributions from anyone on the internet.
+Thank you for helping improve Dagu! We welcome contributions from everyone.
 
 ## Quick Start
 
@@ -80,7 +80,7 @@ pnpm install
 pnpm dev
 ```
 
-Navigate to [http://localhost:8081](http://localhost:8081) to view hot-reloading frontend.
+Open [http://localhost:8081](http://localhost:8081) to view the hot-reloading frontend.
 
 ### Code Standards
 

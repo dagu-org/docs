@@ -583,7 +583,7 @@ dagu start-all --coordinator.host=0.0.0.0 --coordinator.port=50055
 dagu start-all --host=0.0.0.0 --port=9000 --coordinator.host=0.0.0.0
 ```
 
-**Note:** The coordinator service is only started when `--coordinator.host` is set to a non-localhost address (not `127.0.0.1` or `localhost`). By default, `start-all` runs in single instance mode without the coordinator.
+**Note:** The coordinator service starts only when `--coordinator.host` is set to a non-localhost address (not `127.0.0.1` or `localhost`). By default, `start-all` runs in single instance mode without the coordinator.
 
 ### `validate`
 

@@ -149,7 +149,7 @@ env:
   - SLACK_WEBHOOK=${SLACK_WEBHOOK_URL}  # Expand from OS env
 ```
 
-Environment variables from base config are **appended** to those defined in individual DAGs, allowing you to set common defaults while DAGs add their specific variables.
+Environment variables from the base configuration are appended to those defined in individual DAGs, so you can set common defaults while individual DAGs add specific variables.
 
 Child DAG `env:` entries can reference inherited base env values, and param `eval` expressions can reference the merged result.
 

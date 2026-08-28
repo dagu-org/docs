@@ -1,10 +1,10 @@
 # Self-Upgrade
 
-Dagu includes a built-in upgrade command that allows you to update to the latest version directly from the command line.
+Dagu includes a built-in upgrade command to update to the latest version directly from the command line.
 
 ## Overview
 
-The `dagu upgrade` command downloads and installs the latest version of Dagu, with built-in checksum verification for security.
+The `dagu upgrade` command downloads and installs the latest version of Dagu, using SHA256 checksum verification.
 
 ## Basic Usage
 

@@ -27,7 +27,7 @@ Dagu uses the most specific configured scope:
 DAG override -> workspace override -> Global default
 ```
 
-If a scope is set to inherit, Dagu keeps looking at the next broader scope. If a scope is configured, that scope is authoritative. A configured scope with no routes intentionally sends no notifications.
+When a scope is set to inherit, Dagu checks the next broader scope. When a scope is configured, it overrides broader scopes. A configured scope with no routes sends no notifications.
 
 ## Events
 

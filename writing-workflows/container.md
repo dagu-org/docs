@@ -413,21 +413,21 @@ Instead of duplicating the `container`, `env`, `retry_policy`, `preconditions`, 
 
 ## Execution Model and Entrypoint Behavior
 
-- **How it runs:** When you set a DAG‑level `container`, Dagu starts one
-  long‑lived container for the workflow. By default (`startup: keepalive`),
+- **How it runs:** When you set a DAG-level `container`, Dagu starts one
+  long-lived container for the workflow. By default (`startup: keepalive`),
   it runs a lightweight keepalive process (or sleep) so the container stays
   up. Each step then runs inside that container via `docker exec`.
 - **Entrypoint/CMD not used for steps:** Because steps are executed with
-  `docker exec`, your image’s `ENTRYPOINT` or `CMD` are not invoked for step
+  `docker exec`, your image's `ENTRYPOINT` or `CMD` are not invoked for step
   commands. Steps run directly in the running container process context.
-- **Implication:** If your image’s entrypoint is a dispatcher that expects a
+- **Implication:** If your image's entrypoint is a dispatcher that expects a
   subcommand (for example, `my-entrypoint sendConfirmationEmails` which then
   calls `npm run sendConfirmationEmails`), the step command must invoke that
   dispatcher explicitly.
 
 ### Startup Modes
 
-Choose how the DAG‑level container starts:
+Choose how the DAG-level container starts:
 
 ```yaml
 container:
@@ -446,8 +446,8 @@ container:
 
 - `keepalive` (default): preserves current behavior using an embedded
   keepalive binary or `sh -c 'while true; sleep 86400; done'` in DinD.
-- `entrypoint`: honors the image’s `ENTRYPOINT`/`CMD` with no overrides.
-- `command`: runs a user‑provided `command` array instead of image defaults.
+- `entrypoint`: honors the image's `ENTRYPOINT`/`CMD` with no overrides.
+- `command`: runs a user-provided `command` array instead of image defaults.
 
 Readiness before steps run:
 

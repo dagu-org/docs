@@ -20,12 +20,12 @@ Dagu can call language models from workflows, let models invoke DAGs as tools, o
 
 Use `action: chat.completion` for provider API calls, multi-turn sessions, model fallback, reasoning, web search, and response routing.
 
-- [LLM Completion](/step-types/llm/) — quick start and complete field reference
-- [Providers & Endpoints](/step-types/llm/providers) — credentials, shared defaults, and compatible endpoints
-- [Local Models](/step-types/llm/local-models) — Ollama, vLLM, and LM Studio
-- [Agent DAGs & Completions](/step-types/llm/agent-completions) — the step-by-step path from one completion to LLM-directed workflows
-- [Reasoning & Web Search](/step-types/llm/reasoning-web-search) — provider reasoning and search capabilities
-- [Reliability](/step-types/llm/reliability) — provider retries and model fallback
+- [LLM Completion](/step-types/llm/): quick start and complete field reference
+- [Providers & Endpoints](/step-types/llm/providers): credentials, shared defaults, and compatible endpoints
+- [Local Models](/step-types/llm/local-models): Ollama, vLLM, and LM Studio
+- [Agent DAGs & Completions](/step-types/llm/agent-completions): the step-by-step path from one completion to LLM-directed workflows
+- [Reasoning & Web Search](/step-types/llm/reasoning-web-search): provider reasoning and search capabilities
+- [Reliability](/step-types/llm/reliability): provider retries and model fallback
 
 ## Agents and Tools
 

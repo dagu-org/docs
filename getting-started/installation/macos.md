@@ -8,7 +8,7 @@ Common paths: **Homebrew** (binary only), **npm** (binary only), or the **guided
 brew install dagu
 ```
 
-Upgrade later with `brew upgrade dagu`. Homebrew installs the binary only — no service, no admin account. Set those up yourself or use the script installer.
+Upgrade later with `brew upgrade dagu`. Homebrew installs the binary only, without setting up a service or creating an admin account. Configure those manually or use the script installer.
 
 ## npm
 
@@ -50,7 +50,7 @@ curl -fsSL https://raw.githubusercontent.com/dagucloud/dagu/main/scripts/install
 
 ### Service PATH capture
 
-When the installer sets up a background service, it captures the `PATH` from the shell you ran it in. CLI tools on that `PATH` — `claude`, `node`, `docker`, and so on — become available to workflow steps that run inside the service. If you add new tools later, rerun the installer or use absolute paths in steps.
+When the installer sets up a background service, it captures the `PATH` from the shell you ran it in. CLI tools on that `PATH` (such as `claude`, `node`, or `docker`) become available to workflow steps that run inside the service. If you add new tools later, rerun the installer or use absolute paths in steps.
 
 ## Manual binary
 

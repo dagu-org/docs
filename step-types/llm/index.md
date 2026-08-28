@@ -170,11 +170,11 @@ All action-specific fields belong under `with`.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `prompt` | string | — | A non-empty user prompt. Required when `messages` is omitted. |
-| `messages` | array | — | A non-empty list of `{role, content}` messages. Required when `prompt` is omitted. |
+| `prompt` | string | - | A non-empty user prompt. Required when `messages` is omitted. |
+| `messages` | array | - | A non-empty list of `{role, content}` messages. Required when `prompt` is omitted. |
 | `provider` | string | inherited | LLM provider. Required for a string `model` unless inherited; omit it when every fallback model entry has its own provider. |
 | `model` | string or array | inherited | Model identifier, or an ordered list of model configurations for [fallback](/step-types/llm/reliability#model-fallback). Inherited only when the action sets no LLM configuration fields. |
-| `system` | string | — | Default system prompt. An explicit system message in `messages` takes precedence. |
+| `system` | string | - | Default system prompt. An explicit system message in `messages` takes precedence. |
 | `temperature` | number | provider default | Sampling randomness from `0.0` to `2.0`. |
 | `max_tokens` | integer | provider default | Maximum number of tokens to generate. |
 | `top_p` | number | provider default | Nucleus sampling value from `0.0` to `1.0`. |
@@ -182,7 +182,7 @@ All action-specific fields belong under `with`.
 | `api_key_name` | string | provider default | Environment variable that contains the API key. |
 | `stream` | boolean | `true` | Stream response tokens to stdout as they arrive. |
 | `thinking` | object | disabled | Provider-specific [extended reasoning](/step-types/llm/reasoning-web-search#reasoning). |
-| `tools` | array | — | DAG names exposed to the model as callable tools. |
+| `tools` | array | - | DAG names exposed to the model as callable tools. |
 | `max_tool_iterations` | integer | `10` | Maximum tool-calling rounds. |
 | `web_search` | object | disabled | [Built-in web-search integration](/step-types/llm/reasoning-web-search#web-search) settings. |
 

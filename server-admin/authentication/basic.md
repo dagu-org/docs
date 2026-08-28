@@ -52,5 +52,5 @@ curl -H "Authorization: Basic $(echo -n admin:secure-password | base64)" \
 
 - Basic authentication is active when `auth.mode` is set to `basic` and both username and password are configured
 - To disable authentication entirely, set `auth.mode: none`
-- Basic mode provides a single shared credential — for multi-user support with RBAC, use `auth.mode: builtin`
+- Basic mode provides a single shared credential. For multi-user support with RBAC, use `auth.mode: builtin`.
 - Credentials are checked on every request

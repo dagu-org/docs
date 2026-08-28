@@ -20,7 +20,7 @@ Dagu then calls the normal chat-completions route under that base URL.
 Enter the **base URL**, not a full endpoint. Do not paste vendor-native endpoints such as `/api/generate`.
 :::
 
-## Correct And Incorrect Base URLs
+## Valid and Invalid Base URLs
 
 | Value entered in Dagu | Result |
 |---|---|
@@ -79,17 +79,17 @@ Examples:
 - if Dagu runs in Docker or Kubernetes, `localhost` means that container or pod
 - if a remote node runs the step, `localhost` means that remote node
 
-## Current Limits On This Path
+## Current Limitations
 
-The local-model path is intended for normal text chat use.
+The local-model path is intended for standard text chat.
 
-Plan around these limits:
+Consider these constraints:
 
-- Dagu expects the OpenAI-compatible route, not vendor-native endpoints
-- provider-specific knobs such as Ollama native `think` options are not configured from this path
-- multimodal/image message content is not the target use case here
+- Dagu expects the OpenAI-compatible route, not vendor-native endpoints.
+- Provider-specific options, such as Ollama native `think` settings, cannot be configured here.
+- Multimodal or image message content is not supported on this path.
 
-If you need vendor-specific behavior, put that behind a compatible proxy or use the vendor tool directly outside this path.
+If you need vendor-specific behavior, place the service behind a compatible proxy or invoke the tool directly outside this path.
 
 ## Troubleshooting
 

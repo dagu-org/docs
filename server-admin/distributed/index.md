@@ -29,7 +29,7 @@ See [Workers](./workers/) for configuration and [Worker Deployment](./workers/sh
 
 ## How Dispatch Decisions Work
 
-Every server-side execution path in Dagu — API, scheduler, queue, and sub-DAG steps — uses a single function (`ShouldDispatchToCoordinator`) to decide whether a DAG runs locally or is dispatched to a worker. This guarantees consistent behavior for runs handled by the server and queue processor.
+Every server-side execution path in Dagu (API, scheduler, queue, and sub-DAG steps) uses a single function (`ShouldDispatchToCoordinator`) to decide whether a DAG runs locally or is dispatched to a worker. This guarantees consistent behavior for runs handled by the server and queue processor.
 
 ### Decision Priority
 
@@ -37,11 +37,11 @@ The dispatch decision evaluates these rules in order, stopping at the first matc
 
 | Priority | Condition | Result |
 |----------|-----------|--------|
-| 1 | `worker_selector: local` is set | **Local** — always runs on the main instance |
-| 2 | No coordinator is configured | **Local** — distributed execution is unavailable |
-| 3 | `worker_selector` has labels (e.g., `gpu: "true"`) | **Dispatch** — sent to a matching worker |
-| 4 | `default_execution_mode: distributed` is set | **Dispatch** — sent to any available worker |
-| 5 | None of the above | **Local** — runs on the main instance |
+| 1 | `worker_selector: local` is set | **Local**: always runs on the main instance |
+| 2 | No coordinator is configured | **Local**: distributed execution is unavailable |
+| 3 | `worker_selector` has labels (e.g., `gpu: "true"`) | **Dispatch**: sent to a matching worker |
+| 4 | `default_execution_mode: distributed` is set | **Dispatch**: sent to any available worker |
+| 5 | None of the above | **Local**: runs on the main instance |
 
 ### Execution Paths
 
@@ -58,7 +58,7 @@ All of the following entry points evaluate the same decision logic:
 
 ### Queue Behavior
 
-When a DAG run is enqueued (via API, webhook, or scheduler), it always enters the local queue first with status `queued`. The queue processor dequeues items respecting `max_concurrency`, and only at dequeue time does it evaluate the dispatch decision. This means distributed runs are still subject to queue concurrency limits — the queue acts as a gate before dispatch, not after.
+When a DAG run is enqueued (via API, webhook, or scheduler), it always enters the local queue first with status `queued`. The queue processor dequeues items respecting `max_concurrency`, and only at dequeue time does it evaluate the dispatch decision. This means distributed runs are still subject to queue concurrency limits: the queue acts as a gate before dispatch, not after.
 
 ### Sub-DAG Dispatch
 
@@ -181,7 +181,7 @@ Or via environment variable:
 export DAGU_DEFAULT_EXECUTION_MODE=distributed
 ```
 
-When set to `distributed`, every DAG is dispatched to a worker through the coordinator — even if it has no `worker_selector`. DAGs with a `worker_selector` are always dispatched to a matching worker regardless of this setting.
+When set to `distributed`, every DAG is dispatched to a worker through the coordinator, even if it has no `worker_selector`. DAGs with a `worker_selector` are always dispatched to a matching worker regardless of this setting.
 
 ::: warning Build workflows are local-only
 `type: build` requires local file fencing and is rejected in distributed mode. When the server default is distributed, set `worker_selector: local` on each build workflow. See [Build Workflows](/writing-workflows/incremental-workflows).

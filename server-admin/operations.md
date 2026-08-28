@@ -327,7 +327,7 @@ Deletes:
 - Execution logs
 - Step output (.out, .err)
 - Status files (.jsonl)
-- Sub DAG logs
+- Sub-DAG logs
 - Run artifact directories
 
 For manual cleanup, use `dagu rm --history`:

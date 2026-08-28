@@ -56,7 +56,7 @@ Behavior:
 - A step with `timeout_sec` > 0 gets its own context deadline; it overrides the DAG-level timeout for that step.
 - If the timeout is reached, the step is terminated and marked failed with exit code `124` (standard timeout code).
 - DAG-level `timeout_sec` enforces a ceiling on total runtime; steps without their own `timeout_sec` respect this.
-- Use step timeouts for unreliable external calls or long‑running operations to fail fast while letting other steps continue.
+- Use step timeouts for unreliable external calls or long-running operations to fail fast while letting other steps continue.
 
 Validation rules:
 - `timeout_sec` must be >= 0. `0` (or omitted) means "no explicit timeout" at that scope.

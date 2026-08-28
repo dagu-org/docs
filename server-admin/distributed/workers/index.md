@@ -144,7 +144,7 @@ worker:
 
 This applies only to PostgreSQL. SQLite always uses 1 connection per step.
 
-See [Worker Deployment — PostgreSQL Connection Pool Management](/server-admin/distributed/workers/shared-nothing#postgresql-connection-pool-management) for detailed configuration guidance.
+See [Worker Deployment - PostgreSQL Connection Pool Management](/server-admin/distributed/workers/shared-nothing#postgresql-connection-pool-management) for detailed configuration guidance.
 
 ### Environment Variables
 
