@@ -28,6 +28,7 @@ Dagu's UI is organized around a few everyday jobs:
 - **Notifications** for Microsoft Teams, Slack, email, Telegram, and webhook routing
 - **Incidents** for PagerDuty and SolarWinds Incident Response routing
 - **Profiles** for runtime variables and secrets selected when a run starts
+- **Git Sync** for repository-managed workflows, Wiki content, and supporting files
 - **Search** for finding workflows and Wiki page content quickly
 - **System Status** for scheduler, coordinator, worker, and resource health
 
@@ -77,6 +78,12 @@ Use it to:
 - publish and pull Wiki pages with Git Sync
 
 Unsaved drafts are kept in browser storage, and the editor reports external changes before they can overwrite local work. See [Wiki](/web-ui/wiki) for file operations, workspace behavior, storage configuration, runtime paths, and Git Sync.
+
+## Git Sync
+
+The Git Sync page displays workflows, Wiki content, and supporting files from the configured repository. Type and status filters make it easy to find scripts, templates, binaries, and other files.
+
+Use the page to pull remote changes, review text or binary differences, publish selected edits, and resolve conflicts. Supporting-file diffs also show executable permissions and remote deletions when applicable. See [Git Sync](/server-admin/git-sync) for repository layout, configuration, CLI commands, and production guidance.
 
 ## Dashboard
 

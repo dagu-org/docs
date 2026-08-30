@@ -3491,6 +3491,10 @@ See [Wiki](/web-ui/wiki) for Web UI behavior, workspace ownership, storage, and 
 
 ## Git Sync Endpoints
 
+Git Sync manages workflow definitions, Wiki content, and Git-tracked supporting files. The `kind` field is one of `dag`, `doc`, `doc-asset`, or `file`.
+
+DAG and Wiki page IDs omit their file extension. Supporting-file and attachment IDs retain their complete relative path and file extension. URL-encode IDs in endpoint paths: `scripts/report.py` becomes `scripts%2Freport.py`, while `assets/100%.txt` becomes `assets%2F100%25.txt`.
+
 All sync endpoints accept an optional `remoteNode` query parameter.
 
 ### Get Sync Status
@@ -3519,10 +3523,17 @@ curl "http://localhost:8080/api/v1/sync/status"
       "displayName": "my-dag.yaml",
       "kind": "dag",
       "status": "modified"
+    },
+    {
+      "itemId": "scripts/report.py",
+      "filePath": "scripts/report.py",
+      "displayName": "scripts/report.py",
+      "kind": "file",
+      "status": "synced"
     }
   ],
   "counts": {
-    "synced": 10,
+    "synced": 1,
     "modified": 1,
     "untracked": 0,
     "conflict": 0,
@@ -3545,8 +3556,9 @@ curl -X POST "http://localhost:8080/api/v1/sync/pull"
 ```json
 {
   "success": true,
-  "message": "Synced 3 item(s)",
-  "synced": ["dag-a", "dag-b", "dag-c"],
+  "message": "Synced 2 and deleted 1 sync item(s)",
+  "synced": ["dag-a", "scripts/report.py"],
+  "deleted": ["scripts/obsolete.py"],
   "modified": [],
   "conflicts": [],
   "errors": [],
@@ -3563,7 +3575,7 @@ Publishes specified items, or all modified/untracked items if `itemIds` is omitt
 ```bash
 curl -X POST "http://localhost:8080/api/v1/sync/publish-all" \
   -H "Content-Type: application/json" \
-  -d '{"message":"Batch publish","itemIds":["my-dag","skills/review"]}'
+  -d '{"message":"Batch publish","itemIds":["my-dag","scripts/report.py"]}'
 ```
 
 **Request Body**:
@@ -3647,22 +3659,27 @@ curl -X PUT "http://localhost:8080/api/v1/sync/config" \
 
 **Endpoint**: `GET /api/v1/sync/items/{itemId}/diff`
 
-Returns local and remote content for comparison. Requires sync service to be configured.
+Returns local and remote content for comparison. For binary files, the endpoint reports byte sizes instead of file content. Supporting-file responses can also indicate executable permissions and remote deletion status. Requires the sync service to be configured.
 
 ```bash
-curl "http://localhost:8080/api/v1/sync/items/skills%2Freview/diff"
+curl "http://localhost:8080/api/v1/sync/items/scripts%2Freport.py/diff"
 ```
 
 **Response (200)**:
 ```json
 {
-  "itemId": "skills/review",
-  "filePath": "skills/review/SKILL.md",
+  "itemId": "scripts/report.py",
+  "filePath": "scripts/report.py",
+  "kind": "file",
   "status": "modified",
-  "localContent": "# Review\nUpdated locally",
-  "remoteContent": "# Review\nOriginal"
+  "localContent": "print('local')\n",
+  "remoteContent": "print('remote')\n",
+  "localExecutable": true,
+  "remoteExecutable": true
 }
 ```
+
+For a binary supporting file, `binary` is `true`, `localSize` and `remoteSize` contain byte counts, and content fields are omitted. A deletion conflict sets `remoteDeleted` to `true` and omits remote content.
 
 **Response (404)**: Item not found.
 
@@ -3799,7 +3816,7 @@ curl -X POST "http://localhost:8080/api/v1/sync/delete-missing" \
 
 **Endpoint**: `POST /api/v1/sync/items/{itemId}/move`
 
-Atomically renames an item across local filesystem, remote repository, and sync state. Requires `permissions.write_dags`.
+Renames a tracked item locally and in the remote repository. Requires `permissions.write_dags`.
 
 ```bash
 curl -X POST "http://localhost:8080/api/v1/sync/items/old-dag/move" \

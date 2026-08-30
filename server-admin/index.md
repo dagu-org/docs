@@ -89,6 +89,11 @@ docker run -d \
 - Monitoring and metrics
 - Logging and alerting
 
+**[Git Sync](/server-admin/git-sync)**
+- Synchronize DAGs and their supporting files
+- Review, publish, and resolve repository changes
+- Configure read-only branch promotion
+
 **[Remote Nodes](/server-admin/remote-nodes)**
 - Configure remote instances
 - Multi-node setup
@@ -167,6 +172,7 @@ dagu start-all
 - [Set up authentication](/server-admin/server#authentication) for production
 - [Understand configuration precedence](/server-admin/configuration) before mixing flags, environment variables, and `config.yaml`
 - [Configure base defaults](/server-admin/base-config) for shared DAG settings
+- [Configure Git Sync](/server-admin/git-sync) for repository-managed DAGs and supporting files
 - [Configure Wiki](/web-ui/wiki) for Markdown runbooks and Git Sync
 - [Configure monitoring](/server-admin/operations#monitoring) for visibility
 - [Set up distributed execution](/server-admin/distributed/) for scaling

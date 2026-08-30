@@ -4,6 +4,8 @@ Use step-level `dependencies` when a distributed worker needs scripts, configura
 
 File dependencies are inputs to a run. They are different from [artifacts](/writing-workflows/artifacts), which preserve files produced by a run, and from [tools](/writing-workflows/tools), which install external commands.
 
+[Git Sync](/server-admin/git-sync) can pull tracked supporting files into the DAG directory on the Dagu host, but it does not automatically send them to distributed workers. Declare required files under `dependencies` so worker dispatches include them.
+
 ## Choose the right field
 
 Use the field that matches the job:
@@ -260,6 +262,7 @@ The DAG definition, selected files, and selected directories all count toward th
 
 ## Related Pages
 
+- [Git Sync](/server-admin/git-sync): synchronizing DAGs and their supporting files from a repository
 - [Distributed Execution](/server-admin/distributed/): coordinator and worker setup
 - [Worker Deployment](/server-admin/distributed/workers/shared-nothing): distributed worker setup
 - [Runtime Context and Variables](/writing-workflows/runtime-variables): work-directory variables

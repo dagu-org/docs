@@ -60,7 +60,7 @@ sse:
 
 # Directories (must be under "paths" key)
 paths:
-  dags_dir: "~/.config/dagu/dags"
+  dags_dir: "~/.config/dagu/dags" # DAGs and Git Sync supporting files
   wiki_dir: ""                # Auto: {dags_dir}/wiki
   alt_dags_dir: ""          # Additional read-only DAG directories
   log_dir: "~/.local/share/dagu/logs"
@@ -328,7 +328,7 @@ All options support `DAGU_` prefix.
 
 ### Directories
 - `DAGU_HOME` - Set all directories to this path (can be overridden by `--dagu-home` flag)
-- `DAGU_DAGS_DIR` - DAG definitions
+- `DAGU_DAGS_DIR` - DAG definitions and Git Sync supporting files
 - `DAGU_DAGS` - Alternative to `DAGU_DAGS_DIR`
 - `DAGU_WIKI_DIR` - Markdown Wiki pages and runbooks (default: `{dags_dir}/wiki`)
 - `DAGU_DOCS_DIR` - Deprecated alias for `DAGU_WIKI_DIR`
@@ -529,10 +529,12 @@ Legacy YAML keys `scheduler.heartbeat_interval`, `scheduler.heartbeat_sync_inter
 - `DAGU_SECRETS_KUBERNETES_CONTEXT` - Default kubeconfig context for the `kubernetes` secret provider
 
 ### Git Sync
+See [Git Sync](/server-admin/git-sync) for repository layout, supporting-file behavior, and operational guidance.
+
 - `DAGU_GITSYNC_ENABLED` - Enable git sync (default: `false`)
 - `DAGU_GITSYNC_REPOSITORY` - Remote repository URL. For SSH servers that require a username other than `git`, include it in the URL, for example `deploy@git.example.com:org/dags.git`.
 - `DAGU_GITSYNC_BRANCH` - Branch to sync (default: `main`)
-- `DAGU_GITSYNC_PATH` - Subdirectory in repo (default: `""`)
+- `DAGU_GITSYNC_PATH` - Repository subdirectory to sync, mapped relative to the local DAG and Wiki roots (default: `""`)
 - `DAGU_GITSYNC_PUSH_ENABLED` - Enable push operations (default: `true`)
 - `DAGU_GITSYNC_AUTH_TYPE` - Auth type: `token` or `ssh` (default: `token`)
 - `DAGU_GITSYNC_AUTH_TOKEN` - Personal access token for HTTPS auth

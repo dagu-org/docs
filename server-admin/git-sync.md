@@ -1,36 +1,109 @@
 # Git Sync
 
-Git Sync keeps Dagu workflows, Markdown Wiki pages, and workflow-authoring skill files aligned with a Git repository.
+Git Sync keeps workflows and their supporting files synchronized with a Git repository. Pulling changes places DAG definitions, scripts, templates, binaries, Wiki pages, and Wiki attachments into their respective Dagu storage directories.
 
-## What It Syncs
+## Repository layout
 
-Git Sync can track:
+Set `git_sync.path` when workflow files occupy a subdirectory within a larger repository. Dagu ignores tracked files outside that directory.
 
-- DAG files
-- Markdown Wiki pages
-- skills
+```text
+repository
+`-- workflows/                     # git_sync.path
+    |-- daily-report.yaml          # DAG
+    |-- scripts/
+    |   `-- generate.py            # supporting file
+    |-- templates/
+    |   `-- summary.html           # supporting file
+    `-- wiki/
+        `-- operations/
+            `-- daily-report.md    # Wiki page
+```
 
-DAG files live at the configured repository root, Wiki pages live under `wiki/`, and skills live under `skills/`. An existing repository that contains `docs/` but not `wiki/` continues using `docs/` in place. Git Sync rejects repositories containing both directories rather than merging them implicitly.
+After a pull:
 
-## Tracked Items And IDs
+```text
+paths.dags_dir/
+|-- daily-report.yaml
+|-- scripts/
+|   `-- generate.py
+`-- templates/
+    `-- summary.html
 
-Git Sync refers to each tracked file by an `itemId`. You will see that term in the CLI and REST API.
+paths.wiki_dir/
+`-- operations/
+    `-- daily-report.md
+```
 
-| Local file | itemId | kind |
-|---|---|---|
-| `my-dag.yaml` | `my-dag` | `dag` |
-| `subdir/report.yml` | `subdir/report` | `dag` |
-| `wiki/operations/runbook.md` | `wiki/operations/runbook` | `doc` |
-| `skills/review/SKILL.md` | `skills/review/SKILL` | `skill` |
+Paths under `git_sync.path` remain relative to their destination roots. Leave `path` empty when the repository itself is dedicated to Dagu files.
 
-## Basic Configuration
+## What Git Sync tracks
+
+Git Sync assigns every managed file an `itemId` and `kind`. The Web UI, CLI, and REST API use these values.
+
+| Repository file | Local destination | itemId | kind |
+|---|---|---|---|
+| `daily-report.yaml` | `paths.dags_dir/daily-report.yaml` | `daily-report` | `dag` |
+| `scripts/generate.py` | `paths.dags_dir/scripts/generate.py` | `scripts/generate.py` | `file` |
+| `skills/review/SKILL.md` | `paths.dags_dir/skills/review/SKILL.md` | `skills/review/SKILL.md` | `file` |
+| `wiki/operations/runbook.md` | `paths.wiki_dir/operations/runbook.md` | `wiki/operations/runbook` | `doc` |
+| `wiki/.attachments/operations/runbook/chart.png` | `paths.wiki_dir/.attachments/operations/runbook/chart.png` | `wiki/.attachments/operations/runbook/chart.png` | `doc-asset` |
+
+Supporting-file IDs retain their complete relative path and file extension. DAG and Wiki page IDs omit `.yaml`, `.yml`, and `.md`.
+
+An existing repository that contains `docs/` but not `wiki/` continues using `docs/` for Wiki content. Git Sync rejects a repository containing both directories rather than merging them.
+
+### Supporting files
+
+Any Git-tracked regular file in scope that is not handled as a DAG, Wiki page, or Wiki attachment is a supporting file. Common examples include:
+
+- shell, Python, PowerShell, and JavaScript files
+- SQL, JSON, TOML, and dotenv configuration
+- templates, certificates, and binary data
+- authoring files under `skills/`
+
+Git Sync does not automatically discover new supporting files created directly in `paths.dags_dir`. Commit new files to the Git repository first, then pull them into Dagu. Once tracked, local edits and deletions appear in Git Sync status and can be published.
+
+Within the synchronized scope, reserve `.yaml` and `.yml` extensions for DAG definitions. Base configuration files and YAML files under the Wiki tree are excluded from supporting files.
+
+Git symlinks and submodules are not synchronized. Additionally, a repository cannot contain items that resolve to the same `itemId`. For example, `workflow.yaml` and an extensionless supporting file named `workflow` collide, causing the pull operation to fail without writing either item.
+
+::: warning Review the synchronized path
+A pull copies every tracked supporting file in scope. In a general-purpose repository, set `git_sync.path` to the workflow subdirectory so unrelated files are not copied into `paths.dags_dir`.
+:::
+
+## Use supporting files from a workflow
+
+Set `working_dir: .` when local steps should run from the directory containing the DAG file:
+
+```yaml
+working_dir: .
+
+steps:
+  - id: generate
+    run: python scripts/generate.py --template templates/summary.html
+```
+
+For distributed execution, declare each file or directory under `dependencies`. Git Sync places the source files on the Dagu host; `dependencies` sends a snapshot to the worker.
+
+```yaml
+steps:
+  - id: generate
+    run: python scripts/generate.py --template templates/summary.html
+    dependencies:
+      - scripts/generate.py
+      - templates/summary.html
+```
+
+The worker still requires the runtime that executes the file (for example, synchronizing a Python script does not install Python). See [File Dependencies](/writing-workflows/file-dependencies) for directories, globs, limits, and worker behavior.
+
+## Configuration
 
 ```yaml
 git_sync:
   enabled: true
-  repository: github.com/your-org/dags
+  repository: github.com/your-org/automation
   branch: main
-  path: ""
+  path: workflows
   push_enabled: true
 
   auth:
@@ -47,103 +120,113 @@ git_sync:
     author_email: dagu@localhost
 ```
 
+`push_enabled: false` allows pulls but blocks publish, delete, and move operations. This is the recommended setting for deployments that receive reviewed changes from a promotion branch.
+
 ## Authentication
 
-### HTTPS Token
+### HTTPS token
 
 ```yaml
 git_sync:
-  repository: github.com/your-org/dags
+  repository: github.com/your-org/automation
   auth:
     type: token
     token: ${GITHUB_TOKEN}
 ```
 
-### SSH Key
+### SSH key
 
 ```yaml
 git_sync:
-  repository: git@github.com:your-org/dags.git
+  repository: git@github.com:your-org/automation.git
   auth:
     type: ssh
     ssh_key_path: /home/user/.ssh/id_ed25519
     ssh_passphrase: ${SSH_PASSPHRASE}
 ```
 
-For SSH servers that require a username other than `git`, put the username in
-the repository URL:
+For an SSH server that requires a username other than `git`, include it in the repository URL:
 
 ```yaml
 git_sync:
-  repository: deploy@git.example.com:your-org/dags.git
+  repository: deploy@git.example.com:your-org/automation.git
   auth:
     type: ssh
     ssh_key_path: /home/user/.ssh/id_ed25519
 ```
 
-## Everyday Workflow
+## Work with changes
 
-Most teams use Git Sync in this order:
+A typical update follows this sequence:
 
-1. **Check status**
-2. **Pull** remote changes
-3. **Review diffs**
-4. **Publish** selected local changes
-5. **Discard**, **forget**, or **clean up** stale items when needed
+1. Check the current status.
+2. Pull remote changes.
+3. Review local and remote differences.
+4. Publish selected local changes.
+5. Resolve conflicts or clean up missing items.
 
-## Status Values
+### Status values
 
 | Status | Meaning |
 |---|---|
-| `synced` | Local content matches the last synced revision |
-| `modified` | Local content changed since the last sync |
-| `untracked` | The local file exists but has not been published yet |
-| `conflict` | Both local and remote changed |
-| `missing` | A previously tracked local file is gone |
+| `synced` | Local content matches the last synchronized version. |
+| `modified` | A tracked local file changed. |
+| `untracked` | A local DAG, Wiki page, or Wiki attachment has not been published. New local supporting files are not discovered. |
+| `conflict` | Local and remote content both changed, or a locally edited supporting file was deleted remotely. |
+| `missing` | A previously tracked local file is gone. |
+
+### Pull and remote deletion
+
+Pulling preserves local edits. If the remote repository deletes a supporting file:
+
+- An unchanged local copy is removed.
+- A locally edited copy remains and becomes a conflict.
+- Discarding that deletion conflict removes the local copy.
+- Force publishing the conflict restores the local file to the repository.
+
+The CLI and Web UI report how many items were updated and removed.
+
+### Text, binary, and executable files
+
+Text files show local and remote content in the diff view. Binary files show local and remote sizes instead of loading their content into the viewer.
+
+Git Sync preserves whether a supporting file is executable. On Unix systems, changing that permission marks the file as modified so it can be published. Windows does not track this file permission mode directly, so published changes preserve the executable state recorded in the repository.
+
+## Web UI
+
+Open **Git Sync** from the server navigation. The page provides separate filters for workflows, Wiki pages, attachments, and supporting files.
+
+Use it to:
+
+- pull remote changes and view updated or removed counts
+- filter items by type and status
+- compare text diffs, binary sizes, executable permissions, and remote deletions
+- publish selected changes
+- discard, move, delete, or forget an item when permitted by its status
+- inspect the configured repository, branch, push mode, and auto-sync interval
+
+Pull and other write operations require a write-capable role and `permissions.write_dags`. Publishing, deleting, and moving also require `push_enabled: true`.
 
 ## CLI
 
-### Check Status
-
 ```bash
 dagu sync status
-```
-
-### Pull
-
-```bash
 dagu sync pull
-```
 
-### Publish
+dagu sync publish daily-report -m "Update workflow"
+dagu sync publish scripts/generate.py -m "Update report script"
+dagu sync publish skills/review/SKILL.md -m "Update review skill"
+dagu sync publish --all -m "Update automation files"
 
-```bash
-dagu sync publish my-dag -m "Update workflow"
-dagu sync publish docs/operations/runbook -m "Update operations runbook"
-dagu sync publish skills/review -m "Update review skill"
-dagu sync publish --all -m "Batch update"
-```
+dagu sync discard scripts/generate.py
+dagu sync mv scripts/generate.py scripts/render.py -m "Rename report script"
+dagu sync delete scripts/render.py -m "Remove report script"
 
-### Discard Local Changes
-
-```bash
-dagu sync discard my-dag
-```
-
-### Forget Stale State
-
-```bash
-dagu sync forget missing-dag
+dagu sync forget missing-item
 dagu sync cleanup
 ```
 
-### Delete Or Move
-
-```bash
-dagu sync delete my-dag -m "Remove old workflow"
-dagu sync mv old-dag new-dag -m "Rename workflow"
-dagu sync mv docs/operations/runbook docs/operations/deploy -m "Rename runbook"
-```
+See [CLI Reference](/getting-started/cli#sync) for every option and confirmation flag.
 
 ## REST API
 
@@ -155,7 +238,7 @@ dagu sync mv docs/operations/runbook docs/operations/deploy -m "Rename runbook"
 | POST | `/api/v1/sync/test-connection` | Verify repository access |
 | GET | `/api/v1/sync/config` | Read current Git Sync config |
 | PUT | `/api/v1/sync/config` | Update Git Sync config |
-| GET | `/api/v1/sync/items/{itemId}/diff` | Show local vs remote diff |
+| GET | `/api/v1/sync/items/{itemId}/diff` | Show local and remote differences |
 | POST | `/api/v1/sync/items/{itemId}/publish` | Publish one item |
 | POST | `/api/v1/sync/items/{itemId}/discard` | Discard one item |
 | POST | `/api/v1/sync/items/{itemId}/forget` | Remove stale sync state for one item |
@@ -164,28 +247,27 @@ dagu sync mv docs/operations/runbook docs/operations/deploy -m "Rename runbook"
 | POST | `/api/v1/sync/delete-missing` | Delete all missing items from the remote |
 | POST | `/api/v1/sync/cleanup` | Remove all missing entries from sync state |
 
-If an `itemId` contains `/`, URL-encode it in REST calls.
+URL-encode item IDs in REST paths. For example, `scripts/report.py` becomes `scripts%2Freport.py`, and `assets/100%.txt` becomes `assets%2F100%25.txt`.
 
-## Permissions
+See [REST API](/web-ui/api#git-sync-endpoints) for request and response examples.
+
+## Permissions and production use
+
+Treat a synchronized repository as executable code. Review changes before promotion, restrict repository write access, and keep secrets out of tracked files.
 
 | Action | Requirement |
-|--------|-------------|
-| View status and config | Authenticated access |
-| Pull, publish, discard, delete, move, cleanup | `permissions.write_dags` plus a write-capable role |
-| Update Git Sync config | Admin role |
+|---|---|
+| View status, diffs, and configuration | Authenticated access |
+| Pull, publish, discard, delete, move, forget, and cleanup | `permissions.write_dags` and a write-capable role |
+| Update Git Sync configuration | Admin role |
 
-Write operations are blocked when Git Sync is configured as read-only (`push_enabled: false`).
+Publishing, deleting, and moving also require `push_enabled: true`.
 
-## Operational Notes
+For staging and production environments, use read-only Git Sync and promote reviewed commits between environment branches. See [Multi-Environment Deployments](/server-admin/deployment/multi-environment).
 
-- Manage Git Sync through the UI, CLI, or API rather than editing its internal state directly.
-- Wiki pages edited in the Web UI appear as `doc` items in Git Sync status, diff, publish, discard, delete, and move operations. The `doc` kind remains the stable wire value.
-- Pull before publishing when multiple people or systems may change the same repository.
-- Use clear commit messages because Git Sync publishes normal Git commits.
-- For staging and production, prefer read-only Git Sync configurations and promote reviewed workflow versions between environment branches. See [Multi-Environment Deployments](/server-admin/deployment/multi-environment).
+## Related pages
 
-## Related Pages
-
-- [Server Administration](/server-admin/)
+- [File Dependencies](/writing-workflows/file-dependencies)
 - [Wiki](/web-ui/wiki)
+- [Configuration](/server-admin/configuration)
 - [Multi-Environment Deployments](/server-admin/deployment/multi-environment)

@@ -89,7 +89,7 @@ Common examples:
 | `DAGU_HOST` | `host` | Web UI bind address |
 | `DAGU_PORT` | `port` | Web UI port |
 | `DAGU_PUBLIC_URL` | `public_url` | External URL used in generated links |
-| `DAGU_DAGS_DIR` | `paths.dags_dir` | DAG definition directory |
+| `DAGU_DAGS_DIR` | `paths.dags_dir` | DAG definitions and Git Sync supporting files |
 | `DAGU_WIKI_DIR` | `paths.wiki_dir` | Markdown Wiki page directory |
 | `DAGU_DAG_DISCOVERY_RECURSIVE` | `dag_discovery.recursive` | Discover DAG definitions in subdirectories |
 | `DAGU_DAG_DISCOVERY_SYMLINKS` | `dag_discovery.symlinks` | Include DAG file symlinks and allow external targets |
@@ -135,7 +135,10 @@ Typical layout:
 |-- config.yaml
 |-- base.yaml
 |-- dags/
-|   `-- docs/
+|   |-- report.yaml
+|   |-- scripts/
+|   |   `-- report.py
+|   `-- wiki/
 |-- logs/
 `-- data/
     |-- artifacts/
@@ -153,7 +156,7 @@ Most persistent runtime data is stored under `paths.data_dir` by default.
 
 | Config field | Default | Purpose |
 | --- | --- | --- |
-| `paths.dags_dir` | `~/.config/dagu/dags` | DAG definitions |
+| `paths.dags_dir` | `~/.config/dagu/dags` | DAG definitions and Git Sync supporting files |
 | `paths.wiki_dir` | `{dags_dir}/wiki` | Markdown Wiki pages and runbooks |
 | `paths.log_dir` | `~/.local/share/dagu/logs` | DAG logs |
 | `paths.data_dir` | `~/.local/share/dagu/data` | Base directory for runtime data |
@@ -168,6 +171,8 @@ Most persistent runtime data is stored under `paths.data_dir` by default.
 | `paths.users_dir` | `{data_dir}/users` | Builtin auth users |
 | `paths.contexts_dir` | `{data_dir}/contexts` | CLI contexts |
 | `paths.workspaces_dir` | `{data_dir}/workspaces` | Web UI workspaces |
+
+[Git Sync](/server-admin/git-sync) writes DAG definitions and supporting files to `paths.dags_dir`, and Wiki pages and attachments to `paths.wiki_dir`. The `git_sync.path` setting selects a repository subdirectory without appending that subdirectory name to either local destination path.
 
 A backup of the complete `paths.data_dir` includes both DAG-run history and per-run work directories at their default locations. If backups select individual subdirectories, include both `paths.dag_runs_dir` and `paths.dag_run_work_dir`; restoring history alone can leave retries without files created by earlier attempts.
 

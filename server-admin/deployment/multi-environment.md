@@ -32,17 +32,17 @@ Do not mount the same writable data directory into independent environments. Sha
 
 ## Promote Workflows with Git Sync
 
-[Git Sync](/server-admin/git-sync) distributes DAG definitions, Markdown documents, and workflow-authoring skills from a repository. Use a branch promotion workflow so each deployment advances only after the repository version has passed the preceding environment.
+[Git Sync](/server-admin/git-sync) distributes DAG definitions, Wiki content, and supporting files from a repository. Use a branch promotion workflow so each deployment advances only after the repository version has passed the preceding environment.
 
 A typical flow is:
 
-1. Author and validate a workflow or its operational documents in development.
+1. Author and validate a workflow, its scripts, and its operational documents in development.
 2. Review the change in Git.
 3. Promote the reviewed commit to the branch tracked by staging.
 4. Validate the workflow and its integrations in staging.
 5. Promote the approved commit to the branch tracked by production.
 
-Configure each deployed environment to track its own branch. Staging and production should normally be read-only so workflow and document edits cannot publish directly from those installations.
+Configure each deployed environment to track its own branch. Staging and production should normally be read-only so edits to workflows, supporting files, or Wiki pages cannot publish directly from those installations.
 
 ```yaml
 # Staging config.yaml
@@ -86,7 +86,7 @@ Tracking the same moving branch from staging and production removes the promotio
 
 ## Keep Runtime Configuration Deployment-Local
 
-Git Sync distributes workflow-authoring files. It does not copy deployment state such as managed secrets, runtime profiles, profile values, DAG-run history, or server-side DAG settings.
+Git Sync distributes repository-managed workflows, Wiki content, and supporting files. It does not copy deployment state such as managed secrets, runtime profiles, profile values, DAG-run history, or server-side DAG settings.
 
 Provision those resources independently in each deployment:
 

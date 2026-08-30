@@ -836,7 +836,7 @@ Successfully removed 5 run(s) for DAG "my-workflow"
 
 ### `sync`
 
-Manage Git sync operations.
+Manage Git synchronization for workflows, Wiki content, and supporting files.
 
 ```bash
 dagu sync <subcommand>
@@ -852,7 +852,7 @@ Show current sync status.
 dagu sync status
 ```
 
-Displays repository URL, branch, last sync info, status counts per state, and a table of non-synced items.
+Displays repository URL, branch, last sync info, status counts per state, and a table of non-synced items. Supporting-file IDs include their file extensions.
 
 #### `sync pull`
 
@@ -861,6 +861,8 @@ Pull changes from remote repository.
 ```bash
 dagu sync pull
 ```
+
+Reports how many items were synchronized and how many unchanged local supporting files were removed after a remote deletion. Locally edited files remain as conflicts.
 
 #### `sync publish`
 
@@ -880,8 +882,9 @@ Provide either an item ID or `--all`, not both.
 
 ```bash
 dagu sync publish my-dag -m "Update dag"
-dagu sync publish docs/operations/runbook -m "Update runbook"
-dagu sync publish skills/review -m "Update review skill"
+dagu sync publish wiki/operations/runbook -m "Update runbook"
+dagu sync publish scripts/report.py -m "Update report script"
+dagu sync publish skills/review/SKILL.md -m "Update review skill"
 dagu sync publish --all -m "Batch update"
 dagu sync publish my-dag --force -m "Overwrite remote"
 ```
@@ -899,7 +902,7 @@ dagu sync discard <item-id> [options]
 
 ```bash
 dagu sync discard my-dag
-dagu sync discard skills/review -y
+dagu sync discard scripts/report.py -y
 ```
 
 #### `sync forget`
@@ -959,7 +962,8 @@ Provide either an item ID or `--all-missing`, not both. Untracked items cannot b
 
 ```bash
 dagu sync delete my-dag -m "Remove old dag"
-dagu sync delete docs/operations/runbook -m "Remove old runbook"
+dagu sync delete wiki/operations/runbook -m "Remove old runbook"
+dagu sync delete scripts/report.py -m "Remove report script"
 dagu sync delete my-dag --force -m "Remove despite modifications"
 dagu sync delete --all-missing -m "Clean up missing"
 dagu sync delete my-dag --dry-run
@@ -968,7 +972,7 @@ dagu sync delete --all-missing --dry-run
 
 #### `sync mv`
 
-Atomically rename an item across local filesystem, remote repository, and sync state.
+Rename a tracked item locally and in the remote repository.
 
 ```bash
 dagu sync mv <old-id> <new-id> [options]
@@ -984,7 +988,8 @@ Both source and destination must be of the same kind.
 
 ```bash
 dagu sync mv old-dag new-dag -m "Rename workflow"
-dagu sync mv docs/operations/runbook docs/operations/deploy -m "Rename runbook"
+dagu sync mv wiki/operations/runbook wiki/operations/deploy -m "Rename runbook"
+dagu sync mv scripts/report.py scripts/render.py -m "Rename report script"
 dagu sync mv old-dag new-dag --force -m "Move despite conflict"
 dagu sync mv old-dag new-dag --dry-run
 ```
