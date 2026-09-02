@@ -127,6 +127,11 @@ dagu start deploy.yaml -- ENVIRONMENT=production
 
 Parameters can also be typed and validated before a run starts. See [Parameters](/writing-workflows/parameters).
 
+::: tip Container runtime access
+Container examples require a Docker-compatible daemon. If Dagu runs in Docker,
+[mount the host socket first](/getting-started/installation/docker#run-container-steps-when-dagu-runs-in-docker).
+:::
+
 ### Run the workflow in a shared container
 
 ```yaml

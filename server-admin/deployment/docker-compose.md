@@ -14,8 +14,6 @@ services:
     ports:
       - "8525:8080"
 
-    entrypoint: ["/usr/local/bin/tini", "-g", "--"] # Keep Tini as PID 1
-
     # Default command: run all-in-one (server + scheduler + coordinator in-process)
     # You may override this at runtime, e.g.:
     #   docker compose -f compose.dev.yaml run --rm dagu dagu server
@@ -48,8 +46,6 @@ services:
     volumes:
       - dagu-data:/var/lib/dagu
       - ./dags:/var/lib/dagu/dags
-      # For Docker in Docker (DinD) support, mount the host Docker socket:
-      - /var/run/docker.sock:/var/run/docker.sock
 
     # Quick command presets (uncomment any one to run specific component):
     # command: ["dagu", "server"]
@@ -63,15 +59,14 @@ services:
     #   - DAGU_AUTH_BASIC_USERNAME=dev
     #   - DAGU_AUTH_BASIC_PASSWORD=devpass
 
-    user: "0:0" # Run as root for Docker in Docker (DinD) support
-
 volumes:
   dagu-data:
     driver: local
 
 ```
 
-This setup bypasses `/entrypoint.sh` so Dagu can run as root for Docker socket access, but it keeps Tini as PID 1. For normal command changes, leave `entrypoint` unset and override only `command`.
+The image entrypoint keeps Tini as PID 1 and applies `PUID`/`PGID`. Override only
+`command` for normal deployments.
 
 The `./dags` mount is writable so Dagu can seed first-run examples and save DAG edits. Add `:ro` only when using immutable DAG sources.
 
@@ -88,6 +83,33 @@ Start with:
 ```bash
 docker compose up -d
 ```
+
+## Run Container Steps
+
+Use this smaller service definition when workflows use `container:`,
+`action: docker.run`, or containerized `harness.run`:
+
+```yaml
+services:
+  dagu:
+    image: ghcr.io/dagucloud/dagu:latest
+    ports:
+      - "8525:8080"
+    volumes:
+      - dagu-data:/var/lib/dagu
+      - /var/run/docker.sock:/var/run/docker.sock
+    entrypoint: ["/usr/local/bin/tini", "-g", "--"]
+    command: ["dagu", "start-all"]
+    user: "0:0"
+
+volumes:
+  dagu-data: {}
+```
+
+This bypasses `/entrypoint.sh` so Dagu runs as root while Tini remains PID 1.
+The socket grants workflows control of the host daemon. See
+[Run container steps when Dagu runs in Docker](/getting-started/installation/docker#run-container-steps-when-dagu-runs-in-docker)
+before enabling it.
 
 ## Commands
 

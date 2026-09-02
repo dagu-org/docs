@@ -51,7 +51,7 @@ docker run -d \
   ghcr.io/dagucloud/dagu:latest
 ```
 
-## With Docker Executor Support
+## Run Container Steps
 
 ```bash
 docker run -d \
@@ -60,10 +60,16 @@ docker run -d \
   -v dagu-data:/var/lib/dagu \
   -v /var/run/docker.sock:/var/run/docker.sock \
   --user 0:0 \
-  ghcr.io/dagucloud/dagu:latest
+  --entrypoint /usr/local/bin/tini \
+  ghcr.io/dagucloud/dagu:latest \
+  -g -- dagu start-all
 ```
 
-Mounting `/var/run/docker.sock` and running as `root` gives workflows broad control over the host. Treat this as privileged host access and use it only when your workflows genuinely require Docker executor support.
+The entrypoint override keeps Tini as PID 1 while running Dagu as root. Mounting
+`/var/run/docker.sock` gives workflows control of the host Docker daemon. Use
+this only for trusted workflows on an authenticated server. See the
+[container-step setup](/getting-started/installation/docker#run-container-steps-when-dagu-runs-in-docker)
+for the execution model and remote-daemon alternative.
 
 ## Environment Variables
 

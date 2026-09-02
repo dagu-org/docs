@@ -121,16 +121,10 @@ services:
       # User/Group IDs (optional)
       # - PUID=1000
       # - PGID=1000
-      
-      # Docker-in-Docker support (optional)
-      # - DOCKER_GID=999
     
     # Volume mounts
     volumes:
-      - dagu:/var/lib/dagu
-      
-      # Docker socket for Docker executor (optional)
-      # - /var/run/docker.sock:/var/run/docker.sock
+      - dagu-data:/var/lib/dagu
     
     # Logging configuration
     logging:
@@ -141,8 +135,11 @@ services:
 
 volumes:
   dagu-data:
-  dagu-logs:
 ```
+
+If workflows need container steps, use the
+[socket-enabled Compose setup](/getting-started/installation/docker#run-container-steps-when-dagu-runs-in-docker)
+instead of adding only the socket mount.
 
 ```bash
 # Start

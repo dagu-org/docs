@@ -6,6 +6,13 @@ description: Run Dagu with Docker or Docker Compose and persist workflows, histo
 
 Run Dagu in Docker and keep your workflows, history, logs, and settings on a host volume.
 
+::: tip Choose the required access
+The standard commands below run shell and built-in steps without exposing the
+host Docker daemon. If a workflow uses `container:`, `action: docker.run`, or a
+containerized `harness.run`, use
+[Run container steps when Dagu runs in Docker](#run-container-steps-when-dagu-runs-in-docker).
+:::
+
 ## One-off run
 
 ```bash
@@ -63,10 +70,29 @@ dagu context test docker
 
 Coordinator port `50055` is unrelated to remote CLI contexts. Publish it only when `dagu worker` processes outside the Compose network need to connect.
 
-## Giving DAGs access to the host Docker daemon
+## Run container steps when Dagu runs in Docker
 
-Use this layout when workflows run `container:`, `docker.run`, or
-containerized `harness.run` steps and should reuse the host's Docker engine:
+Container steps need a Docker-compatible daemon. Mount the host socket into the
+Dagu container so Dagu can create sibling containers through the host engine.
+
+### Docker Run
+
+```bash
+docker run -d \
+  --name dagu \
+  -p 8080:8080 \
+  -v dagu-data:/var/lib/dagu \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  --user 0:0 \
+  --entrypoint /usr/local/bin/tini \
+  ghcr.io/dagucloud/dagu:latest \
+  -g -- dagu start-all
+```
+
+The named data volume avoids creating root-owned files in a host directory.
+Keep an existing data mount when converting an existing installation.
+
+### Docker Compose
 
 ```yaml
 services:
@@ -75,20 +101,29 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - dagu:/var/lib/dagu
+      - dagu-data:/var/lib/dagu
       - /var/run/docker.sock:/var/run/docker.sock
-    environment:
-      - DAGU_CONTAINER_RUNTIME=docker
-    entrypoint: ["/usr/local/bin/tini", "-g", "--"]  # keep Tini as PID 1
-    user: "0:0"      # root is needed for socket access
+    entrypoint: ["/usr/local/bin/tini", "-g", "--"]
+    command: ["dagu", "start-all"]
+    user: "0:0"
 volumes:
-  dagu: {}
+  dagu-data: {}
 ```
 
-This example bypasses `/entrypoint.sh` so Dagu can run as root for Docker socket access, but it keeps Tini as PID 1. Do not change it to `entrypoint: []`; that removes process reaping.
+Both examples bypass `/entrypoint.sh` so Dagu runs as root regardless of the
+socket's group ownership. Tini remains PID 1 for signal forwarding and process
+reaping. Docker is the default runtime; `DAGU_CONTAINER_RUNTIME=docker` is not
+required.
+
+For a remote daemon, omit the socket mount and configure `DOCKER_HOST` and any
+required Docker TLS variables on the Dagu container. In distributed setups,
+configure daemon access on every worker that can receive container steps. See
+[Docker](/step-types/docker#docker-daemon-access).
 
 ::: warning Security
-Mounting `/var/run/docker.sock` grants the container full control of the host Docker daemon. Only do this on trusted hosts and behind authentication.
+Mounting `/var/run/docker.sock` grants workflows control of the host Docker
+daemon, including the ability to mount host files or start privileged
+containers. Use it only for trusted workflows on an authenticated Dagu server.
 :::
 
 For AI and coding-agent CLI sandboxes, see

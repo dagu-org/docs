@@ -13,6 +13,19 @@ daemon such as `DOCKER_HOST`. Deployments can also select Podman's
 Docker-compatible API with `DAGU_CONTAINER_RUNTIME=podman`.
 :::
 
+## Docker Daemon Access
+
+| Where Dagu runs | Required setup |
+|---|---|
+| Directly on a Docker host | The default local Docker socket is used automatically. |
+| Inside Docker | [Mount the host socket and run Dagu with socket access](/getting-started/installation/docker#run-container-steps-when-dagu-runs-in-docker). |
+| With a remote Docker daemon | Set `DOCKER_HOST` and any required Docker TLS variables on the Dagu process. |
+| With Podman | Set `DAGU_CONTAINER_RUNTIME=podman` and, when needed, `DAGU_PODMAN_HOST`. |
+
+Dagu calls the daemon API. When Dagu itself runs in Docker, the daemon creates
+sibling containers on the host. In distributed setups, each worker that can
+receive container steps needs daemon access.
+
 The `container` field supports two modes:
 - **Image mode**: Create a new container from a Docker image
 - **Exec mode**: Execute commands in an already-running container
@@ -246,6 +259,11 @@ Volume specs use `source:target[:ro|rw]`.
 
 These rules apply to DAG-level `container:`, step-level `container:`, and the
 shortcut `volumes:` field under `action: docker.run` `with:` config.
+
+When Dagu runs inside Docker with the host socket, child containers do not
+inherit the Dagu container's mounts. Bind-mount sources must exist at the path
+seen by the host daemon. Use Docker named volumes when both containers need the
+same daemon-managed data.
 
 ```yaml
 container:
@@ -606,27 +624,6 @@ dagu start-all
 These variables are process-level settings, not DAG YAML fields. See
 [Harness Sandbox with Podman](/step-types/harness/sandbox/podman) for socket
 setup details.
-
-## Docker in Docker
-
-Mount the Docker socket and run as root to use Docker inside your containers:
-
-```yaml
-# compose.yml for Dagu with Docker support
-services:
-  dagu:
-    image: ghcr.io/dagucloud/dagu:latest
-    ports:
-      - 8080:8080
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./dags:/var/lib/dagu/dags
-    entrypoint: ["/usr/local/bin/tini", "-g", "--"]
-    command: ["dagu", "start-all"]
-    user: "0:0"  # Run as root for Docker access
-```
-
-This bypasses `/entrypoint.sh` so Dagu can run as root for Docker socket access, but it keeps Tini as PID 1. Do not use `entrypoint: []`; that removes process reaping.
 
 ## Container Lifecycle Management
 

@@ -223,6 +223,9 @@ See [Shell](/step-types/shell) for more details.
 
 Execute in containers:
 
+If Dagu runs in Docker, first
+[give it Docker daemon access](/getting-started/installation/docker#run-container-steps-when-dagu-runs-in-docker).
+
 ```yaml
 container:
   image: python:3.11

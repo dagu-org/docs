@@ -47,12 +47,10 @@ Dev image with extra tooling:
 docker run -d -p 8525:8080 -v dagu-data:/var/lib/dagu ghcr.io/dagucloud/dagu:dev
 ```
 
-For Docker-in-Docker workflows, mount the host socket and run as root:
-```bash
-docker run -d -p 8525:8080 -v dagu-data:/var/lib/dagu -v /var/run/docker.sock:/var/run/docker.sock --user 0:0 ghcr.io/dagucloud/dagu:latest
-```
-
-This setup should be treated as privileged host access. A workflow that can reach the Docker socket can usually control the host through containers, mounts, or image execution. Use it only when Docker executor support is required and the instance is otherwise tightly controlled.
+For container steps, use the
+[socket-enabled Docker setup](/getting-started/installation/docker#run-container-steps-when-dagu-runs-in-docker).
+It preserves Tini while running Dagu with access to the host daemon and explains
+the resulting host-level privilege.
 
 ## Custom Images
 

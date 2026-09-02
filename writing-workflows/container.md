@@ -2,6 +2,11 @@
 
 Run workflow steps in Docker containers for consistent, isolated execution environments.
 
+::: warning Docker-compatible runtime required
+The Dagu process must reach a Docker-compatible daemon. If Dagu runs in Docker,
+[mount the host Docker socket](/getting-started/installation/docker#run-container-steps-when-dagu-runs-in-docker).
+:::
+
 The `container` field supports two modes:
 - **Image mode**: Create a new container from an image
 - **Exec mode**: Execute commands in an existing running container
@@ -444,8 +449,8 @@ container:
   restart_policy: unless-stopped   # optional
 ```
 
-- `keepalive` (default): preserves current behavior using an embedded
-  keepalive binary or `sh -c 'while true; sleep 86400; done'` in DinD.
+- `keepalive` (default): uses an embedded keepalive binary or a shell sleep
+  fallback.
 - `entrypoint`: honors the image's `ENTRYPOINT`/`CMD` with no overrides.
 - `command`: runs a user-provided `command` array instead of image defaults.
 

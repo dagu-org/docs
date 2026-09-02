@@ -213,6 +213,12 @@ handler_on:
 
 ### Containers
 
+::: warning Docker installation
+If Dagu itself runs in Docker, the earlier Docker command cannot create
+container steps until you
+[mount the host Docker socket](/getting-started/installation/docker#run-container-steps-when-dagu-runs-in-docker).
+:::
+
 Run every step in the same container:
 
 ```yaml

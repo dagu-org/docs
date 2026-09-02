@@ -144,24 +144,9 @@ Provider-specific examples:
 ## Dagu in Docker
 
 When Dagu itself runs inside Docker, the Docker socket must be mounted into the
-Dagu container if harness steps should create sibling containers:
-
-```yaml
-services:
-  dagu:
-    image: ghcr.io/dagucloud/dagu:latest
-    ports:
-      - "8080:8080"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./workflows:/var/lib/dagu/dags
-    environment:
-      DAGU_CONTAINER_RUNTIME: docker
-    command: ["dagu", "start-all"]
-```
-
-Mounting the Docker socket gives the Dagu container control over the Docker
-daemon. Use this only for trusted deployments.
+Dagu container if harness steps should create sibling containers. Use the
+[socket-enabled Docker setup](/getting-started/installation/docker#run-container-steps-when-dagu-runs-in-docker),
+which preserves Tini and explains the resulting host-level privilege.
 
 The runner container created for a harness step does not need the Docker socket
 unless the agent itself should manage containers. Most harness runner images
