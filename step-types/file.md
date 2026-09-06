@@ -98,11 +98,11 @@ steps:
     with:
       source: archive
       destination: archive-ready
-      recursive: true
+      recursive: true # Required for directory moves across filesystems
     depends: copy_report
 ```
 
-Copying or moving directories requires `recursive: true`. `file.copy` refuses to place a copied directory inside its own source path.
+Set `recursive: true` for directory copies and cross-filesystem directory moves. Directory moves within one filesystem use a rename. `file.copy` refuses to place a copied directory inside its own source path.
 
 ## Delete And Mkdir
 
@@ -154,7 +154,7 @@ steps:
 | `overwrite` | write, copy, move | boolean | `false` | Replace an existing destination. |
 | `create_dirs` | write, copy, move | boolean | `false` | Create missing parent directories. |
 | `atomic` | write | boolean | `true` | Use atomic replacement when overwriting files. |
-| `recursive` | copy, move, delete, list | boolean | `false` | Recurse into directories or allow directory deletion. |
+| `recursive` | copy, move, delete, list | boolean | `false` | Required for directory copies, cross-filesystem directory moves, and directory deletion; enables recursive listing. |
 | `missing_ok` | stat, delete | boolean | `false` | Succeed when the target path is missing. |
 | `dry_run` | write, copy, move, delete, mkdir | boolean | `false` | Report what would happen without mutating files. |
 | `include_dirs` | list | boolean | `false` | Include directories in list output. |
