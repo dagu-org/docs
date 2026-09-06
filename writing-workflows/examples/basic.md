@@ -137,6 +137,8 @@ steps:
     run: ./rebuild-search-index
 ```
 
+For hourly runs, set `schedule: "@hourly"`, equivalent to `"0 * * * *"`. See [schedule aliases](/writing-workflows/scheduling#schedule-aliases) for daily, weekly, monthly, and yearly schedules.
+
 ```mermaid
 flowchart LR
     S["Schedule · 09:00 weekdays"] --> SYNC["sync_customers"]

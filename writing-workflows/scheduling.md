@@ -116,6 +116,32 @@ steps:
   - run: echo "Processing scheduled task"
 ```
 
+## Schedule Aliases
+
+Use a quoted alias for a common calendar schedule:
+
+```yaml
+type: graph
+schedule: "@hourly"
+steps:
+  - id: report
+    run: echo "Processing hourly task"
+```
+
+| Alias | Equivalent cron | Runs at |
+|-------|-----------------|---------|
+| `@hourly` | `0 * * * *` | The start of each hour |
+| `@daily` | `0 0 * * *` | Midnight each day |
+| `@weekly` | `0 0 * * 0` | Midnight on Sunday |
+| `@monthly` | `0 0 1 * *` | Midnight on the first day of each month |
+| `@yearly` | `0 0 1 1 *` | Midnight on January 1 |
+
+Aliases are case-sensitive and must be quoted in YAML. They work in schedule arrays, `expression` entries, and `start`, `stop`, and `restart` schedules.
+
+Dagu normalizes aliases to the cron expressions above. The API and UI schedule badges show that expression; the YAML editor retains the authored alias. Next-run and catch-up behavior match the equivalent cron schedule.
+
+For an explicit `CRON_TZ` timezone, use the equivalent five-field expression, such as `"CRON_TZ=Asia/Tokyo 0 0 * * *"` for midnight in Tokyo.
+
 ## Multiple Schedules
 
 Run at different times:

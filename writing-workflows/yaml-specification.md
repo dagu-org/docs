@@ -171,7 +171,7 @@ steps:
 
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
-| `schedule` | string, array, or object | Cron schedule, multiple schedules, one-off `at` entries, or a `start`/`stop`/`restart` schedule map. | - |
+| `schedule` | string, array, or object | Cron expression or [schedule alias](/writing-workflows/scheduling#schedule-aliases), multiple schedules, one-off `at` entries, or a `start`/`stop`/`restart` schedule map. | - |
 | `skip_if_successful` | boolean | Skip the scheduled run if the DAG already succeeded for that day. | `false` |
 | `restart_wait_sec` | integer | Seconds to wait before a scheduled restart. | `0` |
 | `catchup_window` | string | Duration for replaying missed cron runs after scheduler downtime. If omitted, missed runs are not replayed. | - |
@@ -180,6 +180,9 @@ steps:
 ```yaml
 # Single cron schedule
 schedule: "0 2 * * *"
+
+# Schedule alias: midnight each day
+schedule: "@daily"
 
 # Multiple cron schedules
 schedule:

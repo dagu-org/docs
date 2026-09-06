@@ -129,6 +129,8 @@ Retrieves DAG definitions with optional filtering by name and labels.
 
 `schedule` entries are recurring cron objects such as `{"expression":"0 * * * *"}` or typed one-off start entries such as `{"kind":"at","at":"2026-03-29T09:30:00+09:00"}`. `nextRun` is the scheduler-aware next planned run time for that DAG. For a pending one-off start entry, `nextRun` can remain visible even after that timestamp has passed, until the scheduler consumes it.
 
+Schedule aliases in authored YAML are returned as canonical cron expressions. For example, `"@daily"` becomes `"0 0 * * *"` in schedule metadata.
+
 ### Create DAG
 
 **Endpoint**: `POST /api/v1/dags`
